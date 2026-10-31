@@ -604,6 +604,17 @@ body.gameopen{overflow:hidden}
 .matches{pointer-events:auto;cursor:pointer}
 .ch03{background:none;border:0;padding:0;font:inherit;letter-spacing:inherit;color:var(--grey);cursor:pointer}
 .ch03:hover{color:var(--cream)}
+.boardwrap{position:relative}
+.sparks{position:absolute;left:-30px;top:-30px;pointer-events:none;z-index:3}
+.gflash{position:absolute;inset:0;z-index:2;pointer-events:none;background:center/cover no-repeat;opacity:0;filter:grayscale(.3) blur(2px) contrast(1.2);mix-blend-mode:screen}
+.gflash.on{animation:gfl .7s steps(7,end) 1}
+@keyframes gfl{0%{opacity:0;transform:scale(1.15)}15%{opacity:.32;transform:scale(1.1)}30%{opacity:.08}45%{opacity:.22}100%{opacity:0;transform:scale(1)}}
+.grec{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:max(18px, env(safe-area-inset-left,0px));font-family:var(--f-osd);font-size:24px;color:#ff4a3a;
+  letter-spacing:.06em;opacity:0;z-index:4;text-shadow:0 0 8px rgba(255,60,40,.5)}
+.grec.on{animation:rec 2.6s steps(1) 1}
+@keyframes rec{0%,20%,40%,60%,80%{opacity:1}10%,30%,50%,70%{opacity:.15}100%{opacity:0}}
+.seg.roll{animation:segf .35s steps(4) 1}
+@keyframes segf{50%{opacity:.6}}
 /* the eye watches where you push the tape */
 .eyewrap{position:relative;transform:rotate(-.6deg);clip-path:polygon(0.4% 2%, 41% 0%, 99.6% 1.5%, 100% 52%, 99.2% 98.5%, 58% 100%, 0% 98%, 0.6% 46%)}
 .eyewrap canvas{display:block;width:100%;height:100%;filter:contrast(1.05) brightness(.9)}
@@ -635,7 +646,9 @@ body.gameopen{overflow:hidden}
   <button class="gbtn eject" id="eject" type="button" aria-label="Eject">⏏<span class="lbl"> EJECT</span></button>
   <div class="gbar" id="gbar"><svg class="seg" id="gscore" aria-label="Pisteet"></svg><span class="bs" id="gbest">PARAS 0</span></div>
   <div class="eyewrap" id="eyewrap" aria-hidden="true"><canvas id="eye"></canvas></div>
-  <div class="board" id="board"></div>
+  <div class="boardwrap" id="boardwrap"><div class="board" id="board"></div><canvas class="sparks" id="sparks" aria-hidden="true"></canvas></div>
+  <div class="gflash" id="gflash" aria-hidden="true"></div>
+  <div class="grec" id="grec" aria-hidden="true">● REC</div>
   <div class="chain" id="chain" aria-hidden="true"></div>
   <div class="over" id="gover">
     <h2>NAUHA<br>LOPPUI</h2>
@@ -693,7 +706,7 @@ body.gameopen{overflow:hidden}
   }
   function layout(){
     size = Math.floor(Math.min(innerWidth - 36, (innerHeight - 250) / 1.37, 480)); size = Math.max(220, size);
-    eyeSize();
+    eyeSize(); if (typeof sparksSize === 'function') sparksSize();
     gap = Math.round(size * 0.022); cell = (size - gap * (N + 1)) / N;
     board.style.width = board.style.height = size + 'px';
     document.getElementById('gbar').style.width = size + 'px';
@@ -708,7 +721,7 @@ body.gameopen{overflow:hidden}
     el.style.clipPath = w.clip; el.style.filter = w.filt; el.setAttribute('aria-label', NAMES[l]); el.setAttribute('role', 'img');
     place(el, r, c); board.appendChild(el);
     var t = {id:++uid, l:l, r:r, c:c, el:el}; tiles.push(t); grid[r][c] = t;
-    if (l > top){ top = l; if (l >= 6){ flash(); track(); } }
+    if (l > top){ var firstTime = top >= 0 && cls === 'pop'; top = l; if (firstTime) flashFrame(l); }
     if (cls === 'pop') startle(l >= 6);
     chain.children[l].classList.add('got');
     return t;
@@ -725,9 +738,11 @@ body.gameopen{overflow:hidden}
     for (var r = 0; r < N; r++){ grid.push([null,null,null,null]);
       for (var c = 0; c < N; c++){ var d = document.createElement('div'); d.className = 'cell'; d.dataset.r = r; d.dataset.c = c; d._w = wear(); d._w.sc = rr(.95, 1); d.style.clipPath = d._w.clip; d.style.opacity = rr(.5, 1).toFixed(2); board.appendChild(d); } }
     [].forEach.call(chain.children, function(i){ i.classList.remove('got'); });
-    over.classList.remove('on'); layout(); spawn(); spawn(); setScore();
+    over.classList.remove('on'); recShown = false; shown = 0; clearInterval(rollT); seg(document.getElementById('gscore'), 0, 6); layout(); spawn(); spawn(); setScore();
+    try { audio.playbackRate = 1; if (mGain) mGain.gain.value = 1; if (mFilt) mFilt.frequency.value = 20000; } catch(e){}
+    if (musicOn && audio.paused && game.classList.contains('on')) syncMusic();
   }
-  function setScore(){ seg(document.getElementById('gscore'), score, 6); bestEl.textContent = 'PARAS ' + Math.max(best(), score); }
+  function setScore(){ if (typeof rollScore === 'function' && game.classList.contains('on')) rollScore(); else seg(document.getElementById('gscore'), score, 6); bestEl.textContent = 'PARAS ' + Math.max(best(), score); }
 
   function move(dir){
     if (busy || over.classList.contains('on')) return;
@@ -751,14 +766,19 @@ body.gameopen{overflow:hidden}
     look([0,1,0,-1][dir], [-1,0,1,0][dir]);
     busy = true;
     setTimeout(function(){
-      merges.forEach(function(m){
+      var maxL = -1;
+      merges.forEach(function(m, k){
         var a = m[0], b = m[1], r = a.r, c = a.c, l = a.l + 1;
         [a, b].forEach(function(x){ x.el.remove(); tiles.splice(tiles.indexOf(x), 1); });
         grid[r][c] = null;
-        if (l >= NAMES.length){ score += 1024; flash(); track(); }
-        else { makeTile(l, r, c, 'pop'); score += PTS[l]; }
+        if (l >= NAMES.length){ score += 1024; flash(); track(); swallow(); sparks(r, c, 9); }
+        else { makeTile(l, r, c, 'pop'); score += PTS[l]; sparks(r, c, l); strike(l, k * .06); }
+        maxL = Math.max(maxL, l);
+        (function(r, c, k){ setTimeout(function(){ var p = tileCenter(r, c); lookAtPoint(p[0], p[1]); }, k * 260); })(r, c, k);
       });
-      setScore(); spawn(); busy = false;
+      if (merges.length >= 2){ track(); }
+      if (maxL >= 6 && maxL < NAMES.length){ flash(); track(); wow(); }
+      setScore(); checkRecord(); spawn(); busy = false;
       if (!canMove()) end();
     }, reduce ? 0 : 125);
   }
@@ -772,8 +792,115 @@ body.gameopen{overflow:hidden}
   }
   function end(){
     if (score > best()) best(score);
-    setScore(); setTimeout(function(){ showIdent(true, function(){ over.classList.add('on'); seg(document.getElementById('gfinal'), score, 6); }); }, 350);
+    setScore(); tapeStop(); setTimeout(function(){ showIdent(true, function(){ over.classList.add('on'); seg(document.getElementById('gfinal'), score, 6); }); }, 350);
   }
+
+  // ---- sound: struck matches, a stretching tape, a VCR that stops ----
+  var AC = null, mGain, mFilt, sfxBus, mediaSrc;
+  function audioInit(){
+    if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+    try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ return; }
+    mFilt = AC.createBiquadFilter(); mFilt.type = 'lowpass'; mFilt.frequency.value = 20000;
+    mGain = AC.createGain(); sfxBus = AC.createGain(); sfxBus.gain.value = .55;
+    try { mediaSrc = AC.createMediaElementSource(audio); mediaSrc.connect(mFilt); } catch(e){}
+    mFilt.connect(mGain); mGain.connect(AC.destination); sfxBus.connect(AC.destination);
+  }
+  function sfxOn(){ return musicOn && AC && AC.state === 'running'; }
+  var noiseBuf = null;
+  function noise(){
+    if (noiseBuf) return noiseBuf;
+    noiseBuf = AC.createBuffer(1, AC.sampleRate * 1.2, AC.sampleRate);
+    var d = noiseBuf.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return noiseBuf;
+  }
+  function burst(t0, dur, f0, f1, q, vol, type){
+    var s = AC.createBufferSource(); s.buffer = noise();
+    var f = AC.createBiquadFilter(); f.type = type || 'bandpass'; f.Q.value = q;
+    f.frequency.setValueAtTime(f0, t0); f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+    var g = AC.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    s.connect(f); f.connect(g); g.connect(sfxBus); s.start(t0, Math.random() * .4); s.stop(t0 + dur + .05);
+  }
+  function tone(t0, dur, f0, f1, vol, type){
+    var o = AC.createOscillator(); o.type = type || 'sine';
+    o.frequency.setValueAtTime(f0, t0); o.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+    var g = AC.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(sfxBus); o.start(t0); o.stop(t0 + dur + .05);
+  }
+  function strike(l, delay){ // the match scratch gets deeper and fuller up the chain
+    if (!sfxOn()) return;
+    var t0 = AC.currentTime + (delay || 0), k = l / 9;
+    burst(t0, .05 + k * .05, 5200 - k * 3800, 1800 - k * 1300, 2.2, .35);
+    burst(t0 + .03, .28 + k * .5, 2400 - k * 1900, 300 - k * 200, .7, .18 + k * .12, 'lowpass');
+    if (l >= 3) tone(t0 + .02, .35 + k * .6, 120 - k * 50, 45, .12 + k * .25);
+  }
+  function recClick(){ if (!sfxOn()) return; var t0 = AC.currentTime; tone(t0, .03, 1800, 900, .15, 'square'); tone(t0 + .07, .04, 1400, 600, .12, 'square'); burst(t0 + .07, .06, 3000, 800, 1, .1); }
+  function thump(){ if (!sfxOn()) return; var t0 = AC.currentTime; tone(t0, 1.2, 70, 24, .55); burst(t0, .9, 400, 60, .5, .2, 'lowpass'); }
+  var rateT;
+  function rampRate(points, done){ // [[ms, rate], ...] tape speed curve on the music
+    clearInterval(rateT);
+    try { audio.preservesPitch = false; audio.mozPreservesPitch = false; audio.webkitPreservesPitch = false; } catch(e){}
+    var t0 = performance.now(), i = 0;
+    rateT = setInterval(function(){
+      var t = performance.now() - t0;
+      while (i < points.length - 1 && t > points[i + 1][0]) i++;
+      if (i >= points.length - 1){ clearInterval(rateT); audio.playbackRate = points[points.length - 1][1]; if (done) done(); return; }
+      var a = points[i], b = points[i + 1], k = (t - a[0]) / (b[0] - a[0]);
+      try { audio.playbackRate = Math.max(.07, a[1] + (b[1] - a[1]) * k); } catch(e){}
+    }, 30);
+  }
+  function wow(){ if (musicOn && !audio.paused) rampRate([[0,1],[180,.84],[420,.93],[700,1]]); }
+  function swallow(){ // black hole: the song gets pulled in, then comes back
+    if (!AC || !musicOn) return;
+    var t0 = AC.currentTime;
+    mFilt.frequency.cancelScheduledValues(t0); mFilt.frequency.setValueAtTime(mFilt.frequency.value, t0);
+    mFilt.frequency.exponentialRampToValueAtTime(260, t0 + .5); mFilt.frequency.setValueAtTime(260, t0 + 2.1); mFilt.frequency.exponentialRampToValueAtTime(20000, t0 + 3.2);
+    mGain.gain.cancelScheduledValues(t0); mGain.gain.setValueAtTime(mGain.gain.value, t0);
+    mGain.gain.linearRampToValueAtTime(.25, t0 + .5); mGain.gain.setValueAtTime(.25, t0 + 2.1); mGain.gain.linearRampToValueAtTime(1, t0 + 3.2);
+    rampRate([[0,1],[500,.8],[2100,.8],[3000,1]]);
+    setTimeout(thump, 1900);
+  }
+  function tapeStop(done){
+    if (!musicOn || audio.paused){ if (done) done(); return; }
+    rampRate([[0,1],[1300,.08]], function(){ audio.pause(); audio.playbackRate = 1; if (done) done(); });
+  }
+
+  // ---- rewards you can see ----
+  var sp = document.getElementById('sparks'), spx = sp.getContext('2d'), parts = [], spRaf = 0;
+  function sparksSize(){ var d = Math.min(2, window.devicePixelRatio || 1); sp.width = (size + 60) * d; sp.height = (size + 60) * d; sp.style.width = sp.style.height = (size + 60) + 'px'; spx.setTransform(d, 0, 0, d, 0, 0); }
+  function sparks(r, c, l){
+    if (reduce) return;
+    var x = 30 + gap + c * (cell + gap) + cell / 2, y = 30 + gap + r * (cell + gap) + cell / 2, n = 4 + l * 3;
+    for (var i = 0; i < n; i++) parts.push({x: x + rr(-cell * .3, cell * .3), y: y + rr(-cell * .2, cell * .25), vx: rr(-25, 25), vy: rr(-70, -160) * (1 + l * .06), life: 0, max: rr(.5, .9 + l * .05), s: rr(1, 2.2)});
+    if (!spRaf){ var last = performance.now(); spRaf = requestAnimationFrame(function f(t){
+      var dt = Math.min(.05, (t - last) / 1000); last = t;
+      spx.clearRect(0, 0, size + 60, size + 60);
+      parts = parts.filter(function(p){ p.life += dt; return p.life < p.max; });
+      parts.forEach(function(p){
+        p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 40 * dt; p.vx += rr(-30, 30) * dt;
+        var a = 1 - p.life / p.max; spx.fillStyle = 'rgba(' + (242) + ',' + (150 + 60 * a | 0) + ',' + (70) + ',' + a.toFixed(2) + ')';
+        spx.beginPath(); spx.arc(p.x, p.y, p.s * (.6 + a * .6), 0, 7); spx.fill();
+      });
+      spRaf = parts.length ? requestAnimationFrame(f) : 0;
+    }); }
+  }
+  var gfl = document.getElementById('gflash');
+  function flashFrame(l){ if (reduce) return; gfl.style.backgroundImage = 'url(' + IMG[l] + ')'; gfl.classList.remove('on'); void gfl.offsetWidth; gfl.classList.add('on'); }
+  var shown = 0, rollT;
+  function rollScore(){
+    var from = shown, to = score, t0 = performance.now(), svg = document.getElementById('gscore');
+    clearInterval(rollT); if (to === from){ seg(svg, to, 6); return; }
+    svg.classList.remove('roll'); void svg.getBoundingClientRect(); svg.classList.add('roll');
+    rollT = setInterval(function(){
+      var k = Math.min(1, (performance.now() - t0) / 420); shown = Math.round(from + (to - from) * k); seg(svg, shown, 6);
+      if (k >= 1) clearInterval(rollT);
+    }, 35);
+  }
+  var recShown = false;
+  function checkRecord(){
+    var b = best();
+    if (!recShown && b > 0 && score > b){ recShown = true; var e = document.getElementById('grec'); e.classList.remove('on'); void e.offsetWidth; e.classList.add('on'); recClick(); }
+  }
+  function tileCenter(r, c){ var b = board.getBoundingClientRect(); return [b.left + gap + c * (cell + gap) + cell / 2, b.top + gap + r * (cell + gap) + cell / 2]; }
 
   // ---- the eye ----
   var EW = 1280, EH = 472, ECX = 642.5, ECY = 267, ER = 197;
@@ -874,7 +1001,7 @@ body.gameopen{overflow:hidden}
     if (musicOn && game.classList.contains('on')){ if (!audio.src) setTrack(tIdx); audio.volume = 0.7; var p = audio.play(); if (p && p.catch) p.catch(function(){ musBtn.textContent = '♪ PÄÄLLE'; }); }
     else audio.pause();
   }
-  musBtn.addEventListener('click', function(){ musicOn = !musicOn; musicPref(musicOn); syncMusic(); });
+  musBtn.addEventListener('click', function(){ audioInit(); musicOn = !musicOn; musicPref(musicOn); syncMusic(); });
 
   addEventListener('keydown', function(e){
     if (!game.classList.contains('on')) return;
@@ -883,7 +1010,7 @@ body.gameopen{overflow:hidden}
     if (e.key === 'Escape') close();
   });
   var sx = 0, sy = 0, down = false;
-  function nudge(){ if (musicOn && audio.paused && game.classList.contains('on')) syncMusic(); }
+  function nudge(){ audioInit(); if (musicOn && audio.paused && game.classList.contains('on')) syncMusic(); }
   game.addEventListener('pointerdown', nudge); addEventListener('keydown', nudge);
   game.addEventListener('pointerdown', function(e){ if (!e.target.closest('.gbtn')) lookAtPoint(e.clientX, e.clientY); });
   board.addEventListener('pointerdown', function(e){ down = true; sx = e.clientX; sy = e.clientY; board.setPointerCapture && board.setPointerCapture(e.pointerId); });
@@ -908,7 +1035,7 @@ body.gameopen{overflow:hidden}
   function open(){
     window.__gameOpen = true;
     var ga = document.getElementById('ga'); if (ga) ga.pause();
-    game.classList.add('on'); syncMusic(); game.classList.remove('on');   // start music inside the click so phones allow it
+    audioInit(); game.classList.add('on'); syncMusic(); game.classList.remove('on');   // start music inside the click so phones allow it
     channel(function(){
       game.classList.add('on'); document.body.classList.add('gameopen');
       if (!started){ started = true; reset(); } else layout();
