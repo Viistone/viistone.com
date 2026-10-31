@@ -315,6 +315,7 @@ body.paused main{animation:hold .12s steps(2) infinite}
     <nav aria-label="Somekanavat">
       <a href="https://www.youtube.com/@Viistone" target="_blank" rel="noopener">YouTube</a>
       <a href="https://www.instagram.com/lollari5000/" target="_blank" rel="noopener">Instagram</a>
+      <button class="ch03" id="ch03" type="button">CH 03</button>
     </nav>
   </footer>
 </main>
@@ -455,6 +456,7 @@ window.VIISTONE_EMBED = true;
     if (document.body.classList.contains('paused')) { document.body.classList.remove('paused'); mode.innerHTML = PLAY; }
     if (blue.classList.contains('on')) { blue.classList.remove('on'); cancelAnimationFrame(raf); }
     tPause = setTimeout(function(){
+      if (window.__gameOpen) return;
       document.body.classList.add('paused'); mode.textContent = '❚❚ PAUSE';
       tBlue = setTimeout(function(){
         blue.classList.add('on');
@@ -508,6 +510,233 @@ window.VIISTONE_EMBED = true;
   }
 })();
 </script>
+
+<!--GAME-->
+<style>
+/* CH 03: the merge game lives on its own channel above the page */
+.game{position:fixed;inset:0;z-index:70;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:calc(56px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));touch-action:none;user-select:none;-webkit-user-select:none}
+.game.on{display:flex}
+.game .gosd{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));font-family:var(--f-osd);font-size:22px;letter-spacing:.06em;color:var(--osd);opacity:.85;
+  text-shadow:1px 0 0 rgba(255,60,60,.35),-1px 0 0 rgba(60,200,255,.35)}
+.game .gosd.l{left:max(18px, env(safe-area-inset-left,0px))}
+.game .gosd.c{left:50%;transform:translateX(-50%);white-space:nowrap}
+.game .eject{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:max(14px, env(safe-area-inset-right,0px));font-family:var(--f-osd);font-size:22px;
+  letter-spacing:.06em;color:var(--osd);background:none;border:1px solid var(--line);padding:2px 10px;cursor:pointer}
+.game .eject:hover{border-color:var(--cream)}
+.game canvas{display:block;touch-action:none;cursor:crosshair}
+.game .next{font-family:var(--f-osd);font-size:20px;color:var(--grey);letter-spacing:.06em;margin-bottom:8px;min-height:22px}
+.game .next b{color:var(--cream);font-weight:400}
+.game .over{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(11,11,10,.82);text-align:center}
+.game .over.on{display:flex}
+.game .over h2{font-family:var(--f-osd);font-weight:400;font-size:44px;letter-spacing:.08em;color:var(--osd);margin:0;
+  text-shadow:2px 0 0 rgba(255,60,60,.4),-2px 0 0 rgba(60,200,255,.4)}
+.game .over p{font-family:var(--f-mono);font-size:13px;letter-spacing:.14em;color:var(--grey);margin:0;text-transform:uppercase}
+.game .toast{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font-family:var(--f-osd);font-size:30px;color:var(--osd);letter-spacing:.08em;
+  opacity:0;pointer-events:none;transition:opacity .6s;white-space:nowrap}
+.game .toast.on{opacity:.9}
+body.static #grain{opacity:.55 !important;display:block !important}
+body.static .scan{background:repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0 1px, rgba(0,0,0,.3) 1px 3px)}
+body.gameopen{overflow:hidden}
+@media (max-width:720px){
+  .game{padding-top:calc(88px + env(safe-area-inset-top,0px))}
+  .game .gosd{font-size:19px}
+  .game .gosd.c{top:calc(50px + env(safe-area-inset-top,0px));font-size:18px;opacity:.7}
+  .game .eject{font-size:18px}
+  .game .next{font-size:17px}
+}
+.matches{pointer-events:auto;cursor:pointer}
+.ch03{background:none;border:0;padding:0;font:inherit;letter-spacing:inherit;color:var(--grey);cursor:pointer}
+.ch03:hover{color:var(--cream)}
+</style>
+<div class="game" id="game" role="dialog" aria-label="Peli: tulitikusta maailmankaikkeuteen">
+  <div class="gosd l">CH 03</div>
+  <div class="gosd c" id="gscore">0000000</div>
+  <button class="eject" id="eject" type="button">⏏ EJECT</button>
+  <div class="next" id="gnext"></div>
+  <canvas id="gc" aria-label="Pudota esineitä. Kaksi samaa yhdistyy seuraavaksi."></canvas>
+  <div class="toast" id="gtoast"></div>
+  <div class="over" id="gover">
+    <h2>NAUHA LOPPUI</h2>
+    <p id="gfinal"></p>
+    <p id="gbest"></p>
+    <button class="btn" id="gagain" type="button">Uudestaan</button>
+  </div>
+</div>
+<script>
+(function(){
+  var CHAIN = ['tulitikku','liekki','kynttilä','nuotio','palava silta','palava kaupunki','palava maapallo','aurinko','galaksi','musta aukko'];
+  var R = [17,22,28,35,43,52,62,74,87,102];
+  var PTS = [1,3,6,10,15,21,28,36,45,55];
+  var W = 380, H = 560, LINE = 86, G = 1500;
+  var game = document.getElementById('game'), cv = document.getElementById('gc'), cx = cv.getContext('2d');
+  var scoreEl = document.getElementById('gscore'), nextEl = document.getElementById('gnext'), toast = document.getElementById('gtoast');
+  var over = document.getElementById('gover');
+  var balls = [], score = 0, cur = 0, nxt = 0, aimX = W/2, canDrop = true, running = false, raf = 0, last = 0, overT = 0, dead = false, id = 0;
+  var scale = 1, dpr = Math.min(2, window.devicePixelRatio || 1);
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function rnd(){ var x = Math.random(); return x < .34 ? 0 : x < .62 ? 1 : x < .85 ? 2 : 3; }
+  function fit(){
+    var aw = Math.min(innerWidth - 32, 520), ah = innerHeight - 150;
+    scale = Math.min(aw / W, ah / H);
+    cv.style.width = Math.round(W*scale) + 'px'; cv.style.height = Math.round(H*scale) + 'px';
+    cv.width = Math.round(W*scale*dpr); cv.height = Math.round(H*scale*dpr);
+  }
+  function pad(n){ var s = String(n); while (s.length < 7) s = '0' + s; return s; }
+  function setScore(){ scoreEl.textContent = pad(score); }
+  function setNext(){ nextEl.innerHTML = 'SEURAAVA: <b>' + CHAIN[nxt] + '</b>'; }
+  function say(t){ toast.textContent = t; toast.classList.add('on'); clearTimeout(say.t); say.t = setTimeout(function(){ toast.classList.remove('on'); }, 1600); }
+  function best(v){ try { if (v != null) localStorage.setItem('viistone-peli', v); return +localStorage.getItem('viistone-peli') || 0; } catch(e){ return 0; } }
+
+  function reset(){
+    balls = []; score = 0; dead = false; overT = 0; cur = rnd(); nxt = rnd(); canDrop = true;
+    over.classList.remove('on'); setScore(); setNext();
+  }
+  function drop(){
+    if (!canDrop || dead) return;
+    var r = R[cur], x = Math.max(r, Math.min(W - r, aimX));
+    balls.push({id:++id, x:x, y:LINE - r - 6, vx:0, vy:0, r:r, l:cur, born:performance.now(), pop:0});
+    cur = nxt; nxt = rnd(); setNext(); canDrop = false;
+    setTimeout(function(){ canDrop = true; }, 420);
+  }
+
+  function step(dt){
+    var i, j, a, b;
+    for (i = 0; i < balls.length; i++){ a = balls[i]; a.vy += G*dt; a.x += a.vx*dt; a.y += a.vy*dt; a.vx *= 0.995; }
+    for (var it = 0; it < 6; it++){
+      for (i = 0; i < balls.length; i++){
+        a = balls[i];
+        if (a.x < a.r){ a.x = a.r; a.vx = Math.abs(a.vx)*0.2; }
+        if (a.x > W - a.r){ a.x = W - a.r; a.vx = -Math.abs(a.vx)*0.2; }
+        if (a.y > H - a.r){ a.y = H - a.r; if (a.vy > 0) a.vy = -a.vy*0.1; a.vx *= 0.96; }
+        for (j = i + 1; j < balls.length; j++){
+          b = balls[j];
+          var dx = b.x - a.x, dy = b.y - a.y, d2 = dx*dx + dy*dy, rr = a.r + b.r;
+          if (d2 >= rr*rr || d2 === 0) continue;
+          var d = Math.sqrt(d2), nx = dx/d, ny = dy/d, ov = rr - d;
+          if (a.l === b.l && !a.gone && !b.gone){ merge(a, b); continue; }
+          var ma = a.r*a.r, mb = b.r*b.r, t = ma + mb;
+          a.x -= nx*ov*(mb/t); a.y -= ny*ov*(mb/t); b.x += nx*ov*(ma/t); b.y += ny*ov*(ma/t);
+          var rv = (b.vx - a.vx)*nx + (b.vy - a.vy)*ny;
+          if (rv < 0){ var imp = -(1.15)*rv/(1/ma + 1/mb); a.vx -= imp*nx/ma; a.vy -= imp*ny/ma; b.vx += imp*nx/mb; b.vy += imp*ny/mb; }
+        }
+      }
+      balls = balls.filter(function(o){ return !o.gone; });
+    }
+  }
+  function merge(a, b){
+    a.gone = b.gone = true;
+    var l = a.l + 1, x = (a.x + b.x)/2, y = (a.y + b.y)/2;
+    if (l >= CHAIN.length){ score += 200; setScore(); say('sammui'); flash(); return; }
+    var n = {id:++id, x:x, y:y, vx:(a.vx + b.vx)/2, vy:Math.min(a.vy, b.vy)/2, r:R[l], l:l, born:performance.now(), pop:1};
+    balls.push(n); score += PTS[l]; setScore();
+    if (l >= 7) say(CHAIN[l]);
+    if (l >= 6) flash();
+  }
+  function flash(){ if (reduce) return; document.body.classList.add('static'); setTimeout(function(){ document.body.classList.remove('static'); }, 140); }
+
+  function label(c, text, r){
+    var words = text.split(' '), lines = words.length > 1 ? [words[0], words.slice(1).join(' ')] : [text];
+    var longest = lines.reduce(function(m, s){ return Math.max(m, s.length); }, 0);
+    var fs = Math.min(16, r*0.36, (r*1.75)/(longest*0.6));
+    c.font = fs + 'px "IBM Plex Mono", monospace'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    if (lines.length === 1){ c.fillText(text, 0, 0); return; }
+    c.fillText(lines[0], 0, -fs*0.6); c.fillText(lines[1], 0, fs*0.6);
+  }
+  function drawBall(o, ghost){
+    var c = cx, l = o.l, r = o.r, now = performance.now();
+    var k = o.pop ? Math.min(1, (now - o.born)/180) : 1, rs = r*(0.6 + 0.4*k);
+    c.save(); c.translate(o.x, o.y); c.globalAlpha = ghost ? .35 : 1;
+    if (l === 7){ var gr = c.createRadialGradient(0,0,0,0,0,rs); gr.addColorStop(0,'#efe3cc'); gr.addColorStop(.7,'#b98a5a'); gr.addColorStop(1,'rgba(168,122,80,.15)'); c.fillStyle = gr; c.beginPath(); c.arc(0,0,rs,0,7); c.fill(); }
+    else if (l === 9){ c.fillStyle = '#000'; c.beginPath(); c.arc(0,0,rs,0,7); c.fill(); c.strokeStyle = 'rgba(209,194,176,.8)'; c.lineWidth = 2; c.beginPath(); c.arc(0,0,rs,0,7); c.stroke();
+      c.strokeStyle = 'rgba(168,122,80,.35)'; c.lineWidth = 6; c.beginPath(); c.arc(0,0,rs+4,0,7); c.stroke(); }
+    else {
+      c.fillStyle = '#0d0d0c'; c.beginPath(); c.arc(0,0,rs,0,7); c.fill();
+      var burning = l >= 1 && l <= 6;
+      c.strokeStyle = burning ? 'rgba(168,122,80,' + (0.45 + l*0.08) + ')' : 'rgba(209,194,176,.7)';
+      c.lineWidth = l === 8 ? 1 : 1.4;
+      if (l === 8) c.setLineDash([2,4]);
+      c.beginPath(); c.arc(0,0,rs,0,7); c.stroke(); c.setLineDash([]);
+      if (burning){ c.strokeStyle = 'rgba(242,150,60,' + (0.06 + l*0.025) + ')'; c.lineWidth = 5; c.beginPath(); c.arc(0,0,rs+3,0,7); c.stroke(); }
+    }
+    if (l === 0){
+      c.rotate(-0.5); c.strokeStyle = '#cdb894'; c.lineWidth = 2.2; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(0, rs*0.62); c.lineTo(0, -rs*0.35); c.stroke();
+      c.fillStyle = '#8a3b22'; c.beginPath(); c.ellipse(0, -rs*0.45, 3.2, 4.4, 0, 0, 7); c.fill();
+    } else {
+      c.fillStyle = l === 7 ? '#1a140e' : '#d1c2b0';
+      if (rs > 9) label(c, CHAIN[l], rs);
+    }
+    c.restore();
+  }
+  function draw(){
+    var c = cx; c.setTransform(scale*dpr,0,0,scale*dpr,0,0);
+    c.fillStyle = '#0b0b0a'; c.fillRect(0,0,W,H);
+    c.strokeStyle = '#2c2b29'; c.lineWidth = 1; c.strokeRect(0.5,0.5,W-1,H-1);
+    var danger = overT > 0;
+    c.strokeStyle = danger ? 'rgba(242,120,60,.7)' : 'rgba(209,194,176,.18)'; c.setLineDash([4,6]);
+    c.beginPath(); c.moveTo(0,LINE); c.lineTo(W,LINE); c.stroke(); c.setLineDash([]);
+    if (!dead){
+      var r = R[cur], x = Math.max(r, Math.min(W - r, aimX));
+      c.strokeStyle = 'rgba(209,194,176,.12)'; c.beginPath(); c.moveTo(x, LINE); c.lineTo(x, H); c.stroke();
+      drawBall({x:x, y:LINE - r - 6, r:r, l:cur}, !canDrop);
+    }
+    for (var i = 0; i < balls.length; i++) drawBall(balls[i]);
+  }
+  function tick(t){
+    if (!running) return;
+    var dt = Math.min(0.033, (t - last)/1000 || 0.016); last = t;
+    var sub = 3; for (var s = 0; s < sub; s++) step(dt/sub);
+    var now = performance.now(), high = false;
+    for (var i = 0; i < balls.length; i++){ var o = balls[i]; if (now - o.born > 900 && o.y - o.r < LINE && Math.abs(o.vy) < 60) high = true; }
+    overT = high ? overT + dt : 0;
+    if (overT > 1.6 && !dead) end();
+    draw(); raf = requestAnimationFrame(tick);
+  }
+  function end(){
+    dead = true; var b = best();
+    if (score > b) best(score);
+    document.getElementById('gfinal').textContent = 'Pisteet ' + score;
+    document.getElementById('gbest').textContent = 'Paras ' + Math.max(score, b);
+    over.classList.add('on');
+  }
+
+  function toLocal(e){ var r = cv.getBoundingClientRect(); return (e.clientX - r.left)/scale; }
+  cv.addEventListener('pointermove', function(e){ aimX = toLocal(e); });
+  cv.addEventListener('pointerdown', function(e){ aimX = toLocal(e); cv.setPointerCapture && cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointerup', function(e){ aimX = toLocal(e); drop(); });
+  addEventListener('keydown', function(e){
+    if (!game.classList.contains('on')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowLeft') aimX -= 18; if (e.key === 'ArrowRight') aimX += 18;
+    if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown'){ e.preventDefault(); drop(); }
+  });
+
+  function channel(fn){ flash(); document.body.classList.add('static'); setTimeout(function(){ document.body.classList.remove('static'); fn(); }, reduce ? 0 : 320); }
+  function open(){
+    window.__gameOpen = true;
+    channel(function(){
+      game.classList.add('on'); document.body.classList.add('gameopen'); fit();
+      if (!balls.length || dead) reset();
+      running = true; last = performance.now(); raf = requestAnimationFrame(tick);
+    });
+    if (location.hash !== '#peli') history.replaceState(null, '', '#peli');
+  }
+  function close(){
+    running = false; cancelAnimationFrame(raf);
+    channel(function(){ game.classList.remove('on'); document.body.classList.remove('gameopen'); window.__gameOpen = false; });
+    if (location.hash === '#peli') history.replaceState(null, '', location.pathname + location.search);
+  }
+  document.getElementById('eject').addEventListener('click', close);
+  document.getElementById('gagain').addEventListener('click', function(){ reset(); });
+  document.getElementById('matches').addEventListener('click', open);
+  var ch = document.getElementById('ch03'); if (ch) ch.addEventListener('click', open);
+  addEventListener('resize', function(){ if (game.classList.contains('on')) fit(); });
+  if (location.hash === '#peli') open();
+})();
+</script>
+<!--/GAME-->
 
 </body>
 </html>
