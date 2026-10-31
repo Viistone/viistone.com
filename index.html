@@ -562,7 +562,11 @@ window.VIISTONE_EMBED = true;
   background:rgba(9,9,8,.5);border:1px solid rgba(209,194,176,.25);padding:0 10px;cursor:pointer;z-index:4;text-shadow:1px 0 0 rgba(255,60,60,.3),-1px 0 0 rgba(60,200,255,.3)}
 .game .gbtn:hover{border-color:var(--cream)}
 .game .eject{right:max(14px, env(safe-area-inset-right,0px))}
-.game .mus{left:50%;transform:translateX(-50%)}
+.game .gmusic{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:4}
+.game .gmusic .gbtn{position:static}
+.game .gtitle{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);font-family:var(--f-osd);font-size:18px;letter-spacing:.06em;
+  color:var(--osd);opacity:.6;white-space:nowrap;z-index:4;transition:opacity .6s}
+.game .gtitle.hide{opacity:0}
 .gbar{display:flex;justify-content:space-between;align-items:flex-end;transform:rotate(-.6deg)}
 .seg{display:block;height:46px;filter:drop-shadow(0 0 6px rgba(255,92,40,.45))}
 .gbar .bs{font-family:var(--f-osd);font-size:22px;color:var(--grey);opacity:.75;letter-spacing:.04em}
@@ -605,7 +609,7 @@ body.gameopen{overflow:hidden}
 .eyewrap canvas{display:block;width:100%;height:100%;filter:contrast(1.05) brightness(.9)}
 .eyewrap::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 40px 10px rgba(9,9,8,.85);
   background:linear-gradient(100deg, rgba(209,194,176,.05), transparent 45%, rgba(0,0,0,.2))}
-@media (max-width:720px){ .game .gosd{font-size:24px} .game .gbtn{font-size:21px} .seg{height:38px} }
+@media (max-width:720px){ .game .eject .lbl{display:none} .game .gosd{font-size:24px} .game .gbtn{font-size:21px} .seg{height:38px} }
 @media (prefers-reduced-motion:reduce){ .gtrack,.gnoise{display:none} }
 /* channel ident: the logo at the start and the end of the tape */
 .ident{position:absolute;inset:0;z-index:7;display:none;align-items:center;justify-content:center;background:#090908;pointer-events:none}
@@ -626,8 +630,9 @@ body.gameopen{overflow:hidden}
   <div class="gscan" aria-hidden="true"></div>
   <div class="gtrack" id="gtrack" aria-hidden="true"></div>
   <div class="gosd l">CH 03</div>
-  <button class="gbtn mus" id="gmus" type="button" aria-pressed="true">♪ POIS</button>
-  <button class="gbtn eject" id="eject" type="button">⏏ EJECT</button>
+  <div class="gmusic"><button class="gbtn mus" id="gmus" type="button" aria-pressed="true">♪ POIS</button><button class="gbtn" id="gnext" type="button" aria-label="Seuraava kappale">⏭</button></div>
+  <div class="gtitle hide" id="gtitle" aria-live="polite"></div>
+  <button class="gbtn eject" id="eject" type="button" aria-label="Eject">⏏<span class="lbl"> EJECT</span></button>
   <div class="gbar" id="gbar"><svg class="seg" id="gscore" aria-label="Pisteet"></svg><span class="bs" id="gbest">PARAS 0</span></div>
   <div class="eyewrap" id="eyewrap" aria-hidden="true"><canvas id="eye"></canvas></div>
   <div class="board" id="board"></div>
@@ -638,7 +643,7 @@ body.gameopen{overflow:hidden}
     <button class="btn" id="gagain" type="button">Uudestaan</button>
   </div>
   <div class="ident" id="ident" aria-hidden="true"><img alt=""></div>
-  <audio id="gaudio" loop preload="none" data-src="assets/vikaselka.m4a"></audio>
+  <audio id="gaudio" preload="none" data-list='[{"n": "02", "t": "KYMMENEN TIKKUU", "src": "assets/kymmenentikkuu.m4a"}, {"n": "03", "t": "PITKÄSILTA", "src": "assets/pitkasilta.m4a"}, {"n": "04", "t": "SYMMETRISII UNII", "src": "assets/symmetrisiiunii.m4a"}, {"n": "09", "t": "VIKA SELKÄ", "src": "assets/vikaselka.m4a"}]'></audio>
 </div>
 <script>
 (function(){
@@ -854,9 +859,19 @@ body.gameopen{overflow:hidden}
   // Vika selkä plays while you play, unless you say no
   function musicPref(v){ try { if (v != null) localStorage.setItem('viistone-2048-music', v ? '1' : '0'); var s = localStorage.getItem('viistone-2048-music'); return s == null ? true : s === '1'; } catch(e){ return true; } }
   var musicOn = musicPref();
+  var LIST = JSON.parse(audio.dataset.list || '[]'), tIdx = Math.floor(Math.random() * LIST.length), titleT;
+  var titleEl = document.getElementById('gtitle'), nextBtn = document.getElementById('gnext');
+  if (LIST.length < 2) nextBtn.style.display = 'none';
+  function setTrack(i){
+    tIdx = (i + LIST.length) % LIST.length; audio.src = LIST[tIdx].src;
+    titleEl.textContent = '▶ ' + LIST[tIdx].n + ' ' + LIST[tIdx].t; titleEl.classList.remove('hide');
+    clearTimeout(titleT); titleT = setTimeout(function(){ titleEl.classList.add('hide'); }, 4000);
+  }
+  audio.addEventListener('ended', function(){ setTrack(tIdx + 1); if (musicOn) audio.play().catch(function(){}); });
+  nextBtn.addEventListener('click', function(){ setTrack(tIdx + 1); if (musicOn) { audio.play().catch(function(){}); } else { musicOn = true; musicPref(true); syncMusic(); } });
   function syncMusic(){
     musBtn.textContent = musicOn ? '♪ POIS' : '♪ PÄÄLLE'; musBtn.setAttribute('aria-pressed', musicOn);
-    if (musicOn && game.classList.contains('on')){ if (!audio.src) audio.src = audio.dataset.src; audio.volume = 0.7; var p = audio.play(); if (p && p.catch) p.catch(function(){ musBtn.textContent = '♪ PÄÄLLE'; }); }
+    if (musicOn && game.classList.contains('on')){ if (!audio.src) setTrack(tIdx); audio.volume = 0.7; var p = audio.play(); if (p && p.catch) p.catch(function(){ musBtn.textContent = '♪ PÄÄLLE'; }); }
     else audio.pause();
   }
   musBtn.addEventListener('click', function(){ musicOn = !musicOn; musicPref(musicOn); syncMusic(); });
