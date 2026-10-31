@@ -1403,7 +1403,7 @@ body.postiopen{overflow:hidden}
   border:2px solid rgba(232,224,200,.5);background:rgba(14,15,13,.55);color:#e9e4d8;font-family:var(--f-osd);font-size:17px;letter-spacing:.06em;line-height:1;cursor:pointer;overflow:hidden;padding:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;-webkit-tap-highlight-color:transparent;touch-action:none}
 .posti .pbt i{position:absolute;left:0;right:0;bottom:0;height:0;background:rgba(232,224,200,.22);pointer-events:none}
-.posti .pbt b{font-weight:400;font-size:28px;position:relative}
+.posti .pbt .pclk{position:relative;display:block}
 .posti .pbt span{position:relative;font-size:13px;letter-spacing:.04em}
 .posti .pbt.ready{border-color:#e8e0c8}
 .posti .pbt.on{border-color:#ff6a33;color:#ff6a33;animation:pbtp .5s steps(2) infinite}
@@ -1411,7 +1411,7 @@ body.postiopen{overflow:hidden}
 .posti .pbt kbd{font-family:inherit;font-size:12px;opacity:.6;position:relative}
 .posti.bt .pvig{background:radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(0,0,0,.85) 100%)}
 .posti.bt .pscan{opacity:.55}
-@media (max-width:520px){ .posti .pbt kbd,.posti .pbt span{display:none} .posti .pbt b{font-size:32px} .posti .pbt{width:68px;height:68px;bottom:calc(58px + env(safe-area-inset-bottom,0px))} }
+@media (max-width:520px){ .posti .pbt kbd,.posti .pbt span{display:none} .posti .pbt .pclk{width:31px;height:34px} .posti .pbt{width:68px;height:68px;bottom:calc(58px + env(safe-area-inset-bottom,0px))} }
 </style>
 <div class="posti idle" id="posti" role="dialog" aria-label="Peli: Postinkantaja">
   <canvas class="pw" id="pw"></canvas>
@@ -1423,13 +1423,13 @@ body.postiopen{overflow:hidden}
   <div class="psong" id="psong" aria-live="polite"></div>
   <div class="pclock" id="pclock" aria-live="off"></div>
   <div class="phud" id="phud" aria-live="off"><span class="led" id="pdist">00000</span><span class="mul" id="pmul"></span><span id="plet">0 M</span><span class="en"><small>ENERGIA</small><span class="bar" id="pbar" role="meter" aria-label="Energia" aria-valuemin="0" aria-valuemax="100"><i id="pen"></i></span></span></div>
-  <button class="pbt ready" id="pbt" type="button" aria-label="Hidastus"><i id="pbtf"></i><b>⏱</b><span>HIDASTUS</span><kbd>SPACE</kbd></button>
+  <button class="pbt ready" id="pbt" type="button" aria-label="Hidastus"><i id="pbtf"></i><svg class="pclk" viewBox="0 0 9 10" width="27" height="30" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><rect x="3" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="7" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="4" y="5" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/><rect x="8" y="6" width="1" height="1"/><rect x="0" y="7" width="1" height="1"/><rect x="8" y="7" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="2" y="9" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="4" y="9" width="1" height="1"/><rect x="5" y="9" width="1" height="1"/><rect x="6" y="9" width="1" height="1"/></svg><span>HIDASTUS</span><kbd>SPACE</kbd></button>
   <div class="pmsg" id="pmsg" aria-live="polite"></div>
   <div class="ppanel on" id="pstart">
     <img id="pratimg" alt="Iso rotta makoilee kirjekasan päällä">
     <h2>POSTINKANTAJA</h2>
     <p class="ln">”Meil ei asu enää ketää. Vitu iso rotta pitää pesää.”</p>
-    <p class="sm">Jaa lappuja ja kerää kaljatölkit, niistä saa energiaa. Kun rotta tulee, selviä 20 sekuntia tai karkaa isolla hypyllä.<br>← → tai hiiri. Puhelimella sormi.</p>
+    <p class="sm">Jaa posti laatikoihin, joissa lippu on pystyssä. Ohi ajettu laatikko vie energiaa ja katkaisee kertoimen. Läheltä piti ja täysosumat nostavat kerrointa. Kun rotta tulee, selviä 20 sekuntia tai karkaa isolla hypyllä.<br>← → tai hiiri, välilyönti hidastaa. Puhelimella sormi ja kellonappi.</p>
     <div class="psw"><button type="button" id="pswm">MUSIIKKI <b>PÄÄLLÄ</b></button><button type="button" id="pswf">TEHOSTEET <b>PÄÄLLÄ</b></button></div>
     <button class="go" id="pgo" type="button">AJA ▶</button>
     <button class="home" id="phome2" type="button">⏏ KOTISIVULLE</button>
@@ -1467,7 +1467,7 @@ body.postiopen{overflow:hidden}
   var OL = '#14130f', CREAM = '#e8e0c8', NAVY = '#4b5b8c', RUST = '#b4532a', BOX = '#b38a5a', BROWN = '#7a5a3c', GREY = '#8d8a82';
   var BLOOD = ['#c41a1a', '#9e1414', '#e0301e', '#7a0d0d'];
   var W = 0, H = 0, DPR = 1, S0 = 1, S = 1, grain = null;
-  var CHASE = 20, FIRST_RAT = 500, DRAIN = 2.0, CAN = 16, CRASH_E = 10, CATCH_E = 35, EMPTY = 6;
+  var CHASE = 20, FIRST_RAT = 500, DRAIN = 2.4, CAN = 15, CRASH_E = 10, CATCH_E = 35, EMPTY = 6;
   var PER = 480, ROAD = 120, WALK = 172, DARK = .7;
 
   // drawn at a low resolution and scaled up without smoothing: chunky, sharp pixels
@@ -1576,11 +1576,11 @@ body.postiopen{overflow:hidden}
   var CELL = 160, seed = 1, cells = new Map(), objs = [], blds = [], chaseGen = false;
   function rng(i, j, k){ var h = (i * 374761393 + j * 668265263 + (k || 0) * 1442695041 + seed * 2147483647) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; h ^= h >>> 16;
     var s = h >>> 0; return function(){ s = (s + 0x6D2B79F5) | 0; var t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
-  var HIT = {walker:[6,5], jogger:[6,5], tree:[8,6], bush:[11,6], bench:[15,5], plamp:[3,3], box:[14,7], bear:[10,6], shoes:[8,4], chairs:[12,6], stone:[8,5], mailbox:[3,3], car:[12,23], mcar:[12,23], lamp:[3,3], bin:[7,5], cone:[5,4]};
+  var HIT = {walker:[10,6], jogger:[10,6], tree:[8,6], bush:[11,6], bench:[15,5], plamp:[3,3], box:[14,7], bear:[10,6], shoes:[8,4], chairs:[12,6], stone:[8,5], mailbox:[3,3], car:[12,23], mcar:[12,23], lamp:[3,3], bin:[7,5], cone:[5,4]};
   var OBST = {walker:1, jogger:1, tree:1, bush:1, bench:1, box:1, bear:1, shoes:1, chairs:1, stone:1, car:1, mcar:1, bin:1, cone:1};
   var DECOR = {flowers:1, manhole:1, crack:1, paper:1, tuft:1};
   var TABLE = {
-    road:[['car', 13], ['walker', 5], ['box', 6], ['can', 6], ['coffee', 3], ['ramp', 4], ['manhole', 7], ['crack', 8], ['paper', 6]],
+    road:[['car', 13], ['walker', 7], ['box', 6], ['can', 4], ['coffee', 3], ['ramp', 4], ['manhole', 7], ['crack', 8], ['paper', 6]],
     walk:[['mailbox', 26], ['lamp', 8], ['box', 5], ['can', 3], ['paper', 6], ['crack', 4]],
     block:[['tuft', 10], ['paper', 5], ['crack', 4]],
     park:[['tree', 16], ['jogger', 5], ['bench', 5], ['mailbox', 11], ['plamp', 4], ['can', 4], ['coffee', 2], ['ramp', 4], ['flowers', 8], ['tuft', 14], ['paper', 4]]
@@ -1596,11 +1596,12 @@ body.postiopen{overflow:hidden}
       if (y < 380 && Math.abs(x) < 200) continue;
       var park = biome(y) === 'park', zone = park ? 'park' : zoneOf(x), type = pick(r, zone), c = roadC(x), side = x >= c ? 1 : -1, o = {type:type, x:x, y:y, v:r(), done:false, h:0};
       if (OBST[type] && ((d < 200 && r() < .45) || (chaseGen && r() < .65))){ o.type = 'crack'; }
-      else if (type === 'walker'){ o.c = c; o.x = c - side * (ROAD + 24); o.vx = side * (34 + r() * 26); }
-      else if (park && type === 'jogger'){ o.c = roadC(x); o.off = (r() - .5) * 16; o.x = pathX(o.c, y) + o.off; }
+      else if (type === 'walker'){ o.c = c; o.rng = ROAD + 26; o.x = c - side * (ROAD + 24); o.vx = side * (40 + r() * 30); }
+      else if (park && type === 'jogger'){ o.c = pathX(x, y); o.rng = 70; o.x = o.c - side * 60; o.vx = side * (55 + r() * 30); }
       else if (park){ if (type === 'mailbox' || type === 'plamp'){ o.x = pathX(x, y) + side * (type === 'plamp' ? 34 : 30); o.side = 0; } }
       else if (type === 'car'){ o.x = c + side * 96; o.dir = r() < .5 ? 1 : -1; o.col = r(); o.ds = -side; o.dc = d > 150 && r() < .4; o.door = 0; }
       else if (type === 'mailbox'){ o.x = c + side * (ROAD + 12); }
+      if (o.type === 'mailbox') o.m = r() < .5;
       else if (type === 'lamp'){ o.x = c + side * (ROAD + 30); o.side = side; }
       add(o, list);
     }
@@ -1645,13 +1646,13 @@ body.postiopen{overflow:hidden}
   var nextRat = FIRST_RAT, lowWarn = 0, nextHelp = 0, nextHonk = 0;
   function reset(){
     seed = (Math.random() * 1e9) | 0; cells.clear(); objs = []; blds = []; trail = []; parts = []; streaks = []; decals = []; chaseGen = false;
-    P = {x:0, y:0, a:0, v:0, air:0, airT:1, airH:0, down:0, inv:0, boost:0, dist:0, letters:0, cans:0, jumps:0, bigs:0, crashes:0, pedal:0, e:100, empty:0, escapes:0, bonus:0, high:false, caught:0, combo:0, perfect:0, near:0, passedBest:false};
+    P = {x:0, y:0, a:0, v:0, air:0, airT:1, airH:0, down:0, inv:0, boost:0, dist:0, letters:0, cans:0, jumps:0, bigs:0, crashes:0, pedal:0, e:100, empty:0, escapes:0, bonus:0, high:false, caught:0, missed:0, combo:0, perfect:0, near:0, passedBest:false};
     rat = null; nextRat = FIRST_RAT; nextBig = 380 + Math.random() * 200; cam.x = 0; cam.y = 0; glitch = 0; gust.v = 0; lowWarn = 0; nextHelp = 0; nextHonk = 4; bnds = []; P.bio = 'city'; hud();
   }
   function mult(){ return Math.min(5, 1 + Math.floor(P.combo / 3)); }
   function pop(x, y, txt, col){ parts.push({k:'txt', x:x, y:y, txt:txt, c:col || '#ffd28a', t:0}); }
   function streak(pts, e, x, y, txt){ P.combo++; var m = mult(); P.bonus += pts * m; if (e) energy(e); pop(x, y, txt + ' +' + pts * m); }
-  function score(){ return Math.floor(P.dist) + P.cans * 15 + P.jumps * 25 + P.bigs * 100 + P.bonus; }
+  function score(){ return Math.floor(P.dist + P.cans * 15 + P.jumps * 25 + P.bigs * 100 + P.bonus); }
   function hud(){
     hudD.textContent = String(score()).padStart(5, '0'); hudL.textContent = Math.floor(P.dist) + ' M';
     var m = mult(), me = document.getElementById('pmul'); if (me.textContent !== (m > 1 ? 'x' + m : '')){ me.textContent = m > 1 ? 'x' + m : ''; me.classList.remove('bump'); void me.offsetWidth; me.classList.add('bump'); }
@@ -1703,7 +1704,7 @@ body.postiopen{overflow:hidden}
   }
 
   // ---------- update ----------
-  var TURN = 2.4, AMAX = 1.25;
+  var TURN = 4.2, AMAX = 1.45;
   function step(dt){
     tsec += dt;
     var chasing = rat && rat.mode === 'chase';
@@ -1711,7 +1712,7 @@ body.postiopen{overflow:hidden}
     if (P.down > 0){ P.down -= dt; P.v = 0; if (P.down <= 0){ P.inv = 1.4; P.v = vmax * .4; } }
     else {
       if (input.ptr){ var sx = W / 2 + (P.x - cam.x) * S, sy = H * .38 + (P.y - cam.y) * S, dx = input.ptr.x - sx, dy = Math.max(70, input.ptr.y - sy);
-        var target = Math.max(-AMAX, Math.min(AMAX, -Math.atan2(dx, dy))); P.a += (target - P.a) * Math.min(1, dt * 7); }
+        var target = Math.max(-AMAX, Math.min(AMAX, -Math.atan2(dx, dy))); P.a += (target - P.a) * Math.min(1, dt * 13); }
       if (input.left) P.a = Math.min(AMAX, P.a + TURN * dt);
       if (input.right) P.a = Math.max(-AMAX, P.a - TURN * dt);
       if (input.down) P.a *= Math.max(0, 1 - dt * 5);
@@ -1725,7 +1726,7 @@ body.postiopen{overflow:hidden}
     var near = rat && chasing ? Math.max(0, 1 - Math.hypot(P.x - rat.x, P.y - rat.y) / 800) : 0;
     gust.v += (gust.dir * gust.k * (.55 + near * .6) - gust.v) * Math.min(1, dt * 2.5);
     if (P.down <= 0 && P.air <= 0) vx += gust.v * 95;
-    var py0 = P.y; P.x += vx * dt; P.y += vy * dt; P.dist = Math.max(P.dist, P.y / 10); P.pedal += P.v * dt * .05;
+    var py0 = P.y, d0 = P.dist; P.x += vx * dt; P.y += vy * dt; P.dist = Math.max(P.dist, P.y / 10); P.bonus += (P.dist - d0) * (mult() - 1); P.pedal += P.v * dt * .05;
     if (P.air > 0){ P.air = Math.max(0, P.air - dt); if (P.air === 0 && P.high){ P.high = false; if (rat && rat.mode === 'chase') ratGiveUp('jump'); } }
     var hNow = height();
     S = S0 * (1 - .2 * Math.min(1, hNow / 80));
@@ -1749,14 +1750,14 @@ body.postiopen{overflow:hidden}
 
     for (var k = 0; k < objs.length; k++){
       var o = objs[k];
-      if (o.type === 'walker' && Math.abs(o.y - P.y) < 700){ o.x += o.vx * dt; if (Math.abs(o.x - o.c) > ROAD + 26) o.vx = -o.vx; }
-      if (o.type === 'jogger' && o.y - P.y < 700 && o.y - P.y > -200){ o.y -= 55 * dt; o.x = pathX(o.c, o.y) + o.off; }
+      if ((o.type === 'walker' || o.type === 'jogger') && Math.abs(o.y - P.y) < 700){ o.x += o.vx * dt; if (Math.abs(o.x - o.c) > o.rng && (o.x - o.c) * o.vx > 0) o.vx = -o.vx; }
       if (o.type === 'car' && o.dc && !o.door && o.y - P.y < 170 && o.y > P.y && Math.abs(P.x - o.x) < 110){ o.door = .01; tone(520, .18, 'square', .03, 300); }
       if (o.door && o.door < 1) o.door = Math.min(1, o.door + dt * 4);
       if (o.type === 'mcar'){ o.y += o.dir * o.sp * dt; if (biome(o.y) !== 'city'){ o.type = 'tuft'; continue; } carSounds(o); }
       if (Math.abs(o.y - P.y) > 110) continue;
       var dx = P.x - o.x, dy = (P.y + 8) - o.y;
-      if (o.type === 'mailbox' && !o.done && py0 + 8 <= o.y && P.y + 8 > o.y && Math.abs(dx) < 80 && P.down <= 0){
+      if (o.type === 'mailbox' && o.m && !o.done && !o.miss && P.y + 8 > o.y + 26 && roadC(o.x) === roadC(P.x)){ o.miss = 1; P.missed++; energy(-6); breakCombo(); pop(o.x, o.y - 50, 'UNOHTUI −6', '#ff6a33'); tone(140, .25, 'sawtooth', .05, 90); }
+      if (o.type === 'mailbox' && o.m && !o.done && !o.miss && py0 + 8 <= o.y && P.y + 8 > o.y && Math.abs(dx) < 80 && P.down <= 0){
         o.done = true; P.letters++; sfx.deliver(); if (Math.abs(dx) < 42){ P.perfect++; streak(100, 6, o.x, o.y - 46, 'TÄYSOSUMA'); } else streak(40, 3, o.x, o.y - 46, '✉'); parts.push({k:'letter', x:P.x, y:P.y - 10 - hNow, tx:o.x, ty:o.y - 30, t:0}); if (rat && rat.mode === 'chase') rat.anger++;
       }
       if (o.done || DECOR[o.type]) continue;
@@ -1851,9 +1852,10 @@ body.postiopen{overflow:hidden}
       ctx.fillStyle = CREAM; ctx.fillRect(-2, -4, 4, 1.4); ctx.fillRect(-2, -1, 4, 1.4); ctx.restore(); }); },
     chairs: function(){ shadow(17, 5, 2); for (var i = 0; i < 3; i++){ var y = -i * 9; line(2); box(-14, y - 6, 28, 6, i % 2 ? '#9a7a52' : '#8a6a44'); box(-14, y - 16, 4, 10, '#8a6a44'); } },
     stone: function(o){ shadow(11, 4, 2); line(); ctx.beginPath(); ctx.moveTo(-11, 0); ctx.lineTo(-10, -11); ctx.lineTo(-2, -14); ctx.lineTo(9, -11); ctx.lineTo(11, -2); ctx.closePath(); fillStroke(o.v < .5 ? GREY : '#a5a092'); },
-    mailbox: function(o){ shadow(10, 3, 1); line(2.2); box(-2.5, -24, 5, 24, '#6b5038'); rr(-11, -40, 22, 17, [6, 6, 0, 0]); fillStroke(o.done ? '#c9c0a6' : CREAM);
+    mailbox: function(o){ var want = o.m && !o.done && !o.miss; shadow(10, 3, 1); line(2.2); box(-2.5, -24, 5, 24, '#6b5038'); rr(-11, -40, 22, 17, [6, 6, 0, 0]); fillStroke(want ? CREAM : '#8d8a82');
       ctx.fillStyle = OL; ctx.fillRect(-6, -30, 12, 2);
-      line(1.8); if (o.done){ box(11, -28, 3, 9, RUST); box(-7, -36, 11, 6, '#fff'); } else { box(11, -44, 3, 14, RUST); box(14, -44, 7, 5, RUST); } },
+      line(1.8); if (!want){ box(11, -28, 3, 9, '#6b5038'); if (o.done) box(-7, -36, 11, 6, '#fff'); } else { box(11, -44, 3, 14, RUST); box(14, -44, 7, 5, RUST);
+        var bob = Math.floor(performance.now() / 260 + o.v * 5) % 2; line(1.4); box(-6, -60 - bob * 2, 12, 8, '#ffd28a'); ctx.beginPath(); ctx.moveTo(-6, -60 - bob * 2); ctx.lineTo(0, -55 - bob * 2); ctx.lineTo(6, -60 - bob * 2); ctx.stroke(); } },
     can: function(o){ floaty(o, function(){ line(2); box(-7, -20, 14, 24, RUST); ctx.fillStyle = '#c9c4b8'; ctx.fillRect(-7, -20, 14, 4); ctx.strokeRect(-7, -20, 14, 4);
       ctx.fillStyle = CREAM; [[-5, -9, 2, 5], [-2.5, -11, 2, 9], [0, -13, 2, 12], [2.5, -11, 2, 9], [5, -9, 2, 5]].forEach(function(b){ ctx.fillRect(b[0] - 1, b[1], b[2], b[3]); }); }); },
     coffee: function(o){ floaty(o, function(){ line(2); ctx.beginPath(); ctx.moveTo(-7, -14); ctx.lineTo(7, -14); ctx.lineTo(5, 0); ctx.lineTo(-5, 0); ctx.closePath(); fillStroke('#fff');
@@ -1879,13 +1881,13 @@ body.postiopen{overflow:hidden}
       ctx.beginPath(); ctx.moveTo(-7, -2); ctx.lineTo(7, -2); ctx.moveTo(-8, 1); ctx.lineTo(8, 1); ctx.stroke(); },
     crack: function(o){ ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-12, -3); ctx.lineTo(-4, 1 + o.v * 3); ctx.lineTo(2, -2); ctx.lineTo(12, 2); ctx.moveTo(-4, 1); ctx.lineTo(-6, 6); ctx.stroke(); },
     tuft: function(){ ctx.fillStyle = 'rgba(110,130,80,.55)'; for (var i = -2; i <= 2; i++) ctx.fillRect(i * 3, -6 + Math.abs(i) * 2, 1.5, 6 - Math.abs(i) * 2); },
-    walker: function(o){ var ph = Math.floor(performance.now() / 160 + o.v * 9) % 2, f = o.vx > 0 ? 1 : -1; shadow(7, 3, 1); line(1.6);
+    walker: function(o){ ctx.scale(1.7, 1.7); var ph = Math.floor(performance.now() / 160 + o.v * 9) % 2, f = o.vx > 0 ? 1 : -1; shadow(7, 3, 1); line(1.4);
       ctx.fillStyle = OL; ctx.fillRect(-4 + ph * 2 * f, -6, 3, 6); ctx.fillRect(1 - ph * 2 * f, -6, 3, 6);
       box(-5, -17, 10, 12, o.v < .5 ? '#6b2f2a' : '#3e4a2c'); ell(0, -21, 4.5, 4.5); fillStroke(o.v < .3 ? '#2b2620' : CREAM);
       ctx.fillStyle = OL; ctx.fillRect(f * 2, -22, 2, 2); if (o.v > .6){ ctx.fillStyle = RUST; ctx.fillRect(f * 6, -14, 3, 6); } },
-    jogger: function(o){ var ph = Math.floor(performance.now() / 110 + o.v * 9) % 2; shadow(7, 3, 1); line(1.6);
-      ctx.fillStyle = OL; ctx.fillRect(-4, -6 + ph * 2, 3, 6); ctx.fillRect(1, -4 - ph * 2, 3, 6);
-      box(-5, -17, 10, 12, o.v < .5 ? '#c9c4b8' : '#8a2f22'); ell(0, -21, 4.5, 4.5); fillStroke(CREAM); ctx.fillStyle = '#e0301e'; ctx.fillRect(-4, -25, 8, 2); },
+    jogger: function(o){ ctx.scale(1.7, 1.7); var ph = Math.floor(performance.now() / 100 + o.v * 9) % 2, f = o.vx > 0 ? 1 : -1; shadow(7, 3, 1); line(1.4);
+      ctx.fillStyle = OL; ctx.fillRect(-5 + ph * 4 * f, -6, 3, 6); ctx.fillRect(2 - ph * 4 * f, -6, 3, 6);
+      box(-5, -17, 10, 12, o.v < .5 ? '#c9c4b8' : '#8a2f22'); ell(f, -21, 4.5, 4.5); fillStroke(CREAM); ctx.fillStyle = '#e0301e'; ctx.fillRect(-4 + f, -25, 8, 2); ctx.fillStyle = OL; ctx.fillRect(f * 3, -22, 2, 2); },
     tree: function(o){ ctx.scale(1.5, 1.5); ctx.fillStyle = 'rgba(0,0,0,.45)'; ell(6, 2, 24, 9); ctx.fill(); line(2); box(-3, -16, 6, 16, '#4a3726');
       var g = o.v < .5 ? ['#24361b', '#2f4722', '#3d5a2b'] : ['#2b331a', '#3a4523', '#4d5a2e'];
       line(2.2); ell(-8, -26, 13, 11); fillStroke(g[0]); ell(8, -28, 13, 11); fillStroke(g[0]); ell(0, -38, 15, 13); fillStroke(g[1]);
@@ -1995,6 +1997,7 @@ body.postiopen{overflow:hidden}
     var vt = cam.y - H * .38 / S - 200, vb = cam.y + H * .62 / S + 200;
     objs.forEach(function(o){ if (o.y < vt || o.y > vb || o.done) return; var q;
       if (o.type === 'lamp' || o.type === 'plamp'){ q = sp(o.x - o.side * 14, o.y + 4); hole(q[0], q[1], 120 * S, .95); }
+      else if (o.type === 'mailbox' && o.m && !o.done && !o.miss){ q = sp(o.x, o.y - 40); hole(q[0], q[1], 40 * S, .7); }
       else if (o.type === 'mcar'){ var fq = sp(o.x, o.y + o.dir * 24); cone(fq[0], fq[1], o.dir > 0 ? Math.PI / 2 : -Math.PI / 2, 220 * S, .35, .9); }
       else if (o.type === 'can' || o.type === 'bigramp' || o.type === 'coffee'){ q = sp(o.x, o.y - (o.h || 16)); hole(q[0], q[1], (o.type === 'bigramp' ? 70 : 26) * S, .6); }
     });
@@ -2009,7 +2012,8 @@ body.postiopen{overflow:hidden}
     objs.forEach(function(o){ if (o.y < vt || o.y > vb) return;
       if (o.type === 'lamp' || o.type === 'plamp'){ var q = sp(o.x - o.side * 14, o.y - 44); glow(q[0], q[1], 22 * S, 'rgba(255,220,150,.55)'); q = sp(o.x - o.side * 14, o.y + 4); glow(q[0], q[1], 90 * S, 'rgba(255,190,110,.10)'); }
       if (o.type === 'mcar'){ var fq = sp(o.x, o.y + o.dir * 24); glow(fq[0], fq[1], 18 * S, 'rgba(255,240,200,.5)'); }
-      if (o.type === 'can' && !o.done){ var cq = sp(o.x, o.y - (o.h || 16) - 8); glow(cq[0], cq[1], 16 * S, 'rgba(255,120,60,.25)'); } });
+      if (o.type === 'can' && !o.done){ var cq = sp(o.x, o.y - (o.h || 16) - 8); glow(cq[0], cq[1], 16 * S, 'rgba(255,120,60,.25)'); }
+      if (o.type === 'mailbox' && o.m && !o.done && !o.miss){ var mq = sp(o.x, o.y - 56); glow(mq[0], mq[1], 22 * S, 'rgba(255,200,120,.35)'); } });
     ctx.globalCompositeOperation = 'source-over';
   }
   function vhs(g){
@@ -2143,7 +2147,7 @@ body.postiopen{overflow:hidden}
       : ['”Väsyit myrskyyn ja loputtomaan särkyyn”', '”Joskus kävellen hengästyy”', '”Peli päättyy pilli viheltää”', '”Me ollaa jo muualla”'];
     document.getElementById('povh').textContent = why === 'rat' ? 'ROTTA SAI KIINNI' : 'ENERGIA LOPPU';
     document.getElementById('povl').textContent = lines[Math.floor(Math.random() * lines.length)];
-    document.getElementById('pstats').innerHTML = '<span>' + Math.floor(P.dist) + ' M</span><span>✉ ' + P.letters + '</span><span>TÖLKIT ' + P.cans + '</span><span>KARKUUN ' + P.escapes + '</span><span><em>PISTEET ' + s + '</em></span><span>' + (nb ? 'UUSI OMA ENNÄTYS' : 'OMA PARAS ' + best) + '</span>';
+    document.getElementById('pstats').innerHTML = '<span>' + Math.floor(P.dist) + ' M</span><span>✉ ' + P.letters + '</span><span>TÄYSOSUMAT ' + P.perfect + '</span><span>UNOHTUI ' + P.missed + '</span><span>TÖLKIT ' + P.cans + '</span><span>KARKUUN ' + P.escapes + '</span><span><em>PISTEET ' + s + '</em></span><span>' + (nb ? 'UUSI OMA ENNÄTYS' : 'OMA PARAS ' + best) + '</span>';
     showBoards();
     setTimeout(function(){ pOver.classList.add('on'); root.classList.add('idle'); }, reduce ? 0 : 700);
   }
