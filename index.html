@@ -643,6 +643,13 @@ body.gameopen{overflow:hidden}
 @keyframes rec{0%,20%,40%,60%,80%{opacity:1}10%,30%,50%,70%{opacity:.15}100%{opacity:0}}
 .seg.roll{animation:segf .35s steps(4) 1}
 @keyframes segf{50%{opacity:.6}}
+/* ash blocks */
+.tile.ash{background-image:none !important;background-color:#2b2825;filter:none !important;opacity:calc(.45 + .55 * var(--life,1));box-shadow:inset 0 0 0 1px rgba(168,122,80,.35), inset 0 0 18px rgba(0,0,0,.9)}
+.tile.ash::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 30% 70%, rgba(190,180,165,.55) 0 2px, transparent 3px),radial-gradient(circle at 62% 40%, rgba(190,180,165,.5) 0 1.5px, transparent 2.5px),radial-gradient(circle at 45% 25%, rgba(190,180,165,.4) 0 1px, transparent 2px),radial-gradient(ellipse at 50% 55%, rgba(168,122,80,.18), transparent 60%),
+  radial-gradient(circle at 75% 78%, rgba(242,140,60,.6) 0 1.5px, transparent 3px),repeating-linear-gradient(115deg, rgba(0,0,0,.35) 0 2px, transparent 2px 6px),repeating-linear-gradient(25deg, rgba(255,255,255,.04) 0 1px, transparent 1px 5px)}
+.tile.crumble{animation:crumble .6s ease-in forwards}
+@keyframes crumble{to{opacity:0}}
 /* the eye watches where you push the tape */
 .eyewrap{position:relative;transform:rotate(-.6deg);clip-path:polygon(0.4% 2%, 41% 0%, 99.6% 1.5%, 100% 52%, 99.2% 98.5%, 58% 100%, 0% 98%, 0.6% 46%)}
 .eyewrap canvas{display:block;width:100%;height:100%;filter:contrast(1.05) brightness(.9)}
@@ -695,7 +702,7 @@ body.gameopen{overflow:hidden}
     <a class="gspot" href="https://open.spotify.com/artist/6u7uLNnINNky7DDh3Ym3Ao" target="_blank" rel="noopener">Viistone Spotifyssa ↗</a>
   </div>
   <div class="ident" id="ident" aria-hidden="true"><img alt=""></div>
-  <audio id="gaudio" preload="none" data-list='[{"n": "02", "t": "KYMMENEN TIKKUU", "src": "assets/kymmenentikkuu.m4a"}, {"n": "03", "t": "PITKÄSILTA", "src": "assets/pitkasilta.m4a"}, {"n": "04", "t": "SYMMETRISII UNII", "src": "assets/symmetrisiiunii.m4a"}, {"n": "07", "t": "HYMYTYTTÖ", "src": "assets/hymytytto.m4a"}, {"n": "08", "t": "KOTIINPALUU KAI JOTENKI JÄRJESTYY", "src": "assets/kotiinpaluu.m4a"}, {"n": "09", "t": "VIKA SELKÄ", "src": "assets/vikaselka.m4a"}]'></audio>
+  <audio id="gaudio" preload="none" data-list='[{"n": "01", "t": "PROLOGI", "src": "assets/prologi.m4a"}, {"n": "02", "t": "KYMMENEN TIKKUU", "src": "assets/kymmenentikkuu.m4a"}, {"n": "03", "t": "PITKÄSILTA", "src": "assets/pitkasilta.m4a"}, {"n": "04", "t": "SYMMETRISII UNII", "src": "assets/symmetrisiiunii.m4a"}, {"n": "05", "t": "VÄLII VUODELLA", "src": "assets/valiivuodella.m4a"}, {"n": "06", "t": "POSTINKANTAJA", "src": "assets/postinkantaja.m4a"}, {"n": "07", "t": "HYMYTYTTÖ", "src": "assets/hymytytto.m4a"}, {"n": "08", "t": "KOTIINPALUU KAI JOTENKI JÄRJESTYY", "src": "assets/kotiinpaluu.m4a"}, {"n": "09", "t": "VIKA SELKÄ", "src": "assets/vikaselka.m4a"}, {"n": "10", "t": "EPILOGI", "src": "assets/epilogi.m4a"}]'></audio>
 </div>
 <script>
 (function(){
@@ -765,6 +772,33 @@ body.gameopen{overflow:hidden}
     chain.children[l].classList.add('got');
     return t;
   }
+  // ash: a burnt-out block that sits still, can't merge, and crumbles after a while
+  var moves = 0, ASH_START = 18, ASH_EVERY = 11, ASH_LIFE = 10, ASH_MAX = 2;
+  function ashMaybe(){
+    moves++;
+    if (moves < ASH_START || (moves - ASH_START) % ASH_EVERY !== 0) return;
+    if (tiles.filter(function(x){ return x.l < 0; }).length >= ASH_MAX) return;
+    var free = [];
+    for (var r = 0; r < N; r++) for (var c = 0; c < N; c++) if (!grid[r][c]) free.push([r, c]);
+    if (free.length < 2) return;
+    var p = free[Math.floor(Math.random() * free.length)];
+    var el = document.createElement('div'); el.className = 'tile ash new';
+    var w = wear(); el._w = w; el.style.backgroundImage = 'url(' + IMG[0] + ')'; el.style.width = el.style.height = cell + 'px';
+    el.style.clipPath = w.clip; el.setAttribute('aria-label', 'tuhka'); el.setAttribute('role', 'img');
+    place(el, p[0], p[1]); board.appendChild(el);
+    var a = {id: ++uid, l: -1, r: p[0], c: p[1], el: el, life: ASH_LIFE}; tiles.push(a); grid[p[0]][p[1]] = a;
+    el.style.setProperty('--life', 1);
+    if (typeof strike === 'function') strike(0);
+  }
+  function ashTick(){
+    tiles.filter(function(x){ return x.l < 0; }).forEach(function(a){
+      a.life--; a.el.style.setProperty('--life', (a.life / ASH_LIFE).toFixed(2));
+      if (a.life <= 0){
+        grid[a.r][a.c] = null; tiles.splice(tiles.indexOf(a), 1);
+        a.el.classList.add('crumble'); setTimeout(function(){ a.el.remove(); }, 600);
+      }
+    });
+  }
   function spawn(){
     var free = [];
     for (var r = 0; r < N; r++) for (var c = 0; c < N; c++) if (!grid[r][c]) free.push([r, c]);
@@ -773,7 +807,7 @@ body.gameopen{overflow:hidden}
     makeTile(Math.random() < 0.9 ? 0 : 1, p[0], p[1], 'new');
   }
   function reset(){
-    board.innerHTML = ''; tiles = []; grid = []; score = 0; top = -1; busy = false;
+    board.innerHTML = ''; tiles = []; grid = []; score = 0; top = -1; busy = false; moves = 0;
     for (var r = 0; r < N; r++){ grid.push([null,null,null,null]);
       for (var c = 0; c < N; c++){ var d = document.createElement('div'); d.className = 'cell'; d.dataset.r = r; d.dataset.c = c; d._w = wear(); d._w.sc = rr(.95, 1); d.style.clipPath = d._w.clip; d.style.opacity = rr(.5, 1).toFixed(2); board.appendChild(d); } }
     [].forEach.call(chain.children, function(i){ i.classList.remove('got'); });
@@ -789,7 +823,7 @@ body.gameopen{overflow:hidden}
     var dr = [-1,0,1,0][dir], dc = [0,1,0,-1][dir];
     var idx = [0,1,2,3], rows = dr === 1 ? idx.slice().reverse() : idx, cols = dc === 1 ? idx.slice().reverse() : idx;
     rows.forEach(function(r){ cols.forEach(function(c){
-      var t = grid[r][c]; if (!t) return;
+      var t = grid[r][c]; if (!t || t.l < 0) return;
       var nr = r, nc = c, into = null;
       while (true){
         var r2 = nr + dr, c2 = nc + dc;
@@ -817,13 +851,13 @@ body.gameopen{overflow:hidden}
       });
       if (merges.length >= 2){ track(); }
       if (maxL >= 6 && maxL < NAMES.length){ flash(); track(); wow(); }
-      setScore(); checkRecord(); spawn(); busy = false;
+      setScore(); checkRecord(); ashTick(); spawn(); ashMaybe(); busy = false;
       if (!canMove()) end();
     }, reduce ? 0 : 125);
   }
   function canMove(){
     for (var r = 0; r < N; r++) for (var c = 0; c < N; c++){
-      var t = grid[r][c]; if (!t) return true;
+      var t = grid[r][c]; if (!t) return true; if (t.l < 0) continue;
       if (c < N - 1 && grid[r][c+1] && grid[r][c+1].l === t.l) return true;
       if (r < N - 1 && grid[r+1][c] && grid[r+1][c].l === t.l) return true;
     }
