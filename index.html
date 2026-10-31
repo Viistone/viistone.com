@@ -1341,6 +1341,9 @@ body.gameopen{overflow:hidden}
   color:rgba(233,228,216,.75);white-space:nowrap}
 .posti .phud{position:absolute;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;align-items:center;gap:16px;z-index:4;
   font-family:var(--f-osd);font-size:24px;letter-spacing:.06em;color:#e9e4d8;text-shadow:0 1px 0 rgba(0,0,0,.6)}
+.posti .phud .mul{color:#ffd28a;font-size:30px;min-width:1.6em;text-shadow:0 0 8px rgba(255,210,138,.5)}
+.posti .phud .mul.bump{animation:pbump .3s steps(3)}
+@keyframes pbump{0%{transform:scale(1.6)}100%{transform:scale(1)}}
 .posti .phud .led{color:#ff6a33;font-size:30px;text-shadow:0 0 8px rgba(255,106,51,.45)}
 .posti .phud .en{display:inline-flex;align-items:center;gap:8px}
 .posti .phud .en small{font-size:17px;letter-spacing:.14em;color:rgba(233,228,216,.7)}
@@ -1406,7 +1409,7 @@ body.postiopen{overflow:hidden}
   <button class="pbtn peject" id="peject" type="button" aria-label="Eject">⏏<span class="lbl"> EJECT</span></button>
   <div class="psong" id="psong" aria-live="polite"></div>
   <div class="pclock" id="pclock" aria-live="off"></div>
-  <div class="phud" id="phud" aria-live="off"><span class="led" id="pdist">0000 M</span><span id="plet">✉ 0</span><span class="en"><small>ENERGIA</small><span class="bar" id="pbar" role="meter" aria-label="Energia" aria-valuemin="0" aria-valuemax="100"><i id="pen"></i></span></span></div>
+  <div class="phud" id="phud" aria-live="off"><span class="led" id="pdist">00000</span><span class="mul" id="pmul"></span><span id="plet">0 M</span><span class="en"><small>ENERGIA</small><span class="bar" id="pbar" role="meter" aria-label="Energia" aria-valuemin="0" aria-valuemax="100"><i id="pen"></i></span></span></div>
   <div class="pmsg" id="pmsg" aria-live="polite"></div>
   <div class="ppanel on" id="pstart">
     <img id="pratimg" alt="Iso rotta makoilee kirjekasan päällä">
@@ -1470,7 +1473,7 @@ body.postiopen{overflow:hidden}
   // ---------- sound ----------
   var SFX_FILES = {burp:['burp1.mp3', 'burp2.mp3'], yell:['yell1.mp3', 'yell2.mp3', 'yell3.mp3', 'yell4.mp3'], jet:['jet.mp3'], open:['open.mp3'], crash:['crash.mp3'], cry:['cry.mp3'],
     wind:['wind.mp3'], bell:['bell1.mp3', 'bell2.mp3', 'bell3.mp3'], rat:['rat.mp3'], smash:['smash.mp3'], amb:['amb.mp3'], pedal:['pedal.mp3'],
-    horn:['horn1.mp3', 'horn2.mp3', 'horn3.mp3'], squeal:['squeal.mp3'], driveby:['driveby.mp3'], driveaway:['driveaway.mp3']};
+    horn:['horn1.mp3', 'horn2.mp3', 'horn3.mp3'], squeal:['squeal.mp3'], driveby:['driveby.mp3'], driveaway:['driveaway.mp3'], fart:['fart1.mp3', 'fart2.mp3', 'fart3.mp3', 'fart4.mp3', 'fart5.mp3']};
   var AC = null, fxOn = true, musicOn = true, audio = document.getElementById('paudio'), bufs = {}, master = null, loops = {};
   try { fxOn = localStorage.getItem('posti_fx') !== '0'; musicOn = localStorage.getItem('posti_mus') !== '0'; } catch(e){}
   function acInit(){
@@ -1499,7 +1502,7 @@ body.postiopen{overflow:hidden}
     crash: function(car){ if (!playBuf('smash', car ? .9 : .6, false, .95 + Math.random() * .15)) noise(.25, .25); if (car) playBuf('squeal', .5); if (car || Math.random() < .6) setTimeout(function(){ playBuf('crash', .7, false, .92 + Math.random() * .2); }, 120); },
     jump: function(){ tone(300, .2, 'triangle', .05, 700); if (Math.random() < .55) yell(); },
     big: function(){ if (!playBuf('jet', .8)) tone(200, .9, 'triangle', .08, 1400); setTimeout(yell, 250); },
-    coffee: function(){ tone(400, .2, 'sine', .08, 900); },
+    coffee: function(){ if (!playBuf('fart', .9, false, .9 + Math.random() * .25)) tone(400, .2, 'sine', .08, 900); },
     rat: function(){ if (!playBuf('rat', .95)){ tone(90, .9, 'sawtooth', .09, 45); noise(.6, .12); } },
     gone: function(){ [880, 660, 990].forEach(function(f, i){ setTimeout(function(){ tone(f, .14, 'triangle', .06); }, i * 90); }); },
     hit: function(){ playBuf('smash', .7); if (!playBuf('cry', .9)) tone(200, .7, 'sawtooth', .09, 40); },
@@ -1555,14 +1558,14 @@ body.postiopen{overflow:hidden}
   var CELL = 160, seed = 1, cells = new Map(), objs = [], blds = [], chaseGen = false;
   function rng(i, j, k){ var h = (i * 374761393 + j * 668265263 + (k || 0) * 1442695041 + seed * 2147483647) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; h ^= h >>> 16;
     var s = h >>> 0; return function(){ s = (s + 0x6D2B79F5) | 0; var t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
-  var HIT = {tree:[8,6], bush:[11,6], bench:[15,5], plamp:[3,3], box:[14,7], bear:[10,6], shoes:[8,4], chairs:[12,6], stone:[8,5], mailbox:[3,3], car:[12,23], mcar:[12,23], lamp:[3,3], bin:[7,5], cone:[5,4]};
-  var OBST = {tree:1, bush:1, bench:1, box:1, bear:1, shoes:1, chairs:1, stone:1, car:1, mcar:1, bin:1, cone:1};
+  var HIT = {walker:[6,5], jogger:[6,5], tree:[8,6], bush:[11,6], bench:[15,5], plamp:[3,3], box:[14,7], bear:[10,6], shoes:[8,4], chairs:[12,6], stone:[8,5], mailbox:[3,3], car:[12,23], mcar:[12,23], lamp:[3,3], bin:[7,5], cone:[5,4]};
+  var OBST = {walker:1, jogger:1, tree:1, bush:1, bench:1, box:1, bear:1, shoes:1, chairs:1, stone:1, car:1, mcar:1, bin:1, cone:1};
   var DECOR = {flowers:1, manhole:1, crack:1, paper:1, tuft:1};
   var TABLE = {
-    road:[['car', 12], ['box', 7], ['can', 6], ['coffee', 3], ['ramp', 4], ['manhole', 7], ['crack', 8], ['paper', 6]],
-    walk:[['mailbox', 24], ['lamp', 8], ['bin', 7], ['bear', 6], ['chairs', 6], ['box', 7], ['can', 3], ['paper', 6], ['crack', 4]],
+    road:[['car', 13], ['walker', 5], ['box', 6], ['can', 6], ['coffee', 3], ['ramp', 4], ['manhole', 7], ['crack', 8], ['paper', 6]],
+    walk:[['mailbox', 26], ['lamp', 8], ['box', 5], ['can', 3], ['paper', 6], ['crack', 4]],
     block:[['tuft', 10], ['paper', 5], ['crack', 4]],
-    park:[['tree', 16], ['bush', 8], ['bench', 5], ['mailbox', 10], ['plamp', 4], ['can', 4], ['coffee', 2], ['ramp', 4], ['flowers', 8], ['tuft', 14], ['paper', 4]]
+    park:[['tree', 16], ['jogger', 5], ['bench', 5], ['mailbox', 11], ['plamp', 4], ['can', 4], ['coffee', 2], ['ramp', 4], ['flowers', 8], ['tuft', 14], ['paper', 4]]
   };
   function pick(r, zone){ var w = TABLE[zone], tot = 0; w.forEach(function(x){ tot += x[1]; }); var v = r() * tot;
     for (var k = 0; k < w.length; k++){ v -= w[k][1]; if (v <= 0) return w[k][0]; } return w[0][0]; }
@@ -1575,8 +1578,10 @@ body.postiopen{overflow:hidden}
       if (y < 380 && Math.abs(x) < 200) continue;
       var park = biome(y) === 'park', zone = park ? 'park' : zoneOf(x), type = pick(r, zone), c = roadC(x), side = x >= c ? 1 : -1, o = {type:type, x:x, y:y, v:r(), done:false, h:0};
       if (OBST[type] && ((d < 200 && r() < .45) || (chaseGen && r() < .65))){ o.type = 'crack'; }
+      else if (type === 'walker'){ o.c = c; o.x = c - side * (ROAD + 24); o.vx = side * (34 + r() * 26); }
+      else if (park && type === 'jogger'){ o.c = roadC(x); o.off = (r() - .5) * 16; o.x = pathX(o.c, y) + o.off; }
       else if (park){ if (type === 'mailbox' || type === 'plamp'){ o.x = pathX(x, y) + side * (type === 'plamp' ? 34 : 30); o.side = 0; } }
-      else if (type === 'car'){ o.x = c + side * 96; o.dir = r() < .5 ? 1 : -1; o.col = r(); }
+      else if (type === 'car'){ o.x = c + side * 96; o.dir = r() < .5 ? 1 : -1; o.col = r(); o.ds = -side; o.dc = d > 150 && r() < .4; o.door = 0; }
       else if (type === 'mailbox'){ o.x = c + side * (ROAD + 12); }
       else if (type === 'lamp'){ o.x = c + side * (ROAD + 30); o.side = side; }
       add(o, list);
@@ -1617,17 +1622,21 @@ body.postiopen{overflow:hidden}
   // ---------- state ----------
   var cam = {x:0, y:0}, P, rat, state = 'title', t0 = 0, tsec = 0, last = 0, raf = 0, trail = [], parts = [], streaks = [], decals = [], best = 0, glitch = 0, shake = 0;
   var gust = {dir:1, k:0, next:0, v:0};
-  try { best = +localStorage.getItem('posti_best') || 0; } catch(e){}
+  var bestD = 0; try { best = +localStorage.getItem('posti_best') || 0; bestD = +localStorage.getItem('posti_bestd') || 0; } catch(e){}
   var input = {left:false, right:false, down:false, up:false, ptr:null};
   var nextRat = FIRST_RAT, lowWarn = 0, nextHelp = 0, nextHonk = 0;
   function reset(){
     seed = (Math.random() * 1e9) | 0; cells.clear(); objs = []; blds = []; trail = []; parts = []; streaks = []; decals = []; chaseGen = false;
-    P = {x:0, y:0, a:0, v:0, air:0, airT:1, airH:0, down:0, inv:0, boost:0, dist:0, letters:0, cans:0, jumps:0, bigs:0, crashes:0, pedal:0, e:100, empty:0, escapes:0, bonus:0, high:false, caught:0};
+    P = {x:0, y:0, a:0, v:0, air:0, airT:1, airH:0, down:0, inv:0, boost:0, dist:0, letters:0, cans:0, jumps:0, bigs:0, crashes:0, pedal:0, e:100, empty:0, escapes:0, bonus:0, high:false, caught:0, combo:0, perfect:0, near:0, passedBest:false};
     rat = null; nextRat = FIRST_RAT; nextBig = 380 + Math.random() * 200; cam.x = 0; cam.y = 0; glitch = 0; gust.v = 0; lowWarn = 0; nextHelp = 0; nextHonk = 4; bnds = []; P.bio = 'city'; hud();
   }
-  function score(){ return Math.floor(P.dist) + P.letters * 50 + P.cans * 15 + P.jumps * 25 + P.bigs * 100 + P.bonus; }
+  function mult(){ return Math.min(5, 1 + Math.floor(P.combo / 3)); }
+  function pop(x, y, txt, col){ parts.push({k:'txt', x:x, y:y, txt:txt, c:col || '#ffd28a', t:0}); }
+  function streak(pts, e, x, y, txt){ P.combo++; var m = mult(); P.bonus += pts * m; if (e) energy(e); pop(x, y, txt + ' +' + pts * m); }
+  function score(){ return Math.floor(P.dist) + P.cans * 15 + P.jumps * 25 + P.bigs * 100 + P.bonus; }
   function hud(){
-    hudD.textContent = String(Math.floor(P.dist)).padStart(4, '0') + ' M'; hudL.textContent = '✉ ' + P.letters;
+    hudD.textContent = String(score()).padStart(5, '0'); hudL.textContent = Math.floor(P.dist) + ' M';
+    var m = mult(), me = document.getElementById('pmul'); if (me.textContent !== (m > 1 ? 'x' + m : '')){ me.textContent = m > 1 ? 'x' + m : ''; me.classList.remove('bump'); void me.offsetWidth; me.classList.add('bump'); }
     hudE.style.width = Math.max(0, P.e) + '%'; hudBar.classList.toggle('low', P.e < 25); hudBar.setAttribute('aria-valuenow', Math.round(P.e));
   }
   var msgT = 0;
@@ -1666,7 +1675,7 @@ body.postiopen{overflow:hidden}
     if (why === 'jump'){ P.bonus += 400; P.escapes++; sfx.gone(); say('KARKUUN!', false, 1600, '+400'); }
   }
   function ratCatch(){
-    P.caught++; sfx.hit(); if (!reduce) shake = .5; glitch = 1; blood(P.x, P.y, 60, 1.3);
+    breakCombo(); P.caught++; sfx.hit(); if (!reduce) shake = .5; glitch = 1; blood(P.x, P.y, 60, 1.3);
     if (P.e <= CATCH_E){ P.e = 0; hud(); blood(P.x, P.y, 50, 1.6); gameOver('rat'); return; }
     energy(-CATCH_E); ratRest(); nextRat = P.dist + 300 + Math.random() * 200; P.down = 1.2; P.inv = 0; P.v = 0;
     for (var q = 0; q < 10; q++) parts.push({k:'paper', x:P.x, y:P.y, vx:(Math.random() - .5) * 220, vy:-80 - Math.random() * 120, t:0, r:Math.random() * 6});
@@ -1709,6 +1718,7 @@ body.postiopen{overflow:hidden}
     cam.x += (P.x - cam.x) * Math.min(1, dt * 3); cam.y = P.y;
     if (P.dist > nextBig) placeBig();
     ensureWorld();
+    if (bestD > 60 && !P.passedBest && P.dist > bestD){ P.passedBest = true; say('OHI OMAN PARHAAN', false, 1500); tone(660, .12, 'triangle', .05); setTimeout(function(){ tone(990, .2, 'triangle', .05); }, 110); }
 
     energy(-DRAIN * dt * (P.e < 20 ? .75 : 1)); helpCan();
     if (P.empty){ var lefte = P.empty - tsec; clock.textContent = 'TÖLKKI ' + Math.max(0, Math.ceil(lefte)); clock.classList.add('on'); if (lefte <= 0){ gameOver('energy'); return; } }
@@ -1718,11 +1728,16 @@ body.postiopen{overflow:hidden}
       for (var b = 0; b < blds.length; b++){ var B = blds[b]; if (B.pond){ var ex = (P.x - B.x) / (B.w / 2), ey = (P.y + 8 - B.y) / (B.h / 2); if (ex * ex + ey * ey < .85){ blood(P.x, P.y, 30, 1, ['#6f9fc4', '#a9cbe0', '#3d6f96']); crash(.8, false); say('SPLÄSH', false, 1000); break; } continue; } if (Math.abs(P.x - B.x) < B.w / 2 + 4 && Math.abs(P.y + 8 - B.y) < B.h / 2 + 3){ crash(1.2, true); break; } } }
 
     for (var k = 0; k < objs.length; k++){
-      var o = objs[k]; if (o.type === 'mcar'){ o.y += o.dir * o.sp * dt; if (biome(o.y) !== 'city'){ o.type = 'tuft'; continue; } carSounds(o); }
+      var o = objs[k];
+      if (o.type === 'walker' && Math.abs(o.y - P.y) < 700){ o.x += o.vx * dt; if (Math.abs(o.x - o.c) > ROAD + 26) o.vx = -o.vx; }
+      if (o.type === 'jogger' && o.y - P.y < 700 && o.y - P.y > -200){ o.y -= 55 * dt; o.x = pathX(o.c, o.y) + o.off; }
+      if (o.type === 'car' && o.dc && !o.door && o.y - P.y < 170 && o.y > P.y && Math.abs(P.x - o.x) < 110){ o.door = .01; tone(520, .18, 'square', .03, 300); }
+      if (o.door && o.door < 1) o.door = Math.min(1, o.door + dt * 4);
+      if (o.type === 'mcar'){ o.y += o.dir * o.sp * dt; if (biome(o.y) !== 'city'){ o.type = 'tuft'; continue; } carSounds(o); }
       if (Math.abs(o.y - P.y) > 110) continue;
       var dx = P.x - o.x, dy = (P.y + 8) - o.y;
-      if (o.type === 'mailbox' && !o.done && py0 + 8 <= o.y && P.y + 8 > o.y && Math.abs(dx) < 95 && P.down <= 0){
-        o.done = true; P.letters++; sfx.deliver(); parts.push({k:'letter', x:P.x, y:P.y - 10 - hNow, tx:o.x, ty:o.y - 30, t:0}); if (rat && rat.mode === 'chase') rat.anger++;
+      if (o.type === 'mailbox' && !o.done && py0 + 8 <= o.y && P.y + 8 > o.y && Math.abs(dx) < 80 && P.down <= 0){
+        o.done = true; P.letters++; sfx.deliver(); if (Math.abs(dx) < 42){ P.perfect++; streak(100, 6, o.x, o.y - 46, 'TÄYSOSUMA'); } else streak(40, 3, o.x, o.y - 46, '✉'); parts.push({k:'letter', x:P.x, y:P.y - 10 - hNow, tx:o.x, ty:o.y - 30, t:0}); if (rat && rat.mode === 'chase') rat.anger++;
       }
       if (o.done || DECOR[o.type]) continue;
       var floatH = (o.h || 16), reach = Math.abs(hNow - floatH) < 30 || (floatH <= 16 && hNow < 40);
@@ -1732,6 +1747,8 @@ body.postiopen{overflow:hidden}
       if (o.type === 'bigramp' && P.air <= 0 && Math.abs(dx) < 32 && dy > -44 && dy < 8 && P.down <= 0){ o.done = true; P.air = P.airT = 2.5; P.airH = 82; P.high = true; P.bigs++; P.v = Math.max(P.v, vmax);
         sfx.big(); say('KIPINÖIKSI ME TAIVAALLE LENNETTIIN', false, 2000); continue; }
       var hb = HIT[o.type]; if (!hb || P.air > 0 || P.inv > 0 || P.down > 0) continue;
+      if (o.type === 'car' && o.door > .5){ var ddx = P.x - (o.x + o.ds * 19), ddy = P.y + 8 - (o.y - 6); if (Math.abs(ddx) < 9 && Math.abs(ddy) < 6){ say('OVI AUKES', true, 1100); crash(1.3, true); if (state !== 'run') return; continue; } }
+      if ((OBST[o.type] || o.type === 'mcar') && !o.nm && dy >= 0 && dy < 26 && Math.abs(dx) >= hb[0] + 4 && Math.abs(dx) < hb[0] + 22 && P.v > 120){ o.nm = 1; P.near++; tone(990, .08, 'square', .03, 1400); streak(25, 2, o.x, o.y - 30, 'LÄHELTÄ'); }
       if (Math.abs(dx) < hb[0] + 4 && Math.abs(dy) < hb[1] + 3){ var isCar = o.type === 'car' || o.type === 'mcar'; crash(isCar ? 1.5 : 1, isCar); if (state !== 'run') return; }
     }
 
@@ -1763,6 +1780,7 @@ body.postiopen{overflow:hidden}
     for (var k = parts.length - 1; k >= 0; k--){ var p = parts[k]; p.t = (p.t || 0) + dt;
       if (p.k === 'blood'){ p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; p.vz -= 420 * dt; p.vx *= .985; p.vy *= .985;
         if (p.z <= 0){ decals.push({x:p.x, y:p.y, c:p.c, s:p.s}); if (decals.length > 1400) decals.splice(0, 200); parts.splice(k, 1); } continue; }
+      if (p.k === 'txt'){ p.y -= 34 * dt; if (p.t > 1) parts.splice(k, 1); continue; }
       if (p.k === 'letter' || p.k === 'spark'){ if (p.t > .45) parts.splice(k, 1); }
       else { p.x += p.vx * dt + gust.v * 120 * dt; p.y += p.vy * dt; p.vy += 260 * dt; p.r += dt * 4; if (p.t > 1.1) parts.splice(k, 1); } }
   }
@@ -1772,8 +1790,9 @@ body.postiopen{overflow:hidden}
       if (Math.random() < .8) playBuf('horn', .6, false, .95 + Math.random() * .1); if (dx < 34 && Math.abs(dy) < 150) playBuf('squeal', .4); }
     if (!o.passed && Math.abs(dy) < 30 && dx < 170){ o.passed = 1; playBuf('driveby', .55, false, o.dir < 0 ? 1.05 : .95); }
   }
+  function breakCombo(){ if (mult() > 1) pop(P.x, P.y - 40, 'KERROIN POIKKI', '#ff6a33'); P.combo = 0; }
   function crash(power, car){
-    P.down = .8; P.crashes++; sfx.crash(car); energy(-CRASH_E); if (!reduce) shake = car ? .45 : .3; blood(P.x, P.y, car ? 40 : 22, power || 1);
+    breakCombo(); P.down = .8; P.crashes++; sfx.crash(car); energy(-CRASH_E); if (!reduce) shake = car ? .45 : .3; blood(P.x, P.y, car ? 40 : 22, power || 1);
     for (var q = 0; q < 6; q++) parts.push({k:'paper', x:P.x, y:P.y, vx:(Math.random() - .5) * 160, vy:-60 - Math.random() * 100, t:0, r:Math.random() * 6});
   }
 
@@ -1827,7 +1846,8 @@ body.postiopen{overflow:hidden}
       line(2); rr(-12, -24, 24, 48, 4); fillStroke(CARC[Math.floor(o.col * CARC.length)]);
       ctx.fillStyle = '#1d2226'; ctx.beginPath(); ctx.moveTo(-9, 6); ctx.lineTo(9, 6); ctx.lineTo(7, 13); ctx.lineTo(-7, 13); ctx.closePath(); ctx.fill();
       ctx.fillRect(-8, -16, 16, 5); ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(-8, -10, 16, 15);
-      ctx.fillStyle = '#fff1c4'; ctx.fillRect(-10, 21, 4, 3); ctx.fillRect(6, 21, 4, 3); ctx.fillStyle = '#c22a1a'; ctx.fillRect(-10, -24, 4, 2); ctx.fillRect(6, -24, 4, 2); ctx.restore(); },
+      ctx.fillStyle = '#fff1c4'; ctx.fillRect(-10, 21, 4, 3); ctx.fillRect(6, 21, 4, 3); ctx.fillStyle = '#c22a1a'; ctx.fillRect(-10, -24, 4, 2); ctx.fillRect(6, -24, 4, 2); ctx.restore();
+      if (o.door){ var dw = 15 * o.door; line(1.6); ctx.beginPath(); ctx.rect(o.ds > 0 ? 11 : -11 - dw, -9, dw, 4); fillStroke(CARC[Math.floor(o.col * CARC.length)]); ctx.fillStyle = '#ffe9b0'; ctx.fillRect(o.ds > 0 ? 11 : -14, -12, 3, 2); } },
     mcar: function(o){ draw.car({dir:o.dir, col:o.col}); },
     lamp: function(o){ var s = -o.side; ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fillRect(-2, -1, 8, 4); line(1.6); box(-2, -46, 4, 46, '#3d403b');
       box(Math.min(0, s * 14), -48, 14, 4, '#3d403b'); ctx.fillStyle = '#ffe6a8'; ctx.fillRect(s * 14 - 3, -45, 6, 3); },
@@ -1837,6 +1857,13 @@ body.postiopen{overflow:hidden}
       ctx.beginPath(); ctx.moveTo(-7, -2); ctx.lineTo(7, -2); ctx.moveTo(-8, 1); ctx.lineTo(8, 1); ctx.stroke(); },
     crack: function(o){ ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-12, -3); ctx.lineTo(-4, 1 + o.v * 3); ctx.lineTo(2, -2); ctx.lineTo(12, 2); ctx.moveTo(-4, 1); ctx.lineTo(-6, 6); ctx.stroke(); },
     tuft: function(){ ctx.fillStyle = 'rgba(110,130,80,.55)'; for (var i = -2; i <= 2; i++) ctx.fillRect(i * 3, -6 + Math.abs(i) * 2, 1.5, 6 - Math.abs(i) * 2); },
+    walker: function(o){ var ph = Math.floor(performance.now() / 160 + o.v * 9) % 2, f = o.vx > 0 ? 1 : -1; shadow(7, 3, 1); line(1.6);
+      ctx.fillStyle = OL; ctx.fillRect(-4 + ph * 2 * f, -6, 3, 6); ctx.fillRect(1 - ph * 2 * f, -6, 3, 6);
+      box(-5, -17, 10, 12, o.v < .5 ? '#6b2f2a' : '#3e4a2c'); ell(0, -21, 4.5, 4.5); fillStroke(o.v < .3 ? '#2b2620' : CREAM);
+      ctx.fillStyle = OL; ctx.fillRect(f * 2, -22, 2, 2); if (o.v > .6){ ctx.fillStyle = RUST; ctx.fillRect(f * 6, -14, 3, 6); } },
+    jogger: function(o){ var ph = Math.floor(performance.now() / 110 + o.v * 9) % 2; shadow(7, 3, 1); line(1.6);
+      ctx.fillStyle = OL; ctx.fillRect(-4, -6 + ph * 2, 3, 6); ctx.fillRect(1, -4 - ph * 2, 3, 6);
+      box(-5, -17, 10, 12, o.v < .5 ? '#c9c4b8' : '#8a2f22'); ell(0, -21, 4.5, 4.5); fillStroke(CREAM); ctx.fillStyle = '#e0301e'; ctx.fillRect(-4, -25, 8, 2); },
     tree: function(o){ ctx.scale(1.5, 1.5); ctx.fillStyle = 'rgba(0,0,0,.45)'; ell(6, 2, 24, 9); ctx.fill(); line(2); box(-3, -16, 6, 16, '#4a3726');
       var g = o.v < .5 ? ['#24361b', '#2f4722', '#3d5a2b'] : ['#2b331a', '#3a4523', '#4d5a2e'];
       line(2.2); ell(-8, -26, 13, 11); fillStroke(g[0]); ell(8, -28, 13, 11); fillStroke(g[0]); ell(0, -38, 15, 13); fillStroke(g[1]);
@@ -1981,6 +2008,7 @@ body.postiopen{overflow:hidden}
     var vt = cam.y - H * .38 / S - 160, vb = cam.y + H * .62 / S + 60, vl = cam.x - W / 2 / S - 60, vr = cam.x + W / 2 / S + 60;
     ctx.save(); ctx.translate(ox, oy); ctx.scale(S, S);
     drawGround(vl, vr, vt, vb);
+    if (bestD > 60){ var by = bestD * 10; if (by > vt && by < vb){ ctx.fillStyle = 'rgba(255,106,51,.75)'; for (var bx = Math.floor(vl / 16) * 16; bx < vr; bx += 16) ctx.fillRect(bx, by, 9, 3); ctx.font = '14px VT323, monospace'; ctx.textAlign = 'left'; ctx.fillText('OMA PARAS ' + bestD + ' M', cam.x - W / 2 / S + 12, by - 5); } }
     blds.forEach(function(B){ if (B.pond && B.y + B.h / 2 > vt && B.y - B.h / 2 < vb) drawPond(B); });
     ctx.fillStyle = grain; ctx.fillRect(vl, vt, vr - vl, vb - vt);
     decals.forEach(function(d){ if (d.y > vt && d.y < vb){ ctx.fillStyle = d.c; ctx.fillRect(Math.round(d.x), Math.round(d.y), d.s, d.s); } });
@@ -2002,6 +2030,7 @@ body.postiopen{overflow:hidden}
       if (p.k === 'blood'){ ctx.fillStyle = p.c; ctx.fillRect(Math.round(p.x), Math.round(p.y - p.z), p.s * 1.4, p.s * 1.4); return; }
       if (p.k === 'letter'){ var k = p.t / .45, x = p.x + (p.tx - p.x) * k, y = p.y + (p.ty - p.y) * k - Math.sin(k * Math.PI) * 30;
         ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.rotate(Math.round(k * 6)); line(1.4); box(-6, -4, 12, 8, '#fff'); ctx.restore(); return; }
+      if (p.k === 'txt'){ ctx.globalAlpha = Math.max(0, 1 - p.t * p.t); ctx.font = '15px VT323, monospace'; ctx.textAlign = 'center'; ctx.fillStyle = OL; ctx.fillText(p.txt, Math.round(p.x) + 1, Math.round(p.y) + 1); ctx.fillStyle = p.c; ctx.fillText(p.txt, Math.round(p.x), Math.round(p.y)); ctx.globalAlpha = 1; return; }
       if (p.k === 'spark'){ ctx.fillStyle = 'rgba(255,170,90,' + (1 - p.t / .45) + ')'; var r = 8 + p.t * 50; for (var q = 0; q < 8; q++){ var an = q * .785; ctx.fillRect(Math.round(p.x + Math.cos(an) * r), Math.round(p.y + Math.sin(an) * r), 2, 2); } return; }
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.round(p.r * 2) / 2); ctx.globalAlpha = Math.max(0, 1 - p.t); ctx.fillStyle = p.k === 'flutter' ? '#d8d4ca' : CREAM; ctx.fillRect(-5, -3.5, 10, 7); ctx.restore(); });
     ctx.restore();
@@ -2063,6 +2092,7 @@ body.postiopen{overflow:hidden}
 
   function gameOver(why){
     if (state !== 'run') return; state = 'over'; releasePtr(); clock.classList.remove('on'); loopOff('wind'); loopOff('pedal'); hud(); if (why === 'energy') playBuf('cry', .9);
+    if (P.dist > bestD){ bestD = Math.floor(P.dist); try { localStorage.setItem('posti_bestd', bestD); } catch(e){} }
     var s = score(), nb = s > best; lastScore = s; if (nb){ best = s; try { localStorage.setItem('posti_best', best); } catch(e){} }
     var lines = why === 'rat' ? ['”Tulee päivä ku kaikki on ohi”', '”Meil ei asu enää ketää”', '”Peräs ovi kii, valot sammuu. Oliks se siin sit?”', '”Älä pliis jaa enää niit sun lappuja”']
       : ['”Väsyit myrskyyn ja loputtomaan särkyyn”', '”Joskus kävellen hengästyy”', '”Peli päättyy pilli viheltää”', '”Me ollaa jo muualla”'];
