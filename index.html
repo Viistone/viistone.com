@@ -69,6 +69,14 @@ main{max-width:980px;margin:0 auto;position:relative;z-index:1}
 .logo.glitch .main{clip-path:inset(0 0 0 0);transform:translateX(2px) skewX(-2deg)}
 .logo .main{transition:transform .08s steps(2)}
 .playlink{margin:clamp(44px, 7vh, 72px) 0 0;text-align:center}
+.hiscores{margin:22px auto 0;display:grid;gap:4px;justify-content:center;font-family:var(--f-osd);font-size:21px;letter-spacing:.06em;color:var(--grey);text-align:center;
+  text-shadow:1px 0 0 rgba(255,60,60,.25),-1px 0 0 rgba(60,200,255,.25)}
+.hiscores[hidden]{display:none}
+.hiscores .hl{color:var(--dim);margin-right:12px;font-size:17px;letter-spacing:.2em}
+.hiscores b{font-weight:400;color:var(--osd)}
+.hiscores em{font-style:normal;color:#ff6a33}
+.hiscores .sep{color:var(--dim);margin:0 10px}
+@media (max-width:420px){ .hiscores{font-size:19px} .hiscores .hl{display:block;margin:8px 0 2px} .hiscores .e{display:block} .hiscores .sep{display:none} }
 .tapebtn{display:inline-block;background:none;border:0;padding:0;cursor:pointer;width:min(240px,62vw);transform:rotate(-2deg);transition:transform .25s ease, filter .25s;
   filter:drop-shadow(0 10px 18px rgba(0,0,0,.6)) brightness(.92)}
 .tapebtn svg{display:block;width:100%;height:auto}
@@ -280,6 +288,7 @@ body.paused main{animation:hold .12s steps(2) infinite}
           <circle cx="16" cy="16" r="2.4" fill="#2c2b29"/><circle cx="224" cy="16" r="2.4" fill="#2c2b29"/>
         </svg>
       </button></p>
+      <div class="hiscores" id="hiscores" aria-live="polite" hidden><div><span class="hl">TÄNÄÄN</span><span id="hsToday"></span></div><div><span class="hl">ENNÄTYS</span><span id="hsAll"></span></div></div>
     </div>
   </header>
 
@@ -1228,5 +1237,22 @@ body.gameopen{overflow:hidden}
 </script>
 <!--/GAME-->
 
+<script>
+(function(){ // the day's best and the record, under the cassette
+  var box = document.getElementById('hiscores'); if (!box || !window.fetch) return;
+  function row(r){ return '<b>' + r.n + '</b> <em>' + r.s + '</em>'; }
+  function load(){
+    fetch('https://api.viistone.com/api/scores', {cache: 'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+      if (!d) return;
+      var t = (d.today || []).slice(0, 3), a = (d.all || [])[0];
+      document.getElementById('hsToday').innerHTML = t.length ? t.map(function(r, i){ return '<span class="e">' + (i + 1) + '. ' + row(r) + '</span>'; }).join('<span class="sep">·</span>') : 'ei vielä tuloksia, ole ensimmäinen';
+      document.getElementById('hsAll').innerHTML = a ? row(a) : '<b>---</b> <em>0</em>';
+      box.hidden = false;
+    }).catch(function(){});
+  }
+  setTimeout(load, 600);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) load(); });
+})();
+</script>
 </body>
 </html>
