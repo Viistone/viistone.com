@@ -1501,7 +1501,8 @@ body.postiopen{overflow:hidden}
   // ---------- sound ----------
   var SFX_FILES = {burp:['burp1.mp3', 'burp2.mp3'], yell:['yell1.mp3', 'yell2.mp3', 'yell3.mp3', 'yell4.mp3'], jet:['jet.mp3'], open:['open.mp3'], crash:['crash.mp3'], cry:['cry.mp3'],
     wind:['wind.mp3'], bell:['bell1.mp3', 'bell2.mp3', 'bell3.mp3'], rat:['rat.mp3'], smash:['smash.mp3'], amb:['amb.mp3'], pedal:['pedal.mp3'],
-    horn:['horn1.mp3', 'horn2.mp3', 'horn3.mp3'], squeal:['squeal.mp3'], driveby:['driveby.mp3'], driveaway:['driveaway.mp3'], fart:['fart1.mp3', 'fart2.mp3', 'fart3.mp3', 'fart4.mp3', 'fart5.mp3'], slow:['slow.mp3'], laugh:['laugh1.mp3', 'laugh2.mp3', 'laugh3.mp3', 'laugh4.mp3']};
+    horn:['horn1.mp3', 'horn2.mp3', 'horn3.mp3'], squeal:['squeal.mp3'], driveby:['driveby.mp3'], driveaway:['driveaway.mp3'], fart:['fart1.mp3', 'fart2.mp3', 'fart3.mp3', 'fart4.mp3', 'fart5.mp3'], slow:['slow.mp3'], laugh:['laugh1.mp3', 'laugh2.mp3', 'laugh3.mp3', 'laugh4.mp3'],
+    boom:['boom1.mp3', 'boom2.mp3', 'boom3.mp3', 'boom4.mp3'], carboom:['carboom.mp3'], alarm:['alarm1.mp3', 'alarm2.mp3']};
   var AC = null, fxOn = true, musicOn = true, audio = document.getElementById('paudio'), bufs = {}, master = null, loops = {};
   try { fxOn = localStorage.getItem('posti_fx') !== '0'; musicOn = localStorage.getItem('posti_mus') !== '0'; } catch(e){}
   function acInit(){
@@ -1724,7 +1725,8 @@ body.postiopen{overflow:hidden}
   function rumble(big){ if (!fxOn || !AC) return; var o = AC.createOscillator(), g = AC.createGain(), n = AC.currentTime, d = 2.0; o.type = 'sawtooth';
     o.frequency.setValueAtTime(34, n); o.frequency.linearRampToValueAtTime(big ? 120 : 90, n + d); g.gain.setValueAtTime(.0001, n); g.gain.exponentialRampToValueAtTime(big ? .18 : .11, n + d * .9); g.gain.exponentialRampToValueAtTime(.0001, n + d + .1);
     var lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 320; o.connect(lp).connect(g).connect(master); o.start(n); o.stop(n + d + .2); }
-  function carAlarm(){ if (!fxOn || !AC || tsec < alarmUntil) return; alarmUntil = tsec + 4; var o = AC.createOscillator(), g = AC.createGain(), n = AC.currentTime; o.type = 'square'; g.gain.value = .022;
+  var carBoomed = false;
+  function carAlarm(){ if (!fxOn || !AC || tsec < alarmUntil) return; alarmUntil = tsec + 4; if (playBuf('alarm', .32, false, .97 + Math.random() * .06)) return; var o = AC.createOscillator(), g = AC.createGain(), n = AC.currentTime; o.type = 'square'; g.gain.value = .022;
     for (var i = 0; i < 14; i++) o.frequency.setValueAtTime(i % 2 ? 980 : 740, n + i * .24); o.connect(g).connect(master); o.start(n); o.stop(n + 3.4); }
   function stepPaws(dt){
     for (var i = paws.length - 1; i >= 0; i--){ var w = paws[i];
@@ -1738,7 +1740,8 @@ body.postiopen{overflow:hidden}
   function land(w){
     var dd = Math.hypot(P.x - w.x, P.y + 8 - w.y); rat.landed++;
     if (!reduce){ shake = Math.max(shake, w.big ? 1 : .65); freezeUntil = performance.now() + (w.big ? 150 : 80); flash = w.big ? 1.5 : 1; }
-    playBuf('smash', w.big ? 1 : .75, false, (w.big ? .5 : .62) + Math.random() * .15); tone(55, .5, 'sine', .55, 28); noise(w.big ? .6 : .35, .32);
+    if (!playBuf('boom', w.big ? 1 : .85, false, (w.big ? .82 : .95) + Math.random() * .12)) noise(w.big ? .6 : .35, .32); if (w.big) setTimeout(function(){ playBuf('boom', .7, false, .7); }, 90);
+    playBuf('smash', .45, false, .6 + Math.random() * .15); tone(55, .5, 'sine', .55, 28); carBoomed = false;
     parts.push({k:'ring', x:w.x, y:w.y, t:0, big:w.big}); if (w.big) parts.push({k:'ring', x:w.x, y:w.y, t:-.12, big:true});
     fling(w.x, w.y, w.big ? 270 : 180);
     for (var q = 0; q < (w.big ? 30 : 16); q++){ var an = Math.random() * 6.28; parts.push({k:'blood', x:w.x + Math.cos(an) * 20, y:w.y + Math.sin(an) * 10, z:4, vx:Math.cos(an) * (90 + Math.random() * 160), vy:Math.sin(an) * (60 + Math.random() * 80), vz:80 + Math.random() * 120, c:['#3a3a34', '#55534b', '#24241f'][q % 3], s:2}); }
@@ -1760,6 +1763,7 @@ body.postiopen{overflow:hidden}
       var heavy = o.type === 'car' || o.type === 'mcar' || o.type === 'wreck', pw = (1 - d / R) * (heavy ? .5 : 1) + .25, a = Math.atan2(dy, dx || .01);
       parts.push({k:'fly', o:o, x:o.x, y:o.y, z:0, vx:Math.cos(a) * 440 * pw, vy:Math.sin(a) * 270 * pw, vz:(280 + Math.random() * 220) * pw, rot:o.rot || 0, vr:(Math.random() - .5) * 18 * pw, t:0, heavy:heavy});
       if (o.type === 'walker' || o.type === 'jogger') blood(o.x, o.y, 30, 1.3);
+      if (heavy){ blood(o.x, o.y - 10, 26, 1.6, ['#ffb23a', '#ff6a1a', '#ffe08a', '#3a3a34']); if (!carBoomed){ carBoomed = true; setTimeout(function(){ playBuf('carboom', .8, false, .95 + Math.random() * .1); }, 140); } }
       if (o.type === 'lamp' || o.type === 'plamp'){ tone(2200, .08, 'square', .03); noise(.15, .12); }
       return false; });
   }
