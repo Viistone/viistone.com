@@ -1429,7 +1429,7 @@ body.postiopen{overflow:hidden}
     <img id="pratimg" alt="Iso rotta makoilee kirjekasan päällä">
     <h2>POSTINKANTAJA</h2>
     <p class="ln">”Meil ei asu enää ketää. Vitu iso rotta pitää pesää.”</p>
-    <p class="sm">Jaa posti laatikoihin, joissa lippu on pystyssä. Ohi ajettu laatikko vie energiaa ja katkaisee kertoimen. Läheltä piti ja täysosumat nostavat kerrointa. Kun rotta tulee, selviä 20 sekuntia tai karkaa isolla hypyllä. Kun ruutu välkkyy punaisena, rotta loikkaa: väistä sivulle viime hetkellä.<br>← → tai hiiri, välilyönti hidastaa. Puhelimella sormi ja kellonappi.</p>
+    <p class="sm">Jaa posti laatikoihin, joissa lippu on pystyssä. Ohi ajettu laatikko vie energiaa ja katkaisee kertoimen. Läheltä piti ja täysosumat nostavat kerrointa. Kun rotta tulee, selviä 20 sekuntia tai karkaa isolla hypyllä. Kun ruutu välkkyy punaisena, rotta läiskii tassuilla: väistä punaisista renkaista. Hidastuksessa väistö tuo eniten pisteitä.<br>← → tai hiiri, välilyönti hidastaa. Puhelimella näpäytä vasenta tai oikeaa reunaa, pidempi painallus kääntää jyrkemmin.</p>
     <div class="psw"><button type="button" id="pswm">MUSIIKKI <b>PÄÄLLÄ</b></button><button type="button" id="pswf">TEHOSTEET <b>PÄÄLLÄ</b></button></div>
     <button class="go" id="pgo" type="button">AJA ▶</button>
     <button class="home" id="phome2" type="button">⏏ KOTISIVULLE</button>
@@ -1467,7 +1467,7 @@ body.postiopen{overflow:hidden}
   var OL = '#14130f', CREAM = '#e8e0c8', NAVY = '#4b5b8c', RUST = '#b4532a', BOX = '#b38a5a', BROWN = '#7a5a3c', GREY = '#8d8a82';
   var BLOOD = ['#c41a1a', '#9e1414', '#e0301e', '#7a0d0d'];
   var W = 0, H = 0, DPR = 1, S0 = 1, S = 1, grain = null;
-  var CHASE = 20, FIRST_RAT = 500, DRAIN = 2.4, CAN = 15, CRASH_E = 10, CATCH_E = 35, EMPTY = 6;
+  var CHASE = 20, FIRST_RAT = 500, DRAIN = 2.6, CAN = 12, CRASH_E = 10, CATCH_E = 35, EMPTY = 6;
   var PER = 480, ROAD = 120, WALK = 172, DARK = .7;
 
   // drawn at a low resolution and scaled up without smoothing: chunky, sharp pixels
@@ -1647,7 +1647,7 @@ body.postiopen{overflow:hidden}
   function reset(){
     seed = (Math.random() * 1e9) | 0; cells.clear(); objs = []; blds = []; trail = []; parts = []; streaks = []; decals = []; chaseGen = false;
     P = {x:0, y:0, a:0, v:0, air:0, airT:1, airH:0, down:0, inv:0, boost:0, dist:0, letters:0, cans:0, jumps:0, bigs:0, crashes:0, pedal:0, e:100, empty:0, escapes:0, bonus:0, high:false, caught:0, missed:0, combo:0, perfect:0, near:0, passedBest:false};
-    rat = null; nextRat = FIRST_RAT; nextBig = 380 + Math.random() * 200; cam.x = 0; cam.y = 0; glitch = 0; gust.v = 0; lowWarn = 0; nextHelp = 0; nextHonk = 4; bnds = []; P.bio = 'city'; hud();
+    rat = null; nextRat = FIRST_RAT; nextBig = 380 + Math.random() * 200; cam.x = 0; cam.y = 0; glitch = 0; paws = []; gust.v = 0; lowWarn = 0; nextHelp = 0; nextHonk = 4; bnds = []; P.bio = 'city'; hud();
   }
   function mult(){ return Math.min(5, 1 + Math.floor(P.combo / 3)); }
   function pop(x, y, txt, col){ parts.push({k:'txt', x:x, y:y, txt:txt, c:col || '#ffd28a', t:0}); }
@@ -1686,7 +1686,7 @@ body.postiopen{overflow:hidden}
     say('VITU ISO ROTTA', true, 1800, 'Selviä 20 sekuntia tai hyppää isosta rampista');
     var ahead = P.y + 120; objs = objs.filter(function(o){ return !(OBST[o.type] && o.y > ahead && Math.random() < .55); });
   }
-  function ratRest(){ rat.mode = 'rest'; rat.ls = null; rat.restAt = tsec; chaseGen = false; if (!P.empty) clock.classList.remove('on'); loopOff('wind'); gust.v = 0; }
+  function ratRest(){ rat.mode = 'rest'; rat.ls = null; paws = []; rat.restAt = tsec; chaseGen = false; if (!P.empty) clock.classList.remove('on'); loopOff('wind'); gust.v = 0; }
   var LAUGHS = ['HAHAHA', 'HEH HEH HEH', 'HIHIHI', 'MUAHAHA'];
   function ratLaugh(){ if (!rat) return; playBuf('laugh', .9, false, .92 + Math.random() * .16); pop(rat.x, rat.y - 120, LAUGHS[Math.floor(Math.random() * LAUGHS.length)], '#ff4a2a'); if (!reduce) shake = Math.max(shake, .15); }
   function ratGiveUp(why){
@@ -1695,6 +1695,57 @@ body.postiopen{overflow:hidden}
     if (why === 'time'){ P.bonus += 200; sfx.gone(); say('ROTTA LUOVUTTI', false, 1600, '+200'); }
     if (why === 'jump'){ P.bonus += 400; P.escapes++; sfx.gone(); say('KARKUUN!', false, 1600, '+400'); }
   }
+  // the rat slams big paws down where you are going; a red ring shows where, then it lands
+  var paws = [];
+  function slamStart(){ rat.ls = 'slam'; var n = 3 + (rat.gen > 1 ? 1 : 0); playBuf('rat', .9, false, 1.3); pop(rat.x, rat.y - 130, 'LÄISK LÄISK', '#ff4a2a');
+    var gap = rat.gen > 1 ? .48 : .56;
+    for (var i = 0; i < n; i++) paws.push({t0:tsec + .25 + i * gap, tl:tsec + .25 + i * gap + .8, r:34, set:false, side:i % 2 ? 1 : -1});
+    rumble(); }
+  function rumble(){ if (!fxOn || !AC) return; var o = AC.createOscillator(), g = AC.createGain(), n = AC.currentTime; o.type = 'sawtooth';
+    o.frequency.setValueAtTime(38, n); o.frequency.linearRampToValueAtTime(95, n + 1.1); g.gain.setValueAtTime(.0001, n); g.gain.exponentialRampToValueAtTime(.12, n + .8); g.gain.exponentialRampToValueAtTime(.0001, n + 1.3);
+    var lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 300; o.connect(lp).connect(g).connect(master); o.start(n); o.stop(n + 1.4); }
+  var freezeUntil = 0, flash = 0;
+  function stepPaws(dt){
+    for (var i = paws.length - 1; i >= 0; i--){ var w = paws[i];
+      if (!w.set && tsec >= w.t0){ w.set = true; tone(110, .5, 'sine', .08, 60); }
+      if (w.set && !w.lock){ var lead = Math.max(0, w.tl - tsec), vx = -Math.sin(P.a) * P.v, vy = Math.cos(P.a) * P.v;
+        w.x = P.x + vx * lead; w.y = P.y + 8 + vy * lead; if ((tsec - w.t0) / (w.tl - w.t0) > .62) w.lock = true; }
+      if (w.set && !w.done && tsec >= w.tl){ w.done = true; w.end = tsec + .45;
+        var dd = Math.hypot(P.x - w.x, P.y + 8 - w.y), h = height();
+        if (!reduce){ shake = Math.max(shake, .6); freezeUntil = performance.now() + 70; flash = 1; } playBuf('smash', .7, false, .6 + Math.random() * .2); tone(60, .4, 'sine', .5, 30); noise(.35, .3);
+        parts.push({k:'ring', x:w.x, y:w.y, t:0}); fling(w.x, w.y);
+        for (var q2 = 0; q2 < 14; q2++){ var an = Math.random() * 6.28; parts.push({k:'blood', x:w.x + Math.cos(an) * 20, y:w.y + Math.sin(an) * 10, z:4, vx:Math.cos(an) * (80 + Math.random() * 120), vy:Math.sin(an) * (50 + Math.random() * 60), vz:60 + Math.random() * 90, c:['#3a3a34', '#55534b', '#24241f'][q2 % 3], s:2}); }
+        for (var q = 0; q < 10; q++) parts.push({k:'paper', x:w.x, y:w.y, vx:(Math.random() - .5) * 200, vy:-60 - Math.random() * 90, t:0, r:Math.random() * 6});
+        for (var c2 = 0; c2 < 9; c2++){ var ca = c2 * .7, cr = 14 + (c2 % 3) * 6; decals.push({x:w.x + Math.cos(ca) * cr, y:w.y + Math.sin(ca) * cr * .55, c:'#0c0d0b', s:4 + c2 % 3}); }
+        if (dd < w.r + 6 && h < 30 && P.down <= 0 && P.inv <= 0 && state === 'run'){ pawHit(w); }
+        else if (dd < w.r + 46 && P.down <= 0){ if (BT.on){ P.bonus += 150 * mult(); P.combo += 2; pop(P.x, P.y - 50, 'MATRIX +' + 150 * mult(), '#e8e0c8'); tone(1320, .15, 'triangle', .05); }
+          else { streak(60, 0, P.x, P.y - 50, 'VÄISTÖ'); } } }
+      if (w.done && tsec > w.end) paws.splice(i, 1); }
+  }
+  var FLY = {box:1, can:1, coffee:1, mailbox:1, walker:1, jogger:1, bench:1, car:1, mcar:1, lamp:1, plamp:1, ramp:1, bin:1, cone:1, bear:1, chairs:1, shoes:1, stone:1};
+  function fling(x, y){
+    objs = objs.filter(function(o){ if (!FLY[o.type] || o.done && o.type !== 'mailbox') return true; var dx = o.x - x, dy = o.y - y, d = Math.hypot(dx, dy * 1.6);
+      if (d > 170) return true; var heavy = o.type === 'car' || o.type === 'mcar', pw = (1 - d / 170) * (heavy ? .45 : 1) + .25, a = Math.atan2(dy, dx || .01);
+      parts.push({k:'fly', o:o, x:o.x, y:o.y, z:0, vx:Math.cos(a) * 420 * pw, vy:Math.sin(a) * 260 * pw, vz:(260 + Math.random() * 200) * pw, rot:0, vr:(Math.random() - .5) * 18 * pw, t:0});
+      if (o.type === 'walker' || o.type === 'jogger'){ blood(o.x, o.y, 28, 1.2); P.bonus += 0; }
+      return false; });
+  }
+  function pawHit(w){ P.pawHits = (P.pawHits || 0) + 1; breakCombo(); sfx.hit(); blood(P.x, P.y, 45, 1.4); glitch = 1; P.down = .9; P.v = 0; say('LÄISK', true, 900);
+    if (P.e <= 25){ P.e = 0; hud(); gameOver('rat'); return; } energy(-25); setTimeout(ratLaugh, 300); }
+  function drawPaws(){
+    paws.forEach(function(w){ if (!w.set) return; var k = Math.min(1, (tsec - w.t0) / (w.tl - w.t0));
+      if (!w.done){
+        // the shadow of a paw: toes and all, growing and darkening as it comes down
+        var ss = (.45 + .9 * k) * 1.35, sa = .4 + .5 * k; ctx.save(); ctx.translate(Math.round(w.x), Math.round(w.y)); ctx.scale(ss * w.side, ss * .6);
+        ctx.fillStyle = 'rgba(0,0,0,' + sa + ')'; ell(0, -2, 26, 18); ctx.fill(); [[-20, -16], [-7, -22], [7, -22], [20, -16]].forEach(function(t){ ell(t[0], t[1], 8, 8); ctx.fill(); });
+        ctx.restore();
+        if (k > .25 && Math.floor(tsec * (6 + k * 16)) % 2){ ctx.strokeStyle = 'rgba(255,50,30,' + (.4 + .6 * k) + ')'; ctx.lineWidth = 2; ell(w.x, w.y, w.r * 1.25, w.r * .7); ctx.stroke(); }
+        if (k > .62){ var f2 = (k - .62) / .38; ctx.save(); ctx.translate(Math.round(w.x), Math.round(w.y - (1 - f2) * (1 - f2) * 420)); var sc = 3.2 - 1.8 * f2; ctx.scale(sc * w.side, sc); paw(); ctx.restore(); } }
+      else { var f = Math.max(0, (w.end - tsec) / .45); ctx.globalAlpha = f; ctx.save(); ctx.translate(Math.round(w.x), Math.round(w.y)); ctx.scale(1.4 * w.side, 1.4); paw(); ctx.restore(); ctx.globalAlpha = 1; } });
+  }
+  function paw(){ line(2.2); ell(0, -6, 24, 15); fillStroke('#5f5a50'); ctx.fillStyle = '#7a756a'; ctx.fillRect(-12, -14, 8, 3); ctx.fillRect(4, -10, 7, 2);
+    [[-19, -16], [-7, -21], [6, -21], [18, -16]].forEach(function(t){ line(2); ell(t[0], t[1], 6, 6); fillStroke('#5f5a50'); ctx.fillStyle = CREAM; ctx.beginPath(); ctx.moveTo(t[0] - 2, t[1] - 5); ctx.lineTo(t[0], t[1] - 12); ctx.lineTo(t[0] + 2, t[1] - 5); ctx.fill(); });
+    ctx.fillStyle = '#c98a86'; ctx.fillRect(-4, -4, 8, 5); }
   function ratCatch(){
     breakCombo(); P.caught++; sfx.hit(); setTimeout(ratLaugh, 450); if (!reduce) shake = .5; glitch = 1; blood(P.x, P.y, 60, 1.3);
     if (P.e <= CATCH_E){ P.e = 0; hud(); blood(P.x, P.y, 50, 1.6); gameOver('rat'); return; }
@@ -1704,7 +1755,7 @@ body.postiopen{overflow:hidden}
   }
 
   // ---------- update ----------
-  var TURN = 4.2, AMAX = 1.45;
+  var AMAX = 1.4, hold = 0;
   function step(dt){
     tsec += dt;
     var chasing = rat && rat.mode === 'chase';
@@ -1712,9 +1763,9 @@ body.postiopen{overflow:hidden}
     if (P.down > 0){ P.down -= dt; P.v = 0; if (P.down <= 0){ P.inv = 1.4; P.v = vmax * .4; } }
     else {
       if (input.ptr){ var sx = W / 2 + (P.x - cam.x) * S, sy = H * .38 + (P.y - cam.y) * S, dx = input.ptr.x - sx, dy = Math.max(70, input.ptr.y - sy);
-        var target = Math.max(-AMAX, Math.min(AMAX, -Math.atan2(dx, dy))); P.a += (target - P.a) * Math.min(1, dt * 13); }
-      if (input.left) P.a = Math.min(AMAX, P.a + TURN * dt);
-      if (input.right) P.a = Math.max(-AMAX, P.a - TURN * dt);
+        var target = Math.max(-AMAX, Math.min(AMAX, -Math.atan2(dx, dy))); P.a += (target - P.a) * Math.min(1, dt * 7); }
+      var tl = input.left || touchL > 0, tr = input.right || touchR > 0;
+      if (tl !== tr){ hold += dt; var turn = 1.5 + Math.min(2.3, hold * 4.5); if (tl) P.a = Math.min(AMAX, P.a + turn * dt); else P.a = Math.max(-AMAX, P.a - turn * dt); } else hold = 0;
       if (input.down) P.a *= Math.max(0, 1 - dt * 5);
       var eff = vmax * (.35 + .65 * Math.cos(P.a)) * (P.boost > 0 ? 1.4 : 1) * (input.up ? .55 : 1) * (input.down ? 1.08 : 1);
       P.v += (eff - P.v) * Math.min(1, dt * (eff > P.v ? 1.3 : 3));
@@ -1758,7 +1809,7 @@ body.postiopen{overflow:hidden}
       var dx = P.x - o.x, dy = (P.y + 8) - o.y;
       if (o.type === 'mailbox' && o.m && !o.done && !o.miss && P.y + 8 > o.y + 26 && roadC(o.x) === roadC(P.x)){ o.miss = 1; P.missed++; energy(-6); breakCombo(); pop(o.x, o.y - 50, 'UNOHTUI −6', '#ff6a33'); tone(140, .25, 'sawtooth', .05, 90); }
       if (o.type === 'mailbox' && o.m && !o.done && !o.miss && py0 + 8 <= o.y && P.y + 8 > o.y && Math.abs(dx) < 80 && P.down <= 0){
-        o.done = true; P.letters++; sfx.deliver(); if (Math.abs(dx) < 42){ P.perfect++; btGain(12); streak(100, 6, o.x, o.y - 46, 'TÄYSOSUMA'); } else streak(40, 3, o.x, o.y - 46, '✉'); parts.push({k:'letter', x:P.x, y:P.y - 10 - hNow, tx:o.x, ty:o.y - 30, t:0}); if (rat && rat.mode === 'chase') rat.anger++;
+        o.done = true; P.letters++; sfx.deliver(); if (Math.abs(dx) < 42){ P.perfect++; btGain(12); streak(100, 4, o.x, o.y - 46, 'TÄYSOSUMA'); } else streak(40, 1, o.x, o.y - 46, '✉'); parts.push({k:'letter', x:P.x, y:P.y - 10 - hNow, tx:o.x, ty:o.y - 30, t:0}); if (rat && rat.mode === 'chase') rat.anger++;
       }
       if (o.done || DECOR[o.type]) continue;
       var floatH = (o.h || 16), reach = Math.abs(hNow - floatH) < 30 || (floatH <= 16 && hNow < 40);
@@ -1769,7 +1820,7 @@ body.postiopen{overflow:hidden}
         sfx.big(); say('KIPINÖIKSI ME TAIVAALLE LENNETTIIN', false, 2000); continue; }
       var hb = HIT[o.type]; if (!hb || P.air > 0 || P.inv > 0 || P.down > 0) continue;
       if (o.type === 'car' && o.door > .5){ var ddx = P.x - (o.x + o.ds * 19), ddy = P.y + 8 - (o.y - 6); if (Math.abs(ddx) < 9 && Math.abs(ddy) < 6){ say('OVI AUKES', true, 1100); crash(1.3, true); if (state !== 'run') return; continue; } }
-      if ((OBST[o.type] || o.type === 'mcar') && !o.nm && dy >= 0 && dy < 26 && Math.abs(dx) >= hb[0] + 4 && Math.abs(dx) < hb[0] + 22 && P.v > 120){ o.nm = 1; P.near++; btGain(4); tone(990, .08, 'square', .03, 1400); streak(25, 2, o.x, o.y - 30, 'LÄHELTÄ'); }
+      if ((OBST[o.type] || o.type === 'mcar') && !o.nm && dy >= 0 && dy < 26 && Math.abs(dx) >= hb[0] + 4 && Math.abs(dx) < hb[0] + 22 && P.v > 120){ o.nm = 1; P.near++; btGain(4); tone(990, .08, 'square', .03, 1400); streak(25, 0, o.x, o.y - 30, 'LÄHELTÄ'); }
       if (Math.abs(dx) < hb[0] + 4 && Math.abs(dy) < hb[1] + 3){ var isCar = o.type === 'car' || o.type === 'mcar'; crash(isCar ? 1.5 : 1, isCar); if (state !== 'run') return; }
     }
 
@@ -1784,16 +1835,14 @@ body.postiopen{overflow:hidden}
           var rs = Math.min(vmax * 1.2, vmax * (.8 + rat.gen * .03) + rat.anger * 8 + age * 3.5);
           var rx = P.x - rat.x, ry = (P.y - 6) - rat.y, dd = Math.hypot(rx, ry) || 1;
           if (P.high) rs *= .6;
-          if (!rat.ls && dd < 240 && dd > 70 && tsec > (rat.lcd || 0) && !P.high && P.down <= 0){ rat.ls = 'wind'; rat.lt = tsec + .7; playBuf('rat', .9, false, 1.35); pop(rat.x, rat.y - 130, '!!', '#ff4a2a'); }
-          if (tsec < (rat.stun || 0)) rs *= .35;
-          if (rat.ls === 'wind'){ rs *= .55; rat.tilt = Math.sin(tsec * 60) * .25; if (tsec > rat.lt){ rat.ls = 'dash'; rat.lt = tsec + .5; rat.lx = rx / dd; rat.ly = ry / dd; noise(.3, .2); } }
-          if (rat.ls === 'dash'){ rat.x += rat.lx * vmax * 2.9 * dt; rat.y += rat.ly * vmax * 2.9 * dt; if (tsec > rat.lt){ rat.ls = null; rat.stun = tsec + .8; rat.lcd = tsec + 2.4 + Math.random() * 1.5; } }
-          else { rat.x += rx / dd * rs * dt; rat.y += ry / dd * rs * dt; }
-          dd = Math.hypot(P.x - rat.x, P.y - 6 - rat.y); if (rat.ls !== 'wind') rat.tilt += ((rx / dd) * .35 - rat.tilt) * Math.min(1, dt * 3);
+          if (!rat.ls && dd < 300 && tsec > (rat.lcd || 0) && !P.high && P.down <= 0){ slamStart(); }
+          if (rat.ls === 'slam'){ rs *= .5; rat.tilt = Math.sin(tsec * 30) * .18; if (!paws.length){ rat.ls = null; rat.lcd = tsec + 2.6 + Math.random() * 2; } }
+          rat.x += rx / dd * rs * dt; rat.y += ry / dd * rs * dt;
+          dd = Math.hypot(P.x - rat.x, P.y - 6 - rat.y); if (rat.ls !== 'slam') rat.tilt += ((rx / dd) * .35 - rat.tilt) * Math.min(1, dt * 3);
           if (Math.random() < dt * 9) parts.push({k:'flutter', x:rat.x + (Math.random() - .5) * 60, y:rat.y + 10, vx:(Math.random() - .5) * 60, vy:-30 - Math.random() * 40, t:0, r:Math.random() * 6});
           if (tsec > rat.nextLaugh && dd < 1000){ rat.nextLaugh = tsec + 3.5 + Math.random() * 3.5; ratLaugh(); }
           if (dd < 450 && tsec > rat.beat){ rat.beat = tsec + .28 + dd / 700; tone(58, .13, 'sine', .3, 40); setTimeout(function(){ tone(52, .1, 'sine', .2, 38); }, 120); }
-          if (dd < (rat.ls === 'dash' ? 40 : 34) && hNow < 30 && P.down <= 0 && P.inv <= 0){ ratCatch(); if (state !== 'run') return; }
+          if (dd < 34 && hNow < 30 && P.down <= 0 && P.inv <= 0){ ratCatch(); if (state !== 'run') return; }
           glitch += ((dd < 700 ? 1 - dd / 700 : 0) - glitch) * Math.min(1, dt * 4);
         }
       } else { rat.tilt *= .95; glitch = Math.max(0, glitch - dt * .8); }
@@ -1801,6 +1850,7 @@ body.postiopen{overflow:hidden}
 
     var wk = Math.abs(gust.v); if (wk > .05 && Math.random() < dt * 95 * wk) streaks.push({x:gust.v > 0 ? -60 : W + 60, y:Math.random() * H, l:30 + Math.random() * 90, sp:(900 + Math.random() * 700) * Math.sign(gust.v), t:0, leaf:Math.random() < .25});
     for (k = streaks.length - 1; k >= 0; k--){ var st = streaks[k]; st.t += dt; st.x += st.sp * dt; st.y += 40 * dt; if (st.x < -200 || st.x > W + 200) streaks.splice(k, 1); }
+    stepPaws(dt); if (state !== 'run') return;
     stepParts(dt);
     hud();
   }
@@ -1809,6 +1859,10 @@ body.postiopen{overflow:hidden}
       if (p.k === 'blood'){ p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; p.vz -= 420 * dt; p.vx *= .985; p.vy *= .985;
         if (p.z <= 0){ decals.push({x:p.x, y:p.y, c:p.c, s:p.s}); if (decals.length > 1400) decals.splice(0, 200); parts.splice(k, 1); } continue; }
       if (p.k === 'txt'){ p.y -= 34 * dt; if (p.t > 1) parts.splice(k, 1); continue; }
+      if (p.k === 'ring'){ if (p.t > .5) parts.splice(k, 1); continue; }
+      if (p.k === 'fly'){ p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; p.vz -= 700 * dt; p.rot += p.vr * dt;
+        if (p.z < 0){ p.z = 0; p.vz = -p.vz * .35; p.vx *= .55; p.vy *= .55; p.vr *= .5; if (Math.abs(p.vz) < 40) p.vz = 0; }
+        if (p.t > 2.2) parts.splice(k, 1); continue; }
       if (p.k === 'letter' || p.k === 'spark'){ if (p.t > .45) parts.splice(k, 1); }
       else { p.x += p.vx * dt + gust.v * 120 * dt; p.y += p.vy * dt; p.vy += 260 * dt; p.r += dt * 4; if (p.t > 1.1) parts.splice(k, 1); } }
   }
@@ -2058,10 +2112,13 @@ body.postiopen{overflow:hidden}
       if (o.type === '_b'){ drawBuilding(o.B); return; }
       ctx.save(); ctx.translate(Math.round(o.x), Math.round(o.y)); draw[o.type](o); ctx.restore();
     });
+    drawPaws();
     parts.forEach(function(p){
       if (p.k === 'blood'){ ctx.fillStyle = p.c; ctx.fillRect(Math.round(p.x), Math.round(p.y - p.z), p.s * 1.4, p.s * 1.4); return; }
       if (p.k === 'letter'){ var k = p.t / .45, x = p.x + (p.tx - p.x) * k, y = p.y + (p.ty - p.y) * k - Math.sin(k * Math.PI) * 30;
         ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.rotate(Math.round(k * 6)); line(1.4); box(-6, -4, 12, 8, '#fff'); ctx.restore(); return; }
+      if (p.k === 'fly'){ ctx.save(); ctx.globalAlpha = Math.min(1, (2.2 - p.t) * 2); ctx.fillStyle = 'rgba(0,0,0,.35)'; ell(p.x, p.y, 12, 4); ctx.fill(); ctx.translate(Math.round(p.x), Math.round(p.y - p.z)); ctx.rotate(p.rot); draw[p.o.type](p.o); ctx.restore(); ctx.globalAlpha = 1; return; }
+      if (p.k === 'ring'){ var rr2 = 30 + p.t * 220; ctx.fillStyle = 'rgba(200,195,180,' + (1 - p.t / .5) * .7 + ')'; for (var q3 = 0; q3 < 24; q3++){ var an3 = q3 * .2618; ctx.fillRect(Math.round(p.x + Math.cos(an3) * rr2), Math.round(p.y + Math.sin(an3) * rr2 * .55), 3, 3); } return; }
       if (p.k === 'txt'){ ctx.globalAlpha = Math.max(0, 1 - p.t * p.t); ctx.font = '15px VT323, monospace'; ctx.textAlign = 'center'; ctx.fillStyle = OL; ctx.fillText(p.txt, Math.round(p.x) + 1, Math.round(p.y) + 1); ctx.fillStyle = p.c; ctx.fillText(p.txt, Math.round(p.x), Math.round(p.y)); ctx.globalAlpha = 1; return; }
       if (p.k === 'spark'){ ctx.fillStyle = 'rgba(255,170,90,' + (1 - p.t / .45) + ')'; var r = 8 + p.t * 50; for (var q = 0; q < 8; q++){ var an = q * .785; ctx.fillRect(Math.round(p.x + Math.cos(an) * r), Math.round(p.y + Math.sin(an) * r), 2, 2); } return; }
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.round(p.r * 2) / 2); ctx.globalAlpha = Math.max(0, 1 - p.t); ctx.fillStyle = p.k === 'flutter' ? '#d8d4ca' : CREAM; ctx.fillRect(-5, -3.5, 10, 7); ctx.restore(); });
@@ -2071,9 +2128,11 @@ body.postiopen{overflow:hidden}
       ctx.fillStyle = 'rgba(232,224,200,' + Math.min(.6, .15 + Math.abs(gust.v) * .6) + ')'; ctx.fillRect(Math.round(Math.min(s.x, s.x - Math.sign(s.sp) * s.l)), Math.round(s.y), Math.round(s.l), 1); });
     if (rat && rat.mode === 'chase'){ var ry = H * .38 + (rat.y - cam.y) * S; if (ry < 40){ var rxs = Math.max(40, Math.min(W - 40, W / 2 + (rat.x - cam.x) * S)), d = Math.round((P.y - rat.y) / 10);
       ctx.fillStyle = '#ff6a33'; ctx.font = '22px VT323, monospace'; ctx.textAlign = 'center'; ctx.fillText('▲ ROTTA ' + d + ' M', rxs, 138); }
-      if (rat.ls === 'wind' && Math.floor(performance.now() / 70) % 2){ ctx.fillStyle = 'rgba(200,20,10,.18)'; ctx.fillRect(0, 0, W, H); }
+      var pk = 0; paws.forEach(function(w){ if (w.set && !w.done) pk = Math.max(pk, (tsec - w.t0) / (w.tl - w.t0)); });
+      if (pk > 0){ var vg = ctx.createRadialGradient(W / 2, H * .4, H * .15, W / 2, H * .4, H * .8); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(60,0,0,' + .55 * pk + ')'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H); }
       var gap = P.y - rat.y; if (gap < 320){ var a = (1 - Math.max(0, gap) / 320) * (.45 + Math.sin(performance.now() / 120) * .12); var gr = ctx.createLinearGradient(0, 0, 0, H * .35);
         gr.addColorStop(0, 'rgba(196,40,30,' + a + ')'); gr.addColorStop(1, 'rgba(196,40,30,0)'); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H * .35); } }
+    if (flash > 0){ ctx.fillStyle = 'rgba(255,250,235,' + flash * .55 + ')'; ctx.fillRect(0, 0, W, H); }
     sinCity(BT.k);
     vhs(glitch);
   }
@@ -2103,7 +2162,8 @@ body.postiopen{overflow:hidden}
     raf = requestAnimationFrame(loop);
     var dt = Math.min(.05, (now - last) / 1000 || 0); last = now;
     BT.k += ((BT.on ? 1 : 0) - BT.k) * Math.min(1, dt * 7);
-    if (state === 'run'){ btStep(dt); step(dt * (BT.on ? .3 : 1)); } else if (state === 'over') stepParts(dt);
+    flash = Math.max(0, flash - dt * 6);
+    if (state === 'run' && now > freezeUntil){ btStep(dt); step(dt * (BT.on ? .3 : 1)); } else if (state === 'over') stepParts(dt);
     shake = Math.max(0, shake - dt);
     render();
   }
@@ -2175,11 +2235,18 @@ body.postiopen{overflow:hidden}
   addEventListener('keyup', function(e){ var k = KEYS[e.key]; if (k) input[k] = false; });
   function ptrPos(e){ var r = root.getBoundingClientRect(); return {x:e.clientX - r.left, y:e.clientY - r.top}; }
   var touching = false, capId = null;
-  function releasePtr(){ touching = false; input.ptr = null; if (capId != null){ try { cv.releasePointerCapture(capId); } catch(_){} capId = null; } }
-  cv.addEventListener('pointerdown', function(e){ acInit(); if (state !== 'run') return; touching = true; input.ptr = ptrPos(e); if (e.pointerType !== 'mouse'){ try { cv.setPointerCapture(e.pointerId); capId = e.pointerId; } catch(_){} } });
-  cv.addEventListener('pointermove', function(e){ if (state !== 'run') return; if (e.pointerType === 'mouse' || touching) input.ptr = ptrPos(e); });
-  cv.addEventListener('pointerup', function(e){ touching = false; capId = null; if (e.pointerType !== 'mouse') input.ptr = null; });
-  cv.addEventListener('pointercancel', function(){ touching = false; input.ptr = null; });
+  function releasePtr(){ touching = false; input.ptr = null; tclear(); if (capId != null){ try { cv.releasePointerCapture(capId); } catch(_){} capId = null; } }
+  // touch: left half of the screen turns left, right half turns right, hold longer to turn harder
+  var touchL = 0, touchR = 0, tids = {};
+  function tside(e){ return ptrPos(e).x < root.clientWidth / 2 ? 'L' : 'R'; }
+  function tset(id, sd){ var old = tids[id]; if (old === sd) return; if (old === 'L') touchL--; if (old === 'R') touchR--; if (sd === 'L') touchL++; if (sd === 'R') touchR++; if (sd) tids[id] = sd; else delete tids[id]; }
+  function tclear(){ tids = {}; touchL = touchR = 0; }
+  cv.addEventListener('pointerdown', function(e){ acInit(); if (state !== 'run') return;
+    if (e.pointerType === 'mouse'){ touching = true; input.ptr = ptrPos(e); return; }
+    input.ptr = null; tset(e.pointerId, tside(e)); try { cv.setPointerCapture(e.pointerId); } catch(_){} });
+  cv.addEventListener('pointermove', function(e){ if (state !== 'run') return; if (e.pointerType === 'mouse') input.ptr = ptrPos(e); else if (tids[e.pointerId]) tset(e.pointerId, tside(e)); });
+  cv.addEventListener('pointerup', function(e){ touching = false; capId = null; if (e.pointerType !== 'mouse') tset(e.pointerId, null); });
+  cv.addEventListener('pointercancel', function(e){ touching = false; input.ptr = null; tset(e.pointerId, null); });
   root.addEventListener('touchmove', function(e){ if (root.classList.contains('on') && e.target === cv) e.preventDefault(); }, {passive:false});
   document.getElementById('pgo').addEventListener('click', start);
   document.getElementById('pagain').addEventListener('click', start);
@@ -2205,7 +2272,7 @@ body.postiopen{overflow:hidden}
   addEventListener('resize', function(){ if (root.classList.contains('on')) resize(); });
   document.addEventListener('visibilitychange', function(){ if (!root.classList.contains('on')) return; if (document.hidden){ audio.pause(); loopsOff(); } else syncMusic(); });
   if (location.hash === '#posti') open();
-  window.__posti = {open:open, close:close, start:start, state:function(){ return {state:state, P:P, rat:rat, tsec:tsec, objs:objs, blds:blds, decals:decals}; }};
+  window.__posti = {open:open, close:close, start:start, state:function(){ return {state:state, P:P, rat:rat, tsec:tsec, objs:objs, blds:blds, decals:decals, paws:paws, BT:BT}; }, bt:function(){ btOn(); }};
 })();
 </script>
 <!--/POSTI-->
