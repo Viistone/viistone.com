@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0a">
+<meta property="og:title" content="Viistone">
+<meta property="og:description" content="Kymmenen tikkuu. Albumi 13.11.2026.">
+<meta property="og:image" content="https://viistone.com/assets/cover.jpg">
+<meta property="og:url" content="https://viistone.com/">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.png">
+<title>Viistone</title>
+<meta name="description" content="Viistone: Kymmenen tikkuu. Albumi 13.11.2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400&family=VT323&display=swap">
+<style>
+/* Layout: one dark VHS screen. Logo is the hero, everything else is a quiet tape label below it. */
+:root{
+  --bg:#0b0b0a;
+  --surface:#111110;
+  --cream:#d1c2b0;
+  --grey:#b3b0aa;
+  --dim:#6f6b65;
+  --line:#2c2b29;
+  --ember:#a87a50;
+  --osd:#e9e4d8;
+  --f-body:"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --f-mono:"IBM Plex Mono", "Courier New", monospace;
+  --f-osd:"VT323", "Courier New", monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--grey);font-family:var(--f-body);font-weight:300;font-size:16px;line-height:1.65;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));overflow-x:hidden}
+a{color:var(--cream);text-decoration:underline;text-decoration-color:var(--ember);text-underline-offset:3px;text-decoration-thickness:1px}
+a:hover{color:#fff}
+a:focus-visible,button:focus-visible{outline:1px solid var(--ember);outline-offset:4px}
+
+/* --- tape overlays: grain, scanlines, vignette --- */
+#grain{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50;opacity:.028;mix-blend-mode:screen}
+.scan{position:fixed;inset:0;pointer-events:none;z-index:51;
+  background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,.16) 3px, rgba(0,0,0,0) 4px)}
+.vig{position:fixed;inset:0;pointer-events:none;z-index:49;background:radial-gradient(ellipse at 50% 40%, transparent 55%, rgba(0,0,0,.65) 100%)}
+
+/* --- VHS on-screen display --- */
+.osd{position:fixed;z-index:52;font-family:var(--f-osd);font-size:22px;letter-spacing:.06em;color:var(--osd);opacity:.78;
+  text-shadow:1px 0 0 rgba(255,60,60,.35),-1px 0 0 rgba(60,200,255,.35);pointer-events:none;line-height:1}
+.osd.tl{top:calc(14px + env(safe-area-inset-top,0px));left:max(18px, env(safe-area-inset-left,0px))}
+.osd.tr{top:calc(14px + env(safe-area-inset-top,0px));right:max(18px, env(safe-area-inset-right,0px));text-align:right}
+.osd.bl{bottom:calc(14px + env(safe-area-inset-bottom,0px));left:max(18px, env(safe-area-inset-left,0px))}
+.osd .blink{animation:blink 1.2s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+main{max-width:980px;margin:0 auto}
+
+/* --- hero: the logo --- */
+.hero{min-height:min(78vh,720px);display:grid;place-items:center;padding-block:96px 48px;position:relative}
+.logo{position:relative;width:min(640px,86vw)}
+.logo img{display:block;width:100%;height:auto}
+.logo .ghost{position:absolute;inset:0;opacity:.0;mix-blend-mode:screen;pointer-events:none}
+.logo .r{filter:drop-shadow(0 0 0 #f33) saturate(0) brightness(.9) sepia(1) hue-rotate(-50deg) saturate(6)}
+.logo .c{filter:sepia(1) hue-rotate(150deg) saturate(5)}
+.logo.glitch .r{opacity:.55;transform:translate(-4px,0)}
+.logo.glitch .c{opacity:.5;transform:translate(4px,1px)}
+.logo.glitch .main{clip-path:inset(0 0 0 0);transform:translateX(2px) skewX(-2deg)}
+.logo .main{transition:transform .08s steps(2)}
+.tagline{margin-top:28px;text-align:center;font-family:var(--f-mono);font-size:12px;letter-spacing:.42em;color:var(--dim);text-transform:uppercase}
+
+/* --- sections --- */
+section{border-top:1px solid var(--line);padding-block:56px}
+.label{font-family:var(--f-mono);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--dim);margin:0 0 28px}
+
+.album{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:48px;align-items:start}
+.cover{border:1px solid rgba(209,194,176,.55);padding:10px;max-width:100%}
+.cover img{display:block;width:100%;height:auto}
+.album h1{font-weight:300;font-size:clamp(26px,4.2vw,40px);letter-spacing:.24em;text-transform:uppercase;color:var(--cream);margin:0 0 6px;line-height:1.15;text-wrap:balance}
+.date{font-family:var(--f-mono);font-size:12px;letter-spacing:.3em;color:var(--ember);margin:0 0 26px}
+.album p{max-width:58ch;margin:0 0 18px}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{font-family:var(--f-mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;text-decoration:none;color:var(--cream);
+  border:1px solid var(--cream);padding:12px 18px;display:inline-block}
+.btn:hover{background:var(--cream);color:var(--bg)}
+
+.tracks{list-style:none;margin:0;padding:0;columns:2;column-gap:48px;font-size:15px}
+.tracks li{break-inside:avoid;display:grid;grid-template-columns:34px 1fr;padding-block:5px;color:var(--cream)}
+.tracks li span{font-family:var(--f-mono);font-size:12px;color:var(--ember);padding-top:3px}
+.tracks li em{font-style:normal;color:var(--dim)}
+
+/* --- video tape --- */
+.tape{display:block;position:relative;border:1px solid var(--line);background:#050505;aspect-ratio:16/9;max-width:100%;text-decoration:none;overflow:hidden}
+.tape .screen{position:absolute;inset:0;background:
+   radial-gradient(ellipse at 50% 50%, rgba(209,194,176,.06), transparent 60%),
+   repeating-linear-gradient(to bottom, rgba(255,255,255,.025) 0 1px, transparent 1px 3px)}
+.tape .play{white-space:nowrap;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:var(--f-osd);font-size:clamp(34px,6vw,64px);color:var(--osd);letter-spacing:.08em;
+  text-shadow:2px 0 0 rgba(255,60,60,.4),-2px 0 0 rgba(60,200,255,.4)}
+.tape .meta{position:absolute;left:18px;bottom:14px;font-family:var(--f-osd);font-size:22px;color:var(--osd);opacity:.8}
+.tape .ch{position:absolute;right:18px;top:14px;font-family:var(--f-osd);font-size:22px;color:var(--osd);opacity:.8}
+.tape:hover .play{color:#fff}
+.tape iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.note{font-family:var(--f-mono);font-size:11px;color:var(--dim);margin-top:12px;letter-spacing:.06em}
+
+/* --- press --- */
+.press{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 48px}
+.press p{margin:0 0 10px;max-width:52ch}
+.press ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.mail{font-family:var(--f-mono);color:var(--cream);user-select:all}
+.copy{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;background:none;border:1px solid var(--line);color:var(--grey);padding:6px 10px;margin-left:10px;cursor:pointer}
+.copy:hover{border-color:var(--cream);color:var(--cream)}
+
+footer{border-top:1px solid var(--line);padding-block:32px 72px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;color:var(--dim)}
+footer nav{display:flex;gap:20px;flex-wrap:wrap}
+footer a{color:var(--grey);text-decoration:none}
+footer a:hover{color:var(--cream)}
+
+/* tracking band that rolls through while scrolling */
+.track{position:fixed;left:0;right:0;height:46px;top:-60px;z-index:53;pointer-events:none;opacity:0;mix-blend-mode:screen;
+  background:repeating-linear-gradient(to bottom, rgba(233,228,216,.0) 0 2px, rgba(233,228,216,.22) 2px 3px, rgba(233,228,216,0) 3px 7px),
+  linear-gradient(to bottom, transparent, rgba(233,228,216,.07) 40%, rgba(233,228,216,.07) 60%, transparent);
+  filter:blur(.4px)}
+/* sections arrive like a tape finding its tracking */
+.rv{opacity:0}
+.rv.in{animation:tapein .9s steps(9,end) forwards}
+@keyframes tapein{
+  0%{opacity:0;transform:translateX(-10px);filter:blur(2px);clip-path:inset(0 0 100% 0)}
+  25%{opacity:.6;transform:translateX(7px);filter:blur(1px) drop-shadow(3px 0 0 rgba(255,60,60,.5)) drop-shadow(-3px 0 0 rgba(60,200,255,.5));clip-path:inset(0 0 55% 0)}
+  50%{opacity:.85;transform:translateX(-3px);filter:drop-shadow(2px 0 0 rgba(255,60,60,.35)) drop-shadow(-2px 0 0 rgba(60,200,255,.35));clip-path:inset(0 0 15% 0)}
+  75%{transform:translateX(1px);filter:none;clip-path:inset(0 0 0 0)}
+  100%{opacity:1;transform:none;filter:none;clip-path:inset(0 0 0 0)}}
+.tracks.in li{animation:tapein .6s steps(6,end) both;animation-delay:calc(var(--i) * 70ms)}
+.tracks.rv,.tracks.rv.in{opacity:1;animation:none}
+.tracks.rv li{opacity:0}
+.tracks.rv.in li{opacity:1}
+.hero .logo{will-change:transform,opacity}
+.cover img{transition:filter .4s}
+.cover:hover img{filter:contrast(1.08) brightness(1.08)}
+
+/* streaming */
+.stream{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.stream a{color:var(--grey);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px}
+.stream a:hover{color:var(--cream);border-color:var(--ember)}
+
+/* tracklist as a tape index */
+.tracks li{cursor:default;position:relative;transition:color .15s}
+.tracks li::before{content:"▶";position:absolute;left:-22px;top:5px;font-size:11px;color:var(--ember);opacity:0}
+.tracks li:hover,.tracks li:focus-visible,.tracks li.on{color:#fff;outline:none}
+.tracks li:hover::before,.tracks li:focus-visible::before,.tracks li.on::before{opacity:1;animation:blink 1s steps(1) infinite}
+.tracks li.jolt{animation:jolt .22s steps(3) 1 !important}
+@keyframes jolt{0%{transform:translateX(5px);text-shadow:2px 0 rgba(255,60,60,.6),-2px 0 rgba(60,200,255,.6)}50%{transform:translateX(-3px)}100%{transform:none;text-shadow:none}}
+
+/* the ten matches from the cover, lighting up as the tape plays */
+.matches{position:fixed;z-index:52;right:max(22px, env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;pointer-events:none;--mh:110px;height:var(--mh)}
+.m{display:block;height:100%;background-image:url(assets/matches.png);background-repeat:no-repeat;filter:grayscale(1) brightness(.22);transition:filter .7s}
+.m.burnt{filter:grayscale(.2) brightness(.8)}
+.m.lit{filter:sepia(.35) brightness(1.15);animation:ember 1.4s ease-in-out infinite alternate}
+.m.hint{filter:brightness(1.35)}
+@keyframes ember{from{filter:sepia(.25) brightness(1)}to{filter:sepia(.5) saturate(1.4) brightness(1.3)}}
+
+
+/* pause: a tape held on one frame */
+.pausebar{position:fixed;left:0;right:0;bottom:12%;height:18px;z-index:53;pointer-events:none;opacity:0;mix-blend-mode:screen;
+  background:repeating-linear-gradient(90deg, rgba(233,228,216,.0) 0 3px, rgba(233,228,216,.35) 3px 4px, rgba(233,228,216,.05) 4px 9px);filter:blur(.6px)}
+body.paused .pausebar{opacity:1;animation:pbar .14s steps(2) infinite}
+body.paused main{animation:hold .12s steps(2) infinite}
+@keyframes pbar{50%{transform:translate(-14px,2px)}}
+@keyframes hold{50%{transform:translateY(1px)}}
+
+/* no signal: blue screen with the logo drifting about */
+.blue{position:fixed;inset:0;z-index:60;background:#0b18a8;display:none;overflow:hidden;cursor:none}
+.blue.on{display:block}
+.blue .osd-b{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));left:max(22px, env(safe-area-inset-left,0px));font-family:var(--f-osd);font-size:30px;color:#e9ecff;letter-spacing:.08em}
+.blue .osd-b.r{left:auto;right:max(22px, env(safe-area-inset-right,0px))}
+.blue img{position:absolute;left:0;top:0;width:min(260px,52vw);height:auto;opacity:.95;will-change:transform}
+@media (max-width:720px){
+  .album{grid-template-columns:1fr;gap:28px}
+  .cover{max-width:340px}
+  .tracks{columns:1}
+  .press{grid-template-columns:1fr}
+  .osd{font-size:18px}
+  .matches{right:auto;left:50%;transform:translateX(-50%);--mh:76px}
+  .tagline{letter-spacing:.28em}
+  .tape .play{font-size:30px}
+  .hero{min-height:auto;padding-block:140px 96px}
+}
+@media (prefers-reduced-motion:reduce){
+  .osd .blink{animation:none}
+  #grain{display:none}
+  .rv,.tracks.rv li{opacity:1;animation:none!important}
+  .track{display:none}
+  .m.lit{animation:none}
+  body.paused main,body.paused .pausebar{animation:none}
+}
+</style>
+</head>
+<body>
+
+<canvas id="grain" aria-hidden="true"></canvas>
+<div class="vig" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+<div class="osd tl" aria-hidden="true" id="mode"><span class="blink">▶</span> PLAY</div>
+<div class="osd tr" aria-hidden="true">SP<br><span id="counter">0:00:00</span></div>
+<div class="track" id="track" aria-hidden="true"></div>
+<div class="matches" id="matches" aria-hidden="true"></div>
+<div class="pausebar" aria-hidden="true"></div>
+<div class="blue" id="blue" aria-hidden="true"><div class="osd-b">EI SIGNAALIA</div><div class="osd-b r">AV 1</div><img id="bounce" alt=""></div>
+
+<main>
+  <header class="hero">
+    <div>
+      <div class="logo" id="logo">
+        <img class="main" src="assets/logo.png" alt="Viistone" width="1000" height="158">
+        <img class="ghost r" src="assets/logo.png" alt="" aria-hidden="true">
+        <img class="ghost c" src="assets/logo.png" alt="" aria-hidden="true">
+      </div>
+      <p class="tagline">Kymmenen tikkuu · 13.11.2026</p>
+    </div>
+  </header>
+
+  <section aria-labelledby="albumi">
+    <p class="label rv">Albumi</p>
+    <div class="album rv">
+      <div class="cover"><img src="assets/cover.jpg" alt="Kymmenen tikkuu -albumin kansi: kymmenen palanutta tulitikkua mustalla taustalla" width="900" height="900"></div>
+      <div>
+        <h1 id="albumi">Kymmenen tikkuu</h1>
+        <p class="date">ALBUMI • 13.11.2026</p>
+        <p>Kymmenen tikkuu käsittelee elämän rajallisuuden ymmärtämistä ja sen hyväksymisen vaikeutta. Levyn viitekehyksenä on uni. Sitä toivotaan, mutta samalla pelätään.</p>
+        <p>Valvemaailman täyttävät erot ja muuttolaatikot, lasten leikit ja pienten askelten kopina, vanhenemisen ja kuoleman pelko, aika-avaruus, maailmankaikkeus ja kaikki. Mukaan mahtuu myös ripaus toivoa.</p>
+        <div class="cta">
+          <a class="btn" href="https://distrokid.com/hyperfollow/viistone/kymmenen-tikkuu" target="_blank" rel="noopener">Tallenna albumi</a>
+        </div>
+        <ul class="stream" aria-label="Kuuntele">
+          <li><a href="https://distrokid.com/hyperfollow/viistone/kymmenen-tikkuu" target="_blank" rel="noopener" data-svc="spotify">Spotify</a></li>
+          <li><a href="https://distrokid.com/hyperfollow/viistone/kymmenen-tikkuu" target="_blank" rel="noopener" data-svc="apple">Apple Music</a></li>
+          <li><a href="https://distrokid.com/hyperfollow/viistone/kymmenen-tikkuu" target="_blank" rel="noopener" data-svc="tidal">Tidal</a></li>
+          <li><a href="https://distrokid.com/hyperfollow/viistone/kymmenen-tikkuu" target="_blank" rel="noopener" data-svc="ytmusic">YouTube Music</a></li>
+          <li><a href="https://distrokid.com/hyperfollow/viistone/kymmenen-tikkuu" target="_blank" rel="noopener" data-svc="deezer">Deezer</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Kappalelista">
+    <p class="label rv">Kappaleet</p>
+    <ol class="tracks rv">
+      <li tabindex="0" data-n="0" data-name="PROLOGI"><span>01</span>Prologi</li>
+      <li tabindex="0" data-n="1" data-name="KYMMENEN TIKKUU"><span>02</span>Kymmenen tikkuu</li>
+      <li tabindex="0" data-n="2" data-name="PITKÄSILTA"><span>03</span><div>Pitkäsilta <em>(feat. Antti Who)</em></div></li>
+      <li tabindex="0" data-n="3" data-name="SYMMETRISII UNII"><span>04</span>Symmetrisii unii</li>
+      <li tabindex="0" data-n="4" data-name="VÄLII VUODELLA"><span>05</span><div>Välii vuodella <em>(feat. eQ)</em></div></li>
+      <li tabindex="0" data-n="5" data-name="POSTINKANTAJA"><span>06</span>Postinkantaja</li>
+      <li tabindex="0" data-n="6" data-name="HYMYTYTTÖ"><span>07</span>Hymytyttö</li>
+      <li tabindex="0" data-n="7" data-name="KOTIINPALUU KAI JOTENKI JÄRJESTYY"><span>08</span>Kotiinpaluu kai jotenki järjestyy</li>
+      <li tabindex="0" data-n="8" data-name="VIKA SELKÄ"><span>09</span>Vika selkä</li>
+      <li tabindex="0" data-n="9" data-name="EPILOGI"><span>10</span>Epilogi</li>
+    </ol>
+  </section>
+
+  <section aria-label="Video">
+    <p class="label rv">Video</p>
+    <a class="tape rv" id="tape" href="https://www.youtube.com/watch?v=cSMs5ttWIEg" target="_blank" rel="noopener" data-yt="cSMs5ttWIEg">
+      <span class="screen"></span>
+      <span class="ch">CH 09</span>
+      <span class="play">▶ VIKA SELKÄ</span>
+      <span class="meta">SP · YOUTUBE</span>
+    </a>
+    <p class="note">Ohjaus Viistone · Kuvaus Antti Hedlund</p>
+  </section>
+
+  <section aria-label="Medialle">
+    <p class="label rv">Medialle</p>
+    <div class="press rv">
+      <div>
+        <p>Mediatiedote, äänitiedostot, kappaletiedot, kansikuva, promokuvat ja logot. Materiaalia saa käyttää vapaasti Viistonea ja Kymmenen tikkuu -albumia käsittelevän uutisoinnin, arvostelujen ja radio-ohjelmien yhteydessä.</p>
+      </div>
+      <ul>
+        <li><a href="https://drive.google.com/file/d/1r-iqQRUTy938tMADuKKJs2H_wQ1LHqjg/view" target="_blank" rel="noopener">Mediatiedote (PDF)</a></li>
+        <li><a href="https://drive.google.com/drive/folders/1gQ5u725fySbirsqSQ8EeholW2SCaBH_j" target="_blank" rel="noopener">Mediapaketti</a></li>
+        <li><span class="mail" id="mail">viistoneofficial@gmail.com</span><button class="copy" id="copy" type="button">Kopioi</button></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2026 Viistone</span>
+    <nav aria-label="Somekanavat">
+      <a href="https://www.youtube.com/@Viistone" target="_blank" rel="noopener">YouTube</a>
+      <a href="https://www.instagram.com/lollari5000/" target="_blank" rel="noopener">Instagram</a>
+    </nav>
+  </footer>
+</main>
+
+<script>
+window.VIISTONE_EMBED = true;
+(function(){
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // film grain
+  var c = document.getElementById('grain'), x = c.getContext('2d');
+  function size(){ c.width = Math.ceil(innerWidth/3); c.height = Math.ceil(innerHeight/3); }
+  size(); addEventListener('resize', size);
+  function grain(){
+    var w=c.width,h=c.height,img=x.createImageData(w,h),d=img.data;
+    for(var i=0;i<d.length;i+=4){ var v=Math.random()*255|0; d[i]=d[i+1]=d[i+2]=v; d[i+3]=255; }
+    x.putImageData(img,0,0);
+  }
+  grain();
+  if(!reduce){ setInterval(grain, 90); }
+
+  // tape position follows the scroll: the whole page is the album's 31 minutes
+  var cnt = document.getElementById('counter'), mode = document.getElementById('mode'), track = document.getElementById('track');
+  var heroLogo = document.getElementById('logo');
+  function pad(n){ return (n<10?'0':'')+n; }
+  var TOTAL = 31*60, lastY = scrollY, lastT = performance.now(), idle, vel = 0;
+  var PLAY = '<span class="blink">▶</span> PLAY';
+  function setCounter(){
+    var max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    var s = Math.round(Math.min(1, scrollY/max) * TOTAL);
+    cnt.textContent = '0:'+pad(Math.floor(s/60))+':'+pad(s%60);
+  }
+  setCounter();
+  function onScroll(){
+    var now = performance.now(), dy = scrollY - lastY, dt = Math.max(16, now - lastT);
+    vel = Math.min(1, Math.abs(dy)/dt/2.5); lastY = scrollY; lastT = now;
+    setCounter();
+    if (!reduce) {
+      if (dy > 0) mode.textContent = '▶▶ FF'; else if (dy < 0) mode.textContent = '◀◀ REW';
+      clearTimeout(idle); idle = setTimeout(function(){ mode.innerHTML = PLAY; track.style.opacity = 0; }, 260);
+      // tracking band rolls with the scroll
+      track.style.opacity = (0.25 + vel*0.75).toFixed(2);
+      track.style.top = (((scrollY*1.7) % (innerHeight+120)) - 60) + 'px';
+      // logo drifts away with a little chroma smear
+      var p = Math.min(1, scrollY / (innerHeight*0.8));
+      heroLogo.style.transform = 'translateY(' + (p*60).toFixed(1) + 'px) scale(' + (1 - p*0.06).toFixed(3) + ')';
+      heroLogo.style.opacity = (1 - p*0.85).toFixed(2);
+      heroLogo.style.filter = vel > 0.15 ? 'drop-shadow('+(vel*5).toFixed(1)+'px 0 0 rgba(255,60,60,.45)) drop-shadow(-'+(vel*5).toFixed(1)+'px 0 0 rgba(60,200,255,.45))' : 'none';
+    }
+  }
+  addEventListener('scroll', onScroll, {passive:true});
+  addEventListener('resize', setCounter);
+
+
+  // ten matches
+  var mwrap = document.getElementById('matches'), ms = [];
+  var SB = [[0, 22], [22, 48], [48, 74], [74, 100], [100, 127], [127, 152], [152, 176], [176, 202], [202, 229], [229, 271]], SW = 271, SH = 240;
+  for (var i=0;i<10;i++){ var d=document.createElement('i'); d.className='m'; mwrap.appendChild(d); ms.push(d); }
+  function sizeMatches(){
+    var k = mwrap.clientHeight / SH;
+    ms.forEach(function(m,i){ m.style.width = ((SB[i][1]-SB[i][0])*k)+'px'; m.style.backgroundSize = (SW*k)+'px '+(SH*k)+'px'; m.style.backgroundPosition = (-SB[i][0]*k)+'px 0'; });
+  }
+  sizeMatches(); addEventListener('resize', sizeMatches);
+  function burn(){
+    var max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    var p = Math.min(1, scrollY/max), k = Math.min(10, Math.floor(p*10.0001));
+    ms.forEach(function(m,i){ m.classList.toggle('burnt', i<k); m.classList.toggle('lit', i===k && scrollY>4); });
+  }
+  burn(); addEventListener('scroll', burn, {passive:true}); addEventListener('resize', burn);
+
+  // tracklist: pointing at a song cues it on the deck and its match
+  var lis = document.querySelectorAll('.tracks li');
+  lis.forEach(function(li){
+    var n = +li.dataset.n;
+    function cue(){
+      lis.forEach(function(o){ o.classList.remove('on'); });
+      li.classList.add('on');
+      li.classList.remove('jolt'); void li.offsetWidth; if(!reduce) li.classList.add('jolt');
+      mode.textContent = '▶ ' + (n<9?'0':'') + (n+1) + ' ' + li.dataset.name;
+      ms.forEach(function(m,i){ m.classList.toggle('hint', i===n); });
+    }
+    function uncue(){ li.classList.remove('on'); mode.innerHTML = PLAY; ms.forEach(function(m){ m.classList.remove('hint'); }); }
+    li.addEventListener('mouseenter', cue); li.addEventListener('focus', cue);
+    li.addEventListener('mouseleave', uncue); li.addEventListener('blur', uncue);
+    li.addEventListener('click', cue);
+  });
+
+  // idle: pause after a while, then lose the signal
+  var blue = document.getElementById('blue'), bimg = document.getElementById('bounce');
+  bimg.src = document.querySelector('#logo .main').src;
+  var tPause, tBlue, raf, bx=40, by=60, vx=1.4, vy=1.1;
+  function bounce(){
+    var w = bimg.offsetWidth, h = bimg.offsetHeight, W = innerWidth, H = innerHeight;
+    bx += vx; by += vy;
+    if (bx<0||bx+w>W){ vx=-vx; bx=Math.max(0,Math.min(bx,W-w)); }
+    if (by<0||by+h>H){ vy=-vy; by=Math.max(0,Math.min(by,H-h)); }
+    bimg.style.transform = 'translate('+bx+'px,'+by+'px)';
+    raf = requestAnimationFrame(bounce);
+  }
+  function wake(){
+    clearTimeout(tPause); clearTimeout(tBlue);
+    if (document.body.classList.contains('paused')) { document.body.classList.remove('paused'); mode.innerHTML = PLAY; }
+    if (blue.classList.contains('on')) { blue.classList.remove('on'); cancelAnimationFrame(raf); }
+    tPause = setTimeout(function(){
+      document.body.classList.add('paused'); mode.textContent = '❚❚ PAUSE';
+      tBlue = setTimeout(function(){
+        blue.classList.add('on');
+        bx = Math.random()*(innerWidth*0.5); by = Math.random()*(innerHeight*0.5);
+        if (reduce) { bimg.style.transform='translate('+bx+'px,'+by+'px)'; } else { bounce(); }
+      }, 40000);
+    }, 20000);
+  }
+  ['mousemove','mousedown','keydown','scroll','touchstart','wheel'].forEach(function(ev){ addEventListener(ev, wake, {passive:true}); });
+  wake();
+
+  // reveal sections as they come into view
+  document.querySelectorAll('.tracks li').forEach(function(li,i){ li.style.setProperty('--i', i); });
+  var els = document.querySelectorAll('.rv');
+  if ('IntersectionObserver' in window && !reduce) {
+    var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, {threshold:.18});
+    els.forEach(function(el){ io.observe(el); });
+  } else { els.forEach(function(el){ el.classList.add('in'); }); }
+
+  // occasional tracking glitch on the logo
+  var logo = document.getElementById('logo');
+  function glitch(){
+    if(reduce) return;
+    logo.classList.add('glitch');
+    setTimeout(function(){ logo.classList.remove('glitch'); }, 90 + Math.random()*120);
+    setTimeout(glitch, 3500 + Math.random()*5000);
+  }
+  setTimeout(glitch, 1600);
+
+  // copy email
+  var btn = document.getElementById('copy');
+  btn.addEventListener('click', function(){
+    var t = document.getElementById('mail').textContent;
+    var done = function(){ btn.textContent = 'Kopioitu'; setTimeout(function(){ btn.textContent='Kopioi'; }, 1600); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(done).catch(function(){ selectMail(); });
+    } else { selectMail(); }
+  });
+  function selectMail(){ var r=document.createRange(); r.selectNodeContents(document.getElementById('mail')); var s=getSelection(); s.removeAllRanges(); s.addRange(r); }
+
+  // on the real site the video loads in place only after a click (no YouTube cookies before that)
+  var tape = document.getElementById('tape');
+  if (window.VIISTONE_EMBED) {
+    tape.addEventListener('click', function(e){
+      e.preventDefault();
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube-nocookie.com/embed/' + tape.dataset.yt + '?autoplay=1';
+      f.allow = 'autoplay; encrypted-media; picture-in-picture'; f.allowFullscreen = true; f.title = 'Vika selkä';
+      tape.replaceChildren(f);
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
