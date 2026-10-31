@@ -68,6 +68,10 @@ main{max-width:980px;margin:0 auto;position:relative;z-index:1}
 .logo.glitch .c{opacity:.5;transform:translate(4px,1px)}
 .logo.glitch .main{clip-path:inset(0 0 0 0);transform:translateX(2px) skewX(-2deg)}
 .logo .main{transition:transform .08s steps(2)}
+.playlink{margin:18px 0 0;text-align:center}
+.ch03.big{font-family:var(--f-osd);font-size:24px;letter-spacing:.1em;color:var(--osd);opacity:.75;border:1px solid rgba(209,194,176,.25);padding:2px 14px;
+  text-shadow:1px 0 0 rgba(255,60,60,.3),-1px 0 0 rgba(60,200,255,.3)}
+.ch03.big:hover{opacity:1;border-color:var(--cream)}
 .tagline{margin-top:28px;text-align:center;font-family:var(--f-mono);font-size:12px;letter-spacing:.42em;color:var(--dim);text-transform:uppercase}
 
 /* --- sections --- */
@@ -245,6 +249,7 @@ body.paused main{animation:hold .12s steps(2) infinite}
         <img class="ghost c" src="assets/logo.png" alt="" aria-hidden="true">
       </div>
       <p class="tagline">Kymmenen tikkuu · 13.11.2026</p>
+      <p class="playlink"><button class="ch03 big" id="ch03b" type="button">▶ CH 03</button></p>
     </div>
   </header>
 
@@ -572,6 +577,19 @@ body.gameopen{overflow:hidden}
   background:linear-gradient(100deg, rgba(209,194,176,.05), transparent 45%, rgba(0,0,0,.2))}
 @media (max-width:720px){ .game .gosd{font-size:24px} .game .gbtn{font-size:21px} .seg{height:38px} }
 @media (prefers-reduced-motion:reduce){ .gtrack,.gnoise{display:none} }
+/* channel ident: the logo at the start and the end of the tape */
+.ident{position:absolute;inset:0;z-index:7;display:none;align-items:center;justify-content:center;background:#090908;pointer-events:none}
+.ident.on{display:flex}
+.ident img{width:min(62vw,420px);height:auto;opacity:0;filter:contrast(1.1) brightness(.95)}
+.ident.on img{animation:ident 1.7s steps(28,end) forwards}
+@keyframes ident{
+  0%{opacity:0;transform:translateX(-8px) scaleY(1.06);filter:blur(2px) drop-shadow(6px 0 0 rgba(255,60,60,.6)) drop-shadow(-6px 0 0 rgba(60,200,255,.6))}
+  14%{opacity:.85;transform:translateX(5px)}
+  22%{opacity:.6;transform:translateX(-2px);filter:drop-shadow(3px 0 0 rgba(255,60,60,.45)) drop-shadow(-3px 0 0 rgba(60,200,255,.45))}
+  30%,78%{opacity:.92;transform:none;filter:drop-shadow(1px 0 0 rgba(255,60,60,.25)) drop-shadow(-1px 0 0 rgba(60,200,255,.25))}
+  86%{opacity:.5;transform:translateX(3px)}
+  100%{opacity:0;transform:none}}
+.ident.end{background:rgba(9,9,8,.96)}
 </style>
 <div class="game" id="game" role="dialog" aria-label="Peli: tulitikusta maailmankaikkeuteen">
   <canvas class="gnoise" id="gnoise" aria-hidden="true"></canvas>
@@ -589,6 +607,7 @@ body.gameopen{overflow:hidden}
     <svg class="seg" id="gfinal" aria-label="Pisteet"></svg>
     <button class="btn" id="gagain" type="button">Uudestaan</button>
   </div>
+  <div class="ident" id="ident" aria-hidden="true"><img alt=""></div>
   <audio id="gaudio" loop preload="none" data-src="assets/vikaselka.m4a"></audio>
 </div>
 <script>
@@ -718,7 +737,7 @@ body.gameopen{overflow:hidden}
   }
   function end(){
     if (score > best()) best(score);
-    setScore(); setTimeout(function(){ over.classList.add('on'); seg(document.getElementById('gfinal'), score, 6); }, 350);
+    setScore(); setTimeout(function(){ showIdent(true, function(){ over.classList.add('on'); seg(document.getElementById('gfinal'), score, 6); }); }, 350);
   }
 
   // ---- the eye ----
@@ -782,6 +801,7 @@ body.gameopen{overflow:hidden}
     clearTimeout(idleT); idleT = setTimeout(drift, rr(3000, 7000));
   }
   function startle(big){ pupT = big ? .42 : .36; if (!eRaf) eRaf = requestAnimationFrame(eyeLoop); setTimeout(function(){ pupT = .3; if (!eRaf) eRaf = requestAnimationFrame(eyeLoop); }, 700); }
+  window.__eyeLook = function(x, y){ look(x, y); };
   function lookAtPoint(clientX, clientY){
     var r = ec.getBoundingClientRect(), ox = r.left + r.width * ECX / EW, oy = r.top + r.height * ECY / EH;
     var dx = clientX - ox, dy = clientY - oy, m = Math.max(1, Math.sqrt(dx * dx + dy * dy));
@@ -830,6 +850,15 @@ body.gameopen{overflow:hidden}
   });
   game.addEventListener('touchmove', function(e){ if (game.classList.contains('on')) e.preventDefault(); }, {passive:false});
 
+  var ident = document.getElementById('ident'), identImg = ident.querySelector('img');
+  identImg.src = (document.querySelector('#logo .main') || {}).src || '';
+  function showIdent(end, done){
+    if (reduce || !identImg.src){ if (done) done(); return; }
+    ident.classList.toggle('end', !!end); ident.classList.remove('on'); void ident.offsetWidth; ident.classList.add('on');
+    document.body.classList.add('static'); setTimeout(function(){ document.body.classList.remove('static'); }, 260);
+    setTimeout(function(){ document.body.classList.add('static'); }, 1450);
+    setTimeout(function(){ document.body.classList.remove('static'); ident.classList.remove('on'); if (done) done(); }, 1750);
+  }
   function channel(fn){ flash(); document.body.classList.add('static'); setTimeout(function(){ document.body.classList.remove('static'); fn(); }, reduce ? 0 : 320); }
   function open(){
     window.__gameOpen = true;
@@ -839,6 +868,7 @@ body.gameopen{overflow:hidden}
       game.classList.add('on'); document.body.classList.add('gameopen');
       if (!started){ started = true; reset(); } else layout();
       grainLoop(); trackLoop(); syncMusic(); drift();
+      showIdent(false);
     });
     if (location.hash !== '#peli') history.replaceState(null, '', '#peli');
   }
@@ -850,7 +880,7 @@ body.gameopen{overflow:hidden}
   document.getElementById('eject').addEventListener('click', close);
   document.getElementById('gagain').addEventListener('click', reset);
   document.getElementById('matches').addEventListener('click', open);
-  var ch = document.getElementById('ch03'); if (ch) ch.addEventListener('click', open);
+  ['ch03', 'ch03b'].forEach(function(id){ var b = document.getElementById(id); if (b) b.addEventListener('click', open); });
   addEventListener('resize', function(){ if (game.classList.contains('on')) layout(); });
   if (location.hash === '#peli') open();
 })();
