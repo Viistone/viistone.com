@@ -229,7 +229,7 @@ body.paused main{animation:hold .12s steps(2) infinite}
 <div class="osd tr" aria-hidden="true">SP<br><span id="counter">0:00:00</span></div>
 <div class="track" id="track" aria-hidden="true"></div>
 <div class="ghostvid" id="ghost" aria-hidden="true"><video id="gv" muted loop playsinline preload="none" data-src="assets/shadow.mp4"></video></div>
-<button class="sndbtn" id="snd" type="button" aria-pressed="false">ÄÄNI: POIS</button>
+<button class="sndbtn" id="snd" type="button" aria-pressed="false">▶ ÄÄNI PÄÄLLE</button>
 <audio id="ga" loop preload="none" data-src="assets/outro.m4a"></audio>
 <div class="topband" aria-hidden="true"></div>
 <div class="matches" id="matches" aria-hidden="true"></div>
@@ -407,19 +407,23 @@ window.VIISTONE_EMBED = true;
   var ghost = document.getElementById('ghost'), gv = document.getElementById('gv'), ga = document.getElementById('ga'), snd = document.getElementById('snd');
   var ghostOn = false, soundOn = false, fadeT;
   function load(el){ if(!el.src){ el.src = el.dataset.src; } }
+  // iOS ignores audio.volume, so track the level ourselves and always finish with play/pause
+  var vol = 0;
   function fadeAudio(to, done){
     clearInterval(fadeT);
+    var step = to > vol ? 0.05 : -0.05;
     fadeT = setInterval(function(){
-      var v = ga.volume + (to > ga.volume ? 0.05 : -0.05);
-      if ((to > ga.volume && v >= to) || (to <= ga.volume && v <= to)) { ga.volume = to; clearInterval(fadeT); if(done) done(); }
-      else ga.volume = Math.max(0, Math.min(1, v));
-    }, 60);
+      vol += step;
+      if ((step > 0 && vol >= to) || (step < 0 && vol <= to)) { vol = to; clearInterval(fadeT); if (done) done(); }
+      try { ga.volume = Math.max(0, Math.min(1, vol)); } catch(e){}
+    }, 50);
   }
+  function soundStop(){ fadeAudio(0, function(){ ga.pause(); }); setTimeout(function(){ if(!soundOn || !ghostOn) ga.pause(); }, 1200); }
   function setGhost(on){
     if (on === ghostOn) return; ghostOn = on;
     ghost.classList.toggle('on', on); snd.classList.toggle('show', on);
     if (on) { load(gv); var p = gv.play(); if (p && p.catch) p.catch(function(){}); if (soundOn) { ga.play().catch(function(){}); fadeAudio(.8); } }
-    else { setTimeout(function(){ if(!ghostOn) gv.pause(); }, 2500); if (soundOn) fadeAudio(0, function(){ ga.pause(); }); }
+    else { setTimeout(function(){ if(!ghostOn) gv.pause(); }, 2500); if (soundOn) soundStop(); }
   }
   function checkEnd(){
     var max = document.documentElement.scrollHeight - innerHeight;
@@ -428,10 +432,10 @@ window.VIISTONE_EMBED = true;
   addEventListener('scroll', checkEnd, {passive:true}); addEventListener('resize', checkEnd);
   snd.addEventListener('click', function(){
     soundOn = !soundOn;
-    snd.textContent = soundOn ? 'ÄÄNI: PÄÄLLÄ' : 'ÄÄNI: POIS';
+    snd.textContent = soundOn ? '■ ÄÄNI POIS' : '▶ ÄÄNI PÄÄLLE';
     snd.setAttribute('aria-pressed', soundOn);
-    if (soundOn) { load(ga); ga.volume = 0; ga.play().catch(function(){}); fadeAudio(.8); }
-    else fadeAudio(0, function(){ ga.pause(); });
+    if (soundOn) { load(ga); vol = 0; try{ ga.volume = 0; }catch(e){} ga.play().catch(function(){}); fadeAudio(.8); }
+    else soundStop();
   });
 
   // idle: pause after a while, then lose the signal
