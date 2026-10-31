@@ -1429,7 +1429,7 @@ body.postiopen{overflow:hidden}
     <img id="pratimg" alt="Iso rotta makoilee kirjekasan päällä">
     <h2>POSTINKANTAJA</h2>
     <p class="ln">”Meil ei asu enää ketää. Vitu iso rotta pitää pesää.”</p>
-    <p class="sm">Jaa posti laatikoihin, joissa lippu on pystyssä. Ohi ajettu laatikko vie energiaa ja katkaisee kertoimen. Läheltä piti ja täysosumat nostavat kerrointa. Kun rotta tulee, selviä 20 sekuntia tai karkaa isolla hypyllä.<br>← → tai hiiri, välilyönti hidastaa. Puhelimella sormi ja kellonappi.</p>
+    <p class="sm">Jaa posti laatikoihin, joissa lippu on pystyssä. Ohi ajettu laatikko vie energiaa ja katkaisee kertoimen. Läheltä piti ja täysosumat nostavat kerrointa. Kun rotta tulee, selviä 20 sekuntia tai karkaa isolla hypyllä. Kun ruutu välkkyy punaisena, rotta loikkaa: väistä sivulle viime hetkellä.<br>← → tai hiiri, välilyönti hidastaa. Puhelimella sormi ja kellonappi.</p>
     <div class="psw"><button type="button" id="pswm">MUSIIKKI <b>PÄÄLLÄ</b></button><button type="button" id="pswf">TEHOSTEET <b>PÄÄLLÄ</b></button></div>
     <button class="go" id="pgo" type="button">AJA ▶</button>
     <button class="home" id="phome2" type="button">⏏ KOTISIVULLE</button>
@@ -1686,7 +1686,7 @@ body.postiopen{overflow:hidden}
     say('VITU ISO ROTTA', true, 1800, 'Selviä 20 sekuntia tai hyppää isosta rampista');
     var ahead = P.y + 120; objs = objs.filter(function(o){ return !(OBST[o.type] && o.y > ahead && Math.random() < .55); });
   }
-  function ratRest(){ rat.mode = 'rest'; rat.restAt = tsec; chaseGen = false; if (!P.empty) clock.classList.remove('on'); loopOff('wind'); gust.v = 0; }
+  function ratRest(){ rat.mode = 'rest'; rat.ls = null; rat.restAt = tsec; chaseGen = false; if (!P.empty) clock.classList.remove('on'); loopOff('wind'); gust.v = 0; }
   var LAUGHS = ['HAHAHA', 'HEH HEH HEH', 'HIHIHI', 'MUAHAHA'];
   function ratLaugh(){ if (!rat) return; playBuf('laugh', .9, false, .92 + Math.random() * .16); pop(rat.x, rat.y - 120, LAUGHS[Math.floor(Math.random() * LAUGHS.length)], '#ff4a2a'); if (!reduce) shake = Math.max(shake, .15); }
   function ratGiveUp(why){
@@ -1758,7 +1758,7 @@ body.postiopen{overflow:hidden}
       var dx = P.x - o.x, dy = (P.y + 8) - o.y;
       if (o.type === 'mailbox' && o.m && !o.done && !o.miss && P.y + 8 > o.y + 26 && roadC(o.x) === roadC(P.x)){ o.miss = 1; P.missed++; energy(-6); breakCombo(); pop(o.x, o.y - 50, 'UNOHTUI −6', '#ff6a33'); tone(140, .25, 'sawtooth', .05, 90); }
       if (o.type === 'mailbox' && o.m && !o.done && !o.miss && py0 + 8 <= o.y && P.y + 8 > o.y && Math.abs(dx) < 80 && P.down <= 0){
-        o.done = true; P.letters++; sfx.deliver(); if (Math.abs(dx) < 42){ P.perfect++; streak(100, 6, o.x, o.y - 46, 'TÄYSOSUMA'); } else streak(40, 3, o.x, o.y - 46, '✉'); parts.push({k:'letter', x:P.x, y:P.y - 10 - hNow, tx:o.x, ty:o.y - 30, t:0}); if (rat && rat.mode === 'chase') rat.anger++;
+        o.done = true; P.letters++; sfx.deliver(); if (Math.abs(dx) < 42){ P.perfect++; btGain(12); streak(100, 6, o.x, o.y - 46, 'TÄYSOSUMA'); } else streak(40, 3, o.x, o.y - 46, '✉'); parts.push({k:'letter', x:P.x, y:P.y - 10 - hNow, tx:o.x, ty:o.y - 30, t:0}); if (rat && rat.mode === 'chase') rat.anger++;
       }
       if (o.done || DECOR[o.type]) continue;
       var floatH = (o.h || 16), reach = Math.abs(hNow - floatH) < 30 || (floatH <= 16 && hNow < 40);
@@ -1769,7 +1769,7 @@ body.postiopen{overflow:hidden}
         sfx.big(); say('KIPINÖIKSI ME TAIVAALLE LENNETTIIN', false, 2000); continue; }
       var hb = HIT[o.type]; if (!hb || P.air > 0 || P.inv > 0 || P.down > 0) continue;
       if (o.type === 'car' && o.door > .5){ var ddx = P.x - (o.x + o.ds * 19), ddy = P.y + 8 - (o.y - 6); if (Math.abs(ddx) < 9 && Math.abs(ddy) < 6){ say('OVI AUKES', true, 1100); crash(1.3, true); if (state !== 'run') return; continue; } }
-      if ((OBST[o.type] || o.type === 'mcar') && !o.nm && dy >= 0 && dy < 26 && Math.abs(dx) >= hb[0] + 4 && Math.abs(dx) < hb[0] + 22 && P.v > 120){ o.nm = 1; P.near++; tone(990, .08, 'square', .03, 1400); streak(25, 2, o.x, o.y - 30, 'LÄHELTÄ'); }
+      if ((OBST[o.type] || o.type === 'mcar') && !o.nm && dy >= 0 && dy < 26 && Math.abs(dx) >= hb[0] + 4 && Math.abs(dx) < hb[0] + 22 && P.v > 120){ o.nm = 1; P.near++; btGain(4); tone(990, .08, 'square', .03, 1400); streak(25, 2, o.x, o.y - 30, 'LÄHELTÄ'); }
       if (Math.abs(dx) < hb[0] + 4 && Math.abs(dy) < hb[1] + 3){ var isCar = o.type === 'car' || o.type === 'mcar'; crash(isCar ? 1.5 : 1, isCar); if (state !== 'run') return; }
     }
 
@@ -1781,14 +1781,19 @@ body.postiopen{overflow:hidden}
         if (!P.empty){ clock.textContent = 'SELVIÄ ' + Math.max(0, Math.ceil(left)); clock.classList.add('on'); }
         if (left <= 0) ratGiveUp('time');
         else {
-          var rs = Math.min(vmax * 1.3, vmax * (.86 + rat.gen * .03) + rat.anger * 9 + age * 4);
+          var rs = Math.min(vmax * 1.2, vmax * (.8 + rat.gen * .03) + rat.anger * 8 + age * 3.5);
           var rx = P.x - rat.x, ry = (P.y - 6) - rat.y, dd = Math.hypot(rx, ry) || 1;
           if (P.high) rs *= .6;
-          rat.x += rx / dd * rs * dt; rat.y += ry / dd * rs * dt; rat.tilt += ((rx / dd) * .35 - rat.tilt) * Math.min(1, dt * 3);
+          if (!rat.ls && dd < 240 && dd > 70 && tsec > (rat.lcd || 0) && !P.high && P.down <= 0){ rat.ls = 'wind'; rat.lt = tsec + .7; playBuf('rat', .9, false, 1.35); pop(rat.x, rat.y - 130, '!!', '#ff4a2a'); }
+          if (tsec < (rat.stun || 0)) rs *= .35;
+          if (rat.ls === 'wind'){ rs *= .55; rat.tilt = Math.sin(tsec * 60) * .25; if (tsec > rat.lt){ rat.ls = 'dash'; rat.lt = tsec + .5; rat.lx = rx / dd; rat.ly = ry / dd; noise(.3, .2); } }
+          if (rat.ls === 'dash'){ rat.x += rat.lx * vmax * 2.9 * dt; rat.y += rat.ly * vmax * 2.9 * dt; if (tsec > rat.lt){ rat.ls = null; rat.stun = tsec + .8; rat.lcd = tsec + 2.4 + Math.random() * 1.5; } }
+          else { rat.x += rx / dd * rs * dt; rat.y += ry / dd * rs * dt; }
+          dd = Math.hypot(P.x - rat.x, P.y - 6 - rat.y); if (rat.ls !== 'wind') rat.tilt += ((rx / dd) * .35 - rat.tilt) * Math.min(1, dt * 3);
           if (Math.random() < dt * 9) parts.push({k:'flutter', x:rat.x + (Math.random() - .5) * 60, y:rat.y + 10, vx:(Math.random() - .5) * 60, vy:-30 - Math.random() * 40, t:0, r:Math.random() * 6});
           if (tsec > rat.nextLaugh && dd < 1000){ rat.nextLaugh = tsec + 3.5 + Math.random() * 3.5; ratLaugh(); }
           if (dd < 450 && tsec > rat.beat){ rat.beat = tsec + .28 + dd / 700; tone(58, .13, 'sine', .3, 40); setTimeout(function(){ tone(52, .1, 'sine', .2, 38); }, 120); }
-          if (dd < 34 && hNow < 30 && P.down <= 0 && P.inv <= 0){ ratCatch(); if (state !== 'run') return; }
+          if (dd < (rat.ls === 'dash' ? 40 : 34) && hNow < 30 && P.down <= 0 && P.inv <= 0){ ratCatch(); if (state !== 'run') return; }
           glitch += ((dd < 700 ? 1 - dd / 700 : 0) - glitch) * Math.min(1, dt * 4);
         }
       } else { rat.tilt *= .95; glitch = Math.max(0, glitch - dt * .8); }
@@ -2066,6 +2071,7 @@ body.postiopen{overflow:hidden}
       ctx.fillStyle = 'rgba(232,224,200,' + Math.min(.6, .15 + Math.abs(gust.v) * .6) + ')'; ctx.fillRect(Math.round(Math.min(s.x, s.x - Math.sign(s.sp) * s.l)), Math.round(s.y), Math.round(s.l), 1); });
     if (rat && rat.mode === 'chase'){ var ry = H * .38 + (rat.y - cam.y) * S; if (ry < 40){ var rxs = Math.max(40, Math.min(W - 40, W / 2 + (rat.x - cam.x) * S)), d = Math.round((P.y - rat.y) / 10);
       ctx.fillStyle = '#ff6a33'; ctx.font = '22px VT323, monospace'; ctx.textAlign = 'center'; ctx.fillText('▲ ROTTA ' + d + ' M', rxs, 138); }
+      if (rat.ls === 'wind' && Math.floor(performance.now() / 70) % 2){ ctx.fillStyle = 'rgba(200,20,10,.18)'; ctx.fillRect(0, 0, W, H); }
       var gap = P.y - rat.y; if (gap < 320){ var a = (1 - Math.max(0, gap) / 320) * (.45 + Math.sin(performance.now() / 120) * .12); var gr = ctx.createLinearGradient(0, 0, 0, H * .35);
         gr.addColorStop(0, 'rgba(196,40,30,' + a + ')'); gr.addColorStop(1, 'rgba(196,40,30,0)'); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H * .35); } }
     sinCity(BT.k);
@@ -2079,7 +2085,8 @@ body.postiopen{overflow:hidden}
     BT.on = true; playBuf('slow', .8); setRate(.55); btUi(); }
   function btOff(){ if (!BT.on) return; BT.on = false; setRate(1); tone(500, .14, 'triangle', .04, 1200); btUi(); }
   function btToggle(){ if (BT.on) btOff(); else btOn(); }
-  function btStep(dt){ if (BT.on){ BT.v -= 32 * dt; if (BT.v <= 0){ BT.v = 0; btOff(); } } else BT.v = Math.min(100, BT.v + 4.5 * dt); btUi(); }
+  function btStep(dt){ if (BT.on){ BT.v -= 25 * dt; if (BT.v <= 0){ BT.v = 0; btOff(); } } else BT.v = Math.min(100, BT.v + 1.3 * dt); btUi(); }
+  function btGain(n){ BT.v = Math.min(100, BT.v + n); }
   btBtn.addEventListener('pointerdown', function(e){ e.preventDefault(); e.stopPropagation(); acInit(); btToggle(); });
   btBtn.addEventListener('click', function(e){ e.preventDefault(); });
   // black and white, but red stays red
@@ -2096,7 +2103,7 @@ body.postiopen{overflow:hidden}
     raf = requestAnimationFrame(loop);
     var dt = Math.min(.05, (now - last) / 1000 || 0); last = now;
     BT.k += ((BT.on ? 1 : 0) - BT.k) * Math.min(1, dt * 7);
-    if (state === 'run'){ btStep(dt); step(dt * (BT.on ? .35 : 1)); } else if (state === 'over') stepParts(dt);
+    if (state === 'run'){ btStep(dt); step(dt * (BT.on ? .3 : 1)); } else if (state === 'over') stepParts(dt);
     shake = Math.max(0, shake - dt);
     render();
   }
