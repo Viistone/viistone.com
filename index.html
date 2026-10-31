@@ -1349,7 +1349,7 @@ body.gameopen{overflow:hidden}
 .posti .pmsg.on{opacity:1}
 .posti .pmsg.warn{color:#ff6a33}
 .posti .pmsg small{display:block;font-size:.46em;letter-spacing:.06em;color:#e8e0c8;margin:8px auto 0}
-.posti .ppanel{position:absolute;inset:0;z-index:6;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px 18px;
+.posti .ppanel{position:absolute;inset:0;z-index:6;cursor:default;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px 18px;
   background:rgba(22,27,19,.86);overflow-y:auto}
 .posti .ppanel.on{display:flex}
 .posti .ppanel.blue{background:#1a2fb0}
@@ -1415,7 +1415,7 @@ body.postiopen{overflow:hidden}
 
   var OL = '#14130f', CREAM = '#e8e0c8', NAVY = '#4b5b8c', RUST = '#b4532a', GREEN = '#8fa86a', BOX = '#b38a5a', BROWN = '#7a5a3c', GREY = '#8d8a82';
   var W = 0, H = 0, DPR = 1, S0 = 1, S = 1, grain = null;
-  var CHASE = 20, FIRST_RAT = 500, DRAIN = 1.5, CAN = 18, CRASH_E = 12, CATCH_E = 35;
+  var CHASE = 20, FIRST_RAT = 500, DRAIN = 1.25, CAN = 20, CRASH_E = 10, CATCH_E = 35, EMPTY = 6;
 
   function resize(){
     W = root.clientWidth; H = root.clientHeight; DPR = Math.min(2, window.devicePixelRatio || 1);
@@ -1561,8 +1561,8 @@ body.postiopen{overflow:hidden}
   var nextRat = FIRST_RAT, lowWarn = 0;
   function reset(){
     seed = (Math.random() * 1e9) | 0; cells.clear(); objs = []; trail = []; parts = []; streaks = []; chaseGen = false;
-    P = {x:0, y:0, a:0, v:0, air:0, airT:1, airH:0, down:0, inv:0, boost:0, dist:0, letters:0, cans:0, jumps:0, bigs:0, crashes:0, pedal:0, e:100, escapes:0, bonus:0, high:false, caught:0};
-    rat = null; nextRat = FIRST_RAT; nextBig = 380 + Math.random() * 200; cam.x = 0; cam.y = 0; glitch = 0; gust.v = 0; lowWarn = 0; windStop(); hud();
+    P = {x:0, y:0, a:0, v:0, air:0, airT:1, airH:0, down:0, inv:0, boost:0, dist:0, letters:0, cans:0, jumps:0, bigs:0, crashes:0, pedal:0, e:100, empty:0, escapes:0, bonus:0, high:false, caught:0};
+    rat = null; nextRat = FIRST_RAT; nextBig = 380 + Math.random() * 200; cam.x = 0; cam.y = 0; glitch = 0; gust.v = 0; lowWarn = 0; nextHelp = 0; windStop(); hud();
   }
   function score(){ return Math.floor(P.dist) + P.letters * 50 + P.cans * 15 + P.jumps * 25 + P.bigs * 100 + P.bonus; }
   function hud(){
@@ -1573,7 +1573,19 @@ body.postiopen{overflow:hidden}
   function say(text, warn, ms, sub){ msg.innerHTML = ''; msg.appendChild(document.createTextNode(text)); if (sub){ var s = document.createElement('small'); s.textContent = sub; msg.appendChild(s); }
     msg.classList.toggle('warn', !!warn); msg.classList.add('on'); clearTimeout(msgT); msgT = setTimeout(function(){ msg.classList.remove('on'); }, ms || 1300); }
   function height(){ return P.air > 0 ? P.airH * Math.sin(Math.PI * (1 - P.air / P.airT)) : 0; }
-  function energy(d){ P.e = Math.max(0, Math.min(100, P.e + d)); if (P.e <= 0) gameOver('energy'); }
+  function energy(d){ P.e = Math.max(0, Math.min(100, P.e + d));
+    if (P.e > 0 && P.empty){ P.empty = 0; clock.classList.remove('on'); say('JAKSAA TAAS', false, 1200); }
+    if (P.e <= 0 && !P.empty){ P.empty = tsec + EMPTY; sfx.low(); say('TYHJÄ TANKKI', true, 2200, 'Etsi kaljatölkki ' + EMPTY + ' sekunnissa'); } }
+  // when energy is low, a can always turns up a little ahead on your line
+  var nextHelp = 0;
+  function helpCan(){
+    if (P.e > 33 || tsec < nextHelp) return; nextHelp = tsec + 2.4;
+    var ahead = P.y + (H / S) * .45, far = P.y + (H / S) * .62 + 80;
+    for (var i = 0; i < objs.length; i++){ var o = objs[i]; if (o.type === 'can' && !o.done && !o.h && o.y > P.y + 60 && o.y < far && Math.abs(o.x - P.x) < 140) return; }
+    var x = P.x - Math.sin(P.a) * 160 + (Math.random() - .5) * 90;
+    objs = objs.filter(function(o){ return !(OBST[o.type] && Math.abs(o.x - x) < 40 && Math.abs(o.y - ahead) < 40); });
+    objs.push({type:'can', x:x, y:ahead, v:Math.random(), done:false, h:0, help:true});
+  }
 
   // ---------- rat ----------
   function ratCome(){
@@ -1602,7 +1614,7 @@ body.postiopen{overflow:hidden}
   function step(dt){
     tsec = (performance.now() - t0) / 1000;
     var chasing = rat && rat.mode === 'chase';
-    var vmax = (190 + Math.min(250, P.dist * .3)) * (chasing ? 1.22 : 1) * (.8 + .2 * P.e / 100);
+    var vmax = (190 + Math.min(250, P.dist * .3)) * (chasing ? 1.22 : 1) * (.8 + .2 * P.e / 100) * (P.empty ? .7 : 1);
     if (P.down > 0){ P.down -= dt; P.v = 0; if (P.down <= 0){ P.inv = 1.4; P.v = vmax * .4; } }
     else {
       if (input.ptr){ var sx = W / 2 + (P.x - cam.x) * S, sy = H * .38 + (P.y - cam.y) * S, dx = input.ptr.x - sx, dy = Math.max(70, input.ptr.y - sy);
@@ -1631,7 +1643,8 @@ body.postiopen{overflow:hidden}
     if (P.dist > nextBig) placeBig();
     ensureWorld();
 
-    energy(-DRAIN * dt); if (state !== 'run') return;
+    energy(-DRAIN * dt * (P.e < 30 ? .55 : 1)); helpCan();
+    if (P.empty){ var lefte = P.empty - tsec; clock.textContent = 'TÖLKKI ' + Math.max(0, Math.ceil(lefte)); clock.classList.add('on'); if (lefte <= 0){ gameOver('energy'); return; } }
     if (P.e < 25 && tsec > lowWarn){ lowWarn = tsec + 6; sfx.low(); say('ENERGIA VÄHISSÄ', true, 1300, 'Kerää kaljatölkkejä'); }
 
     for (var k = 0; k < objs.length; k++){
@@ -1662,7 +1675,7 @@ body.postiopen{overflow:hidden}
     if (rat){
       if (rat.mode === 'chase'){
         var age = tsec - rat.born, left = CHASE - age;
-        clock.textContent = 'SELVIÄ ' + Math.max(0, Math.ceil(left)); clock.classList.add('on');
+        if (!P.empty){ clock.textContent = 'SELVIÄ ' + Math.max(0, Math.ceil(left)); clock.classList.add('on'); }
         if (left <= 0) ratGiveUp('time');
         else {
           var rs = Math.min(vmax * 1.3, vmax * (.86 + rat.gen * .03) + rat.anger * 9 + age * 4);
@@ -1836,14 +1849,14 @@ body.postiopen{overflow:hidden}
     render();
   }
   function gameOver(why){
-    if (state !== 'run') return; state = 'over'; clock.classList.remove('on'); windStop(); hud(); if (why === 'energy') playBuf('cry', .9);
+    if (state !== 'run') return; state = 'over'; releasePtr(); clock.classList.remove('on'); windStop(); hud(); if (why === 'energy') playBuf('cry', .9);
     var s = score(), nb = s > best; if (nb){ best = s; try { localStorage.setItem('posti_best', best); } catch(e){} }
     var lines = why === 'rat' ? ['”Tulee päivä ku kaikki on ohi”', '”Meil ei asu enää ketää”', '”Peräs ovi kii, valot sammuu. Oliks se siin sit?”', '”Älä pliis jaa enää niit sun lappuja”']
       : ['”Väsyit myrskyyn ja loputtomaan särkyyn”', '”Joskus kävellen hengästyy”', '”Peli päättyy pilli viheltää”', '”Me ollaa jo muualla”'];
     document.getElementById('povh').textContent = why === 'rat' ? 'ROTTA SAI KIINNI' : 'ENERGIA LOPPU';
     document.getElementById('povl').textContent = lines[Math.floor(Math.random() * lines.length)];
     document.getElementById('pstats').innerHTML = '<span>MATKA ' + Math.floor(P.dist) + ' M</span><span>LAPPUJA ' + P.letters + ' · TÖLKKEJÄ ' + P.cans + '</span><span>KARKUUN ' + P.escapes + ' KERTAA</span><span><em>PISTEET ' + s + '</em></span><span>' + (nb ? 'UUSI ENNÄTYS' : 'PARAS ' + best) + '</span>';
-    setTimeout(function(){ pOver.classList.add('on'); root.classList.add('idle'); }, reduce ? 0 : 600);
+    setTimeout(function(){ pOver.classList.add('on'); root.classList.add('idle'); }, reduce ? 0 : 450);
   }
   function start(){
     acInit(); reset(); pStart.classList.remove('on'); pOver.classList.remove('on'); root.classList.remove('idle'); state = 'run'; t0 = performance.now(); last = t0;
@@ -1861,10 +1874,11 @@ body.postiopen{overflow:hidden}
   });
   addEventListener('keyup', function(e){ var k = KEYS[e.key]; if (k) input[k] = false; });
   function ptrPos(e){ var r = root.getBoundingClientRect(); return {x:e.clientX - r.left, y:e.clientY - r.top}; }
-  var touching = false;
-  cv.addEventListener('pointerdown', function(e){ acInit(); if (state !== 'run') return; touching = true; input.ptr = ptrPos(e); try { cv.setPointerCapture(e.pointerId); } catch(_){} });
+  var touching = false, capId = null;
+  function releasePtr(){ touching = false; input.ptr = null; if (capId != null){ try { cv.releasePointerCapture(capId); } catch(_){} capId = null; } }
+  cv.addEventListener('pointerdown', function(e){ acInit(); if (state !== 'run') return; touching = true; input.ptr = ptrPos(e); if (e.pointerType !== 'mouse'){ try { cv.setPointerCapture(e.pointerId); capId = e.pointerId; } catch(_){} } });
   cv.addEventListener('pointermove', function(e){ if (state !== 'run') return; if (e.pointerType === 'mouse' || touching) input.ptr = ptrPos(e); });
-  cv.addEventListener('pointerup', function(e){ touching = false; if (e.pointerType !== 'mouse') input.ptr = null; });
+  cv.addEventListener('pointerup', function(e){ touching = false; capId = null; if (e.pointerType !== 'mouse') input.ptr = null; });
   cv.addEventListener('pointercancel', function(){ touching = false; input.ptr = null; });
   root.addEventListener('touchmove', function(e){ if (root.classList.contains('on')) e.preventDefault(); }, {passive:false});
   document.getElementById('pgo').addEventListener('click', start);
