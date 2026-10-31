@@ -1,5 +1,5 @@
 // viistone.com CH 03 leaderboard: today (Helsinki time) and all time, three-letter names.
-// Storage: one KV namespace bound as SCORES.
+// Storage: one KV namespace bound as SCORES. Two games: CH 03 (default keys) and CH 06 Postinkantaja (keys prefixed with posti:).
 
 const ORIGINS = ['https://viistone.com', 'https://www.viistone.com', 'http://localhost:8080'];
 const KEEP = 10;
@@ -36,16 +36,21 @@ export default {
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(req) });
     if (url.pathname !== '/api/scores') return json(req, { error: 'not found' }, 404);
 
-    const day = today(), dayKey = 'day:' + day;
+    const day = today();
+    const game = (url.searchParams.get('g') || '') === 'posti' ? 'posti' : '2048';
+    const pre = game === 'posti' ? 'posti:' : '';
+    let dayKey = pre + 'day:' + day, allKey = pre + 'all';
 
     if (req.method === 'GET') {
-      const [d, a] = await Promise.all([list(env, dayKey), list(env, 'all')]);
-      return json(req, { day, today: d, all: a });
+      const [d, a] = await Promise.all([list(env, dayKey), list(env, allKey)]);
+      return json(req, { day, game, today: d, all: a });
     }
 
     if (req.method === 'POST') {
       let body;
       try { body = await req.json(); } catch (e) { return json(req, { error: 'bad json' }, 400); }
+      const bg = body.g === 'posti' ? 'posti' : game, bpre = bg === 'posti' ? 'posti:' : '';
+      dayKey = bpre + 'day:' + day; allKey = bpre + 'all';
       const n = String(body.n || '').toUpperCase();
       const s = Math.floor(Number(body.s));
       const l = Math.floor(Number(body.l));
@@ -61,13 +66,13 @@ export default {
       await env.SCORES.put('rl:' + h, String(Date.now()), { expirationTtl: 60 });
 
       const entry = { n, s, l, t: Date.now() };
-      const [d0, a0] = await Promise.all([list(env, dayKey), list(env, 'all')]);
+      const [d0, a0] = await Promise.all([list(env, dayKey), list(env, allKey)]);
       const d = insert(d0, entry), a = insert(a0, entry);
       await Promise.all([
         env.SCORES.put(dayKey, JSON.stringify(d), { expirationTtl: 60 * 60 * 24 * 4 }),
-        env.SCORES.put('all', JSON.stringify(a)),
+        env.SCORES.put(allKey, JSON.stringify(a)),
       ]);
-      return json(req, { day, today: d, all: a, t: entry.t });
+      return json(req, { day, game: bg, today: d, all: a, t: entry.t });
     }
     return json(req, { error: 'method' }, 405);
   },
