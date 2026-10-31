@@ -772,7 +772,7 @@ body.gameopen{overflow:hidden}
     if (Math.abs(tgtX - lookX) + Math.abs(tgtY - lookY) + Math.abs(pupT - pup) > .2) eRaf = requestAnimationFrame(eyeLoop); else eRaf = 0;
   }
   function look(x, y){ // x,y in -1..1
-    tgtX = x * ER * .2; tgtY = y * ER * .15;
+    tgtX = x * ER * .17; tgtY = y * ER * .07;
     if (!eRaf) eRaf = requestAnimationFrame(eyeLoop);
     clearTimeout(idleT); idleT = setTimeout(drift, 2600);
   }
