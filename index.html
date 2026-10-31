@@ -14,7 +14,7 @@
 <meta name="description" content="Viistone: Kymmenen tikkuu. Albumi 13.11.2026.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400&family=VT323&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Permanent+Marker&family=IBM+Plex+Sans:wght@300;400&family=VT323&display=swap">
 <style>
 /* Layout: one dark VHS screen. Logo is the hero, everything else is a quiet tape label below it. */
 :root{
@@ -68,7 +68,18 @@ main{max-width:980px;margin:0 auto;position:relative;z-index:1}
 .logo.glitch .c{opacity:.5;transform:translate(4px,1px)}
 .logo.glitch .main{clip-path:inset(0 0 0 0);transform:translateX(2px) skewX(-2deg)}
 .logo .main{transition:transform .08s steps(2)}
-.playlink{margin:18px 0 0;text-align:center}
+.playlink{margin:30px 0 0;text-align:center}
+.tapebtn{display:inline-block;background:none;border:0;padding:0;cursor:pointer;width:min(240px,62vw);transform:rotate(-2deg);transition:transform .25s ease, filter .25s;
+  filter:drop-shadow(0 10px 18px rgba(0,0,0,.6)) brightness(.92)}
+.tapebtn svg{display:block;width:100%;height:auto}
+.tapebtn:hover,.tapebtn:focus-visible{transform:rotate(0deg) translateY(-3px);filter:drop-shadow(0 14px 22px rgba(0,0,0,.7)) brightness(1.05)}
+.tapebtn .reel{transition:transform .2s}
+.tapebtn:hover .reel{animation:reel 1.4s linear infinite}
+@keyframes reel{to{transform:rotate(360deg)}}
+.tapelabel{font-family:"Permanent Marker","Comic Sans MS",cursive;font-size:21px;fill:#1b1a18;letter-spacing:.02em}
+.tapesmall{font-family:"IBM Plex Mono",monospace;font-size:7px;fill:#1b1a18;letter-spacing:.12em}
+@media (prefers-reduced-motion:reduce){.tapebtn:hover .reel{animation:none}}
+
 .ch03.big{font-family:var(--f-osd);font-size:24px;letter-spacing:.1em;color:var(--osd);opacity:.75;border:1px solid rgba(209,194,176,.25);padding:2px 14px;
   text-shadow:1px 0 0 rgba(255,60,60,.3),-1px 0 0 rgba(60,200,255,.3)}
 .ch03.big:hover{opacity:1;border-color:var(--cream)}
@@ -249,7 +260,26 @@ body.paused main{animation:hold .12s steps(2) infinite}
         <img class="ghost c" src="assets/logo.png" alt="" aria-hidden="true">
       </div>
       <p class="tagline">Kymmenen tikkuu · 13.11.2026</p>
-      <p class="playlink"><button class="ch03 big" id="ch03b" type="button">▶ CH 03</button></p>
+      <p class="playlink"><button class="tapebtn" id="ch03b" type="button" aria-label="Pelaa peliä">
+        <svg viewBox="0 0 240 140" aria-hidden="true">
+          <rect x="2" y="2" width="236" height="136" rx="7" fill="#151514" stroke="#3a3936" stroke-width="1.5"/>
+          <rect x="8" y="8" width="224" height="124" rx="4" fill="none" stroke="#232220"/>
+          <g transform="rotate(-1.2 120 36)">
+            <rect x="22" y="14" width="196" height="46" rx="2" fill="#d9cdb8"/>
+            <rect x="22" y="14" width="196" height="9" fill="#a87a50" opacity=".85"/>
+            <line x1="30" y1="50" x2="210" y2="50" stroke="#b8ab95" stroke-width=".8"/>
+            <text x="120" y="47" text-anchor="middle" class="tapelabel">PELAA PELIÄ</text>
+            <text x="212" y="21" text-anchor="end" class="tapesmall">CH 03 · SP</text>
+          </g>
+          <rect x="58" y="70" width="124" height="38" rx="5" fill="#070707" stroke="#34332f"/>
+          <path d="M70 101 Q120 112 170 101" stroke="#2a1f19" stroke-width="3" fill="none"/>
+          <g class="reel" style="transform-origin:90px 89px"><circle cx="90" cy="89" r="15" fill="#2a1f19"/><circle cx="90" cy="89" r="9" fill="#d9cdb8" opacity=".85"/><circle cx="90" cy="89" r="3.2" fill="#121211"/><rect x="89" y="80.5" width="2" height="4" fill="#121211" transform="rotate(0 90 89)"/><rect x="89" y="80.5" width="2" height="4" fill="#121211" transform="rotate(60 90 89)"/><rect x="89" y="80.5" width="2" height="4" fill="#121211" transform="rotate(120 90 89)"/><rect x="89" y="80.5" width="2" height="4" fill="#121211" transform="rotate(180 90 89)"/><rect x="89" y="80.5" width="2" height="4" fill="#121211" transform="rotate(240 90 89)"/><rect x="89" y="80.5" width="2" height="4" fill="#121211" transform="rotate(300 90 89)"/></g>
+          <g class="reel" style="transform-origin:150px 89px"><circle cx="150" cy="89" r="10" fill="#2a1f19"/><circle cx="150" cy="89" r="9" fill="#d9cdb8" opacity=".85"/><circle cx="150" cy="89" r="3.2" fill="#121211"/><rect x="149" y="80.5" width="2" height="4" fill="#121211" transform="rotate(0 150 89)"/><rect x="149" y="80.5" width="2" height="4" fill="#121211" transform="rotate(60 150 89)"/><rect x="149" y="80.5" width="2" height="4" fill="#121211" transform="rotate(120 150 89)"/><rect x="149" y="80.5" width="2" height="4" fill="#121211" transform="rotate(180 150 89)"/><rect x="149" y="80.5" width="2" height="4" fill="#121211" transform="rotate(240 150 89)"/><rect x="149" y="80.5" width="2" height="4" fill="#121211" transform="rotate(300 150 89)"/></g>
+          <path d="M60 138 L72 118 L168 118 L180 138" fill="#10100f" stroke="#2c2b29"/>
+          <circle cx="16" cy="124" r="2.4" fill="#2c2b29"/><circle cx="224" cy="124" r="2.4" fill="#2c2b29"/>
+          <circle cx="16" cy="16" r="2.4" fill="#2c2b29"/><circle cx="224" cy="16" r="2.4" fill="#2c2b29"/>
+        </svg>
+      </button></p>
     </div>
   </header>
 
