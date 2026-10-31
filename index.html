@@ -1338,7 +1338,7 @@ body.gameopen{overflow:hidden}
 .posti .ptop{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:4}
 .posti .peject{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:max(14px, env(safe-area-inset-right,0px));z-index:7}
 .posti .psong{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:4;font-family:var(--f-osd);font-size:18px;letter-spacing:.06em;
-  color:rgba(233,228,216,.75);white-space:nowrap}
+  color:rgba(233,228,216,.75);white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis}
 .posti .phud{position:absolute;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;align-items:center;gap:16px;z-index:4;
   font-family:var(--f-osd);font-size:24px;letter-spacing:.06em;color:#e9e4d8;text-shadow:0 1px 0 rgba(0,0,0,.6)}
 .posti .phud .mul{color:#ffd28a;font-size:30px;min-width:1.6em;text-shadow:0 0 8px rgba(255,210,138,.5)}
@@ -1398,7 +1398,20 @@ body.gameopen{overflow:hidden}
   .posti .pboards{gap:6px 14px} .posti .pboards ol{font-size:16px} .posti .pboards li{grid-template-columns:18px 36px 1fr} .posti .ppanel h2{font-size:44px} }
 @media (max-height:700px){ .posti .ppanel img{width:min(170px,46vw)} }
 body.postiopen{overflow:hidden}
-.posti.idle .phud,.posti.idle .psong{visibility:hidden}
+.posti.idle .phud,.posti.idle .psong,.posti.idle .pbt{visibility:hidden}
+.posti .pbt{position:absolute;right:max(16px, env(safe-area-inset-right,0px));bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:5;width:76px;height:76px;border-radius:50%;
+  border:2px solid rgba(232,224,200,.5);background:rgba(14,15,13,.55);color:#e9e4d8;font-family:var(--f-osd);font-size:17px;letter-spacing:.06em;line-height:1;cursor:pointer;overflow:hidden;padding:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;-webkit-tap-highlight-color:transparent;touch-action:none}
+.posti .pbt i{position:absolute;left:0;right:0;bottom:0;height:0;background:rgba(232,224,200,.22);pointer-events:none}
+.posti .pbt b{font-weight:400;font-size:28px;position:relative}
+.posti .pbt span{position:relative;font-size:13px;letter-spacing:.04em}
+.posti .pbt.ready{border-color:#e8e0c8}
+.posti .pbt.on{border-color:#ff6a33;color:#ff6a33;animation:pbtp .5s steps(2) infinite}
+@keyframes pbtp{50%{border-color:#e8e0c8}}
+.posti .pbt kbd{font-family:inherit;font-size:12px;opacity:.6;position:relative}
+.posti.bt .pvig{background:radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(0,0,0,.85) 100%)}
+.posti.bt .pscan{opacity:.55}
+@media (max-width:520px){ .posti .pbt kbd,.posti .pbt span{display:none} .posti .pbt b{font-size:32px} .posti .pbt{width:68px;height:68px;bottom:calc(58px + env(safe-area-inset-bottom,0px))} }
 </style>
 <div class="posti idle" id="posti" role="dialog" aria-label="Peli: Postinkantaja">
   <canvas class="pw" id="pw"></canvas>
@@ -1410,6 +1423,7 @@ body.postiopen{overflow:hidden}
   <div class="psong" id="psong" aria-live="polite"></div>
   <div class="pclock" id="pclock" aria-live="off"></div>
   <div class="phud" id="phud" aria-live="off"><span class="led" id="pdist">00000</span><span class="mul" id="pmul"></span><span id="plet">0 M</span><span class="en"><small>ENERGIA</small><span class="bar" id="pbar" role="meter" aria-label="Energia" aria-valuemin="0" aria-valuemax="100"><i id="pen"></i></span></span></div>
+  <button class="pbt ready" id="pbt" type="button" aria-label="Hidastus"><i id="pbtf"></i><b>⏱</b><span>HIDASTUS</span><kbd>SPACE</kbd></button>
   <div class="pmsg" id="pmsg" aria-live="polite"></div>
   <div class="ppanel on" id="pstart">
     <img id="pratimg" alt="Iso rotta makoilee kirjekasan päällä">
@@ -1473,7 +1487,7 @@ body.postiopen{overflow:hidden}
   // ---------- sound ----------
   var SFX_FILES = {burp:['burp1.mp3', 'burp2.mp3'], yell:['yell1.mp3', 'yell2.mp3', 'yell3.mp3', 'yell4.mp3'], jet:['jet.mp3'], open:['open.mp3'], crash:['crash.mp3'], cry:['cry.mp3'],
     wind:['wind.mp3'], bell:['bell1.mp3', 'bell2.mp3', 'bell3.mp3'], rat:['rat.mp3'], smash:['smash.mp3'], amb:['amb.mp3'], pedal:['pedal.mp3'],
-    horn:['horn1.mp3', 'horn2.mp3', 'horn3.mp3'], squeal:['squeal.mp3'], driveby:['driveby.mp3'], driveaway:['driveaway.mp3'], fart:['fart1.mp3', 'fart2.mp3', 'fart3.mp3', 'fart4.mp3', 'fart5.mp3']};
+    horn:['horn1.mp3', 'horn2.mp3', 'horn3.mp3'], squeal:['squeal.mp3'], driveby:['driveby.mp3'], driveaway:['driveaway.mp3'], fart:['fart1.mp3', 'fart2.mp3', 'fart3.mp3', 'fart4.mp3', 'fart5.mp3'], slow:['slow.mp3'], laugh:['laugh1.mp3', 'laugh2.mp3', 'laugh3.mp3', 'laugh4.mp3']};
   var AC = null, fxOn = true, musicOn = true, audio = document.getElementById('paudio'), bufs = {}, master = null, loops = {};
   try { fxOn = localStorage.getItem('posti_fx') !== '0'; musicOn = localStorage.getItem('posti_mus') !== '0'; } catch(e){}
   function acInit(){
@@ -1484,9 +1498,13 @@ body.postiopen{overflow:hidden}
     fetch('assets/posti/sfx/' + f).then(function(r){ return r.arrayBuffer(); }).then(function(a){ return new Promise(function(ok, no){ AC.decodeAudioData(a, ok, no); }); })
       .then(function(b){ bufs[k].push(b); }).catch(function(){}); }); }); }
   function playBuf(k, vol, loop, rate){ var l = bufs[k]; if (!fxOn || !AC || !l || !l.length) return null; var s = AC.createBufferSource(), g = AC.createGain();
-    s.buffer = l[Math.floor(Math.random() * l.length)]; s.loop = !!loop; if (rate) s.playbackRate.value = rate; g.gain.value = vol == null ? .9 : vol; s.connect(g).connect(master); s.start(); return {src:s, gain:g}; }
+    s.buffer = l[Math.floor(Math.random() * l.length)]; s.loop = !!loop; s._r = rate || 1; s.playbackRate.value = s._r * RATE; g.gain.value = vol == null ? .9 : vol; s.connect(g).connect(master); s.start();
+    live.push(s); s.onended = function(){ var i = live.indexOf(s); if (i >= 0) live.splice(i, 1); }; return {src:s, gain:g}; }
+  var RATE = 1, live = [];
+  function setRate(r){ RATE = r; if (AC) live.forEach(function(s){ try { s.playbackRate.setTargetAtTime(s._r * r, AC.currentTime, .08); } catch(e){} });
+    try { audio.preservesPitch = false; audio.webkitPreservesPitch = false; audio.mozPreservesPitch = false; audio.playbackRate = r < 1 ? .62 : 1; } catch(e){} }
   function loopOn(k, vol){ if (loops[k] || !fxOn) return; var r = playBuf(k, 0, true); if (!r) return; r.gain.gain.setTargetAtTime(vol, AC.currentTime, .4); loops[k] = r; }
-  function loopSet(k, vol, rate){ var l = loops[k]; if (!l) return; l.gain.gain.setTargetAtTime(vol, AC.currentTime, .12); if (rate) l.src.playbackRate.setTargetAtTime(rate, AC.currentTime, .2); }
+  function loopSet(k, vol, rate){ var l = loops[k]; if (!l) return; l.gain.gain.setTargetAtTime(vol, AC.currentTime, .12); if (rate){ l.src._r = rate; l.src.playbackRate.setTargetAtTime(rate * RATE, AC.currentTime, .2); } }
   function loopOff(k){ var l = loops[k]; if (!l) return; loops[k] = null; try { l.gain.gain.setTargetAtTime(0, AC.currentTime, .25); setTimeout(function(){ try { l.src.stop(); } catch(e){} }, 1200); } catch(e){} }
   function loopsOff(){ Object.keys(loops).forEach(loopOff); }
   function tone(f, d, type, vol, f2){ if (!fxOn || !AC) return; var o = AC.createOscillator(), g = AC.createGain(), n = AC.currentTime;
@@ -1663,11 +1681,13 @@ body.postiopen{overflow:hidden}
   // ---------- rat ----------
   function ratCome(){
     rat = {x:P.x + (Math.random() - .5) * 200, y:P.y - 620, born:tsec, tilt:0, mode:'chase', anger:0, gen:(rat ? rat.gen + 1 : 0)};
-    chaseGen = true; sfx.rat(); loopOn('wind', 0); gust.next = tsec + .8;
+    chaseGen = true; sfx.rat(); rat.nextLaugh = tsec + 1; rat.beat = 0; loopOn('wind', 0); gust.next = tsec + .8;
     say('VITU ISO ROTTA', true, 1800, 'Selviä 20 sekuntia tai hyppää isosta rampista');
     var ahead = P.y + 120; objs = objs.filter(function(o){ return !(OBST[o.type] && o.y > ahead && Math.random() < .55); });
   }
   function ratRest(){ rat.mode = 'rest'; rat.restAt = tsec; chaseGen = false; if (!P.empty) clock.classList.remove('on'); loopOff('wind'); gust.v = 0; }
+  var LAUGHS = ['HAHAHA', 'HEH HEH HEH', 'HIHIHI', 'MUAHAHA'];
+  function ratLaugh(){ if (!rat) return; playBuf('laugh', .9, false, .92 + Math.random() * .16); pop(rat.x, rat.y - 120, LAUGHS[Math.floor(Math.random() * LAUGHS.length)], '#ff4a2a'); if (!reduce) shake = Math.max(shake, .15); }
   function ratGiveUp(why){
     if (!rat || rat.mode !== 'chase') return; ratRest();
     nextRat = P.dist + 260 + Math.random() * 200;
@@ -1675,7 +1695,7 @@ body.postiopen{overflow:hidden}
     if (why === 'jump'){ P.bonus += 400; P.escapes++; sfx.gone(); say('KARKUUN!', false, 1600, '+400'); }
   }
   function ratCatch(){
-    breakCombo(); P.caught++; sfx.hit(); if (!reduce) shake = .5; glitch = 1; blood(P.x, P.y, 60, 1.3);
+    breakCombo(); P.caught++; sfx.hit(); setTimeout(ratLaugh, 450); if (!reduce) shake = .5; glitch = 1; blood(P.x, P.y, 60, 1.3);
     if (P.e <= CATCH_E){ P.e = 0; hud(); blood(P.x, P.y, 50, 1.6); gameOver('rat'); return; }
     energy(-CATCH_E); ratRest(); nextRat = P.dist + 300 + Math.random() * 200; P.down = 1.2; P.inv = 0; P.v = 0;
     for (var q = 0; q < 10; q++) parts.push({k:'paper', x:P.x, y:P.y, vx:(Math.random() - .5) * 220, vy:-80 - Math.random() * 120, t:0, r:Math.random() * 6});
@@ -1685,7 +1705,7 @@ body.postiopen{overflow:hidden}
   // ---------- update ----------
   var TURN = 2.4, AMAX = 1.25;
   function step(dt){
-    tsec = (performance.now() - t0) / 1000;
+    tsec += dt;
     var chasing = rat && rat.mode === 'chase';
     var vmax = (190 + Math.min(250, P.dist * .3)) * (chasing ? 1.22 : 1) * (.8 + .2 * P.e / 100) * (P.empty ? .7 : 1);
     if (P.down > 0){ P.down -= dt; P.v = 0; if (P.down <= 0){ P.inv = 1.4; P.v = vmax * .4; } }
@@ -1765,6 +1785,8 @@ body.postiopen{overflow:hidden}
           if (P.high) rs *= .6;
           rat.x += rx / dd * rs * dt; rat.y += ry / dd * rs * dt; rat.tilt += ((rx / dd) * .35 - rat.tilt) * Math.min(1, dt * 3);
           if (Math.random() < dt * 9) parts.push({k:'flutter', x:rat.x + (Math.random() - .5) * 60, y:rat.y + 10, vx:(Math.random() - .5) * 60, vy:-30 - Math.random() * 40, t:0, r:Math.random() * 6});
+          if (tsec > rat.nextLaugh && dd < 1000){ rat.nextLaugh = tsec + 3.5 + Math.random() * 3.5; ratLaugh(); }
+          if (dd < 450 && tsec > rat.beat){ rat.beat = tsec + .28 + dd / 700; tone(58, .13, 'sine', .3, 40); setTimeout(function(){ tone(52, .1, 'sine', .2, 38); }, 120); }
           if (dd < 34 && hNow < 30 && P.down <= 0 && P.inv <= 0){ ratCatch(); if (state !== 'run') return; }
           glitch += ((dd < 700 ? 1 - dd / 700 : 0) - glitch) * Math.min(1, dt * 4);
         }
@@ -1982,6 +2004,7 @@ body.postiopen{overflow:hidden}
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(lcv, 0, 0); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     ctx.globalCompositeOperation = 'lighter';
     function glow(x, y, r, col){ var g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); }
+    if (rat && rat.mode === 'chase'){ var rg = sp(rat.x, rat.y - 50); glow(rg[0], rg[1], (110 + Math.sin(performance.now() / 140) * 15) * S, 'rgba(255,40,25,.22)'); }
     if (P.down <= 0){ var lp = sp(P.x - Math.sin(P.a) * 10, P.y + 10 - h); glow(lp[0], lp[1], 16 * S, 'rgba(255,240,190,.55)'); }
     objs.forEach(function(o){ if (o.y < vt || o.y > vb) return;
       if (o.type === 'lamp' || o.type === 'plamp'){ var q = sp(o.x - o.side * 14, o.y - 44); glow(q[0], q[1], 22 * S, 'rgba(255,220,150,.55)'); q = sp(o.x - o.side * 14, o.y + 4); glow(q[0], q[1], 90 * S, 'rgba(255,190,110,.10)'); }
@@ -2041,13 +2064,35 @@ body.postiopen{overflow:hidden}
       ctx.fillStyle = '#ff6a33'; ctx.font = '22px VT323, monospace'; ctx.textAlign = 'center'; ctx.fillText('▲ ROTTA ' + d + ' M', rxs, 138); }
       var gap = P.y - rat.y; if (gap < 320){ var a = (1 - Math.max(0, gap) / 320) * (.45 + Math.sin(performance.now() / 120) * .12); var gr = ctx.createLinearGradient(0, 0, 0, H * .35);
         gr.addColorStop(0, 'rgba(196,40,30,' + a + ')'); gr.addColorStop(1, 'rgba(196,40,30,0)'); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H * .35); } }
+    sinCity(BT.k);
     vhs(glitch);
   }
 
+  // bullet time: a short slow down, the world goes black and white, everything sounds slower; it charges back slowly
+  var BT = {v:100, on:false, k:0}, btBtn = document.getElementById('pbt'), btFill = document.getElementById('pbtf'), BT_MIN = 30;
+  function btUi(){ btFill.style.height = BT.v + '%'; btBtn.classList.toggle('ready', BT.v >= BT_MIN && !BT.on); btBtn.classList.toggle('on', BT.on); root.classList.toggle('bt', BT.on); }
+  function btOn(){ if (state !== 'run' || BT.on) return; if (BT.v < BT_MIN){ tone(160, .12, 'square', .04); return; }
+    BT.on = true; playBuf('slow', .8); setRate(.55); btUi(); }
+  function btOff(){ if (!BT.on) return; BT.on = false; setRate(1); tone(500, .14, 'triangle', .04, 1200); btUi(); }
+  function btToggle(){ if (BT.on) btOff(); else btOn(); }
+  function btStep(dt){ if (BT.on){ BT.v -= 32 * dt; if (BT.v <= 0){ BT.v = 0; btOff(); } } else BT.v = Math.min(100, BT.v + 4.5 * dt); btUi(); }
+  btBtn.addEventListener('pointerdown', function(e){ e.preventDefault(); e.stopPropagation(); acInit(); btToggle(); });
+  btBtn.addEventListener('click', function(e){ e.preventDefault(); });
+  // black and white, but red stays red
+  function sinCity(k){
+    if (k < .02) return; ctx.setTransform(1, 0, 0, 1, 0, 0);
+    var im; try { im = ctx.getImageData(0, 0, cv.width, cv.height); } catch(e){ return; } var d = im.data;
+    for (var i = 0; i < d.length; i += 4){ var r = d[i], g = d[i + 1], b = d[i + 2];
+      if (r > 80 && r > g * 1.6 && r > b * 1.6) continue;
+      var l = Math.pow((.3 * r + .59 * g + .11 * b) / 255, .72) * 270 - 14; if (l < 0) l = 0; else if (l > 255) l = 255;
+      d[i] = r + (l - r) * k; d[i + 1] = g + (l - g) * k; d[i + 2] = b + (l - b) * k; }
+    ctx.putImageData(im, 0, 0); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
   function loop(now){
     raf = requestAnimationFrame(loop);
     var dt = Math.min(.05, (now - last) / 1000 || 0); last = now;
-    if (state === 'run') step(dt); else if (state === 'over') stepParts(dt);
+    BT.k += ((BT.on ? 1 : 0) - BT.k) * Math.min(1, dt * 7);
+    if (state === 'run'){ btStep(dt); step(dt * (BT.on ? .35 : 1)); } else if (state === 'over') stepParts(dt);
     shake = Math.max(0, shake - dt);
     render();
   }
@@ -2091,7 +2136,7 @@ body.postiopen{overflow:hidden}
   saveBtn.addEventListener('click', save);
 
   function gameOver(why){
-    if (state !== 'run') return; state = 'over'; releasePtr(); clock.classList.remove('on'); loopOff('wind'); loopOff('pedal'); hud(); if (why === 'energy') playBuf('cry', .9);
+    if (state !== 'run') return; btOff(); state = 'over'; releasePtr(); clock.classList.remove('on'); loopOff('wind'); loopOff('pedal'); hud(); if (why === 'energy') playBuf('cry', .9);
     if (P.dist > bestD){ bestD = Math.floor(P.dist); try { localStorage.setItem('posti_bestd', bestD); } catch(e){} }
     var s = score(), nb = s > best; lastScore = s; if (nb){ best = s; try { localStorage.setItem('posti_best', best); } catch(e){} }
     var lines = why === 'rat' ? ['”Tulee päivä ku kaikki on ohi”', '”Meil ei asu enää ketää”', '”Peräs ovi kii, valot sammuu. Oliks se siin sit?”', '”Älä pliis jaa enää niit sun lappuja”']
@@ -2103,7 +2148,7 @@ body.postiopen{overflow:hidden}
     setTimeout(function(){ pOver.classList.add('on'); root.classList.add('idle'); }, reduce ? 0 : 700);
   }
   function start(){
-    acInit(); reset(); pStart.classList.remove('on'); pOver.classList.remove('on'); root.classList.remove('idle'); state = 'run'; t0 = performance.now(); last = t0;
+    acInit(); reset(); pStart.classList.remove('on'); pOver.classList.remove('on'); root.classList.remove('idle'); state = 'run'; tsec = 0; t0 = performance.now(); last = t0; BT.v = 100; btUi();
     mode = 'game'; drawSong(); syncMusic(); say('AJA');
   }
 
@@ -2113,6 +2158,7 @@ body.postiopen{overflow:hidden}
     if (!root.classList.contains('on')) return;
     if (e.key === 'Escape'){ close(); return; }
     if ((e.key === 'Enter' || e.key === ' ') && state !== 'run'){ e.preventDefault(); start(); return; }
+    if ((e.key === ' ' || e.key === 'Shift' || e.key === 'b' || e.key === 'B') && state === 'run'){ e.preventDefault(); if (!e.repeat) btToggle(); return; }
     var k = KEYS[e.key]; if (k){ e.preventDefault(); input[k] = true; input.ptr = null; }
   });
   addEventListener('keyup', function(e){ var k = KEYS[e.key]; if (k) input[k] = false; });
@@ -2138,7 +2184,7 @@ body.postiopen{overflow:hidden}
     if (location.hash !== '#posti') history.replaceState(null, '', '#posti');
   }
   function close(){
-    root.classList.remove('on'); document.body.classList.remove('postiopen'); window.__gameOpen = false; cancelAnimationFrame(raf); audio.pause(); loopsOff();
+    root.classList.remove('on'); document.body.classList.remove('postiopen'); window.__gameOpen = false; btOff(); cancelAnimationFrame(raf); audio.pause(); loopsOff();
     if (state === 'run' || state === 'over') toMenu();
     if (location.hash === '#posti') history.replaceState(null, '', location.pathname + location.search);
   }
