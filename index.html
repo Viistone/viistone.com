@@ -55,7 +55,7 @@ a:focus-visible,button:focus-visible{outline:1px solid var(--ember);outline-offs
 .osd .blink{animation:blink 1.2s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
 
-main{max-width:980px;margin:0 auto}
+main{max-width:980px;margin:0 auto;position:relative;z-index:1}
 
 /* --- hero: the logo --- */
 .hero{min-height:min(78vh,720px);display:grid;place-items:center;padding-block:96px 48px;position:relative}
@@ -151,6 +151,15 @@ footer a:hover{color:var(--cream)}
 .tracks li.jolt{animation:jolt .22s steps(3) 1 !important}
 @keyframes jolt{0%{transform:translateX(5px);text-shadow:2px 0 rgba(255,60,60,.6),-2px 0 rgba(60,200,255,.6)}50%{transform:translateX(-3px)}100%{transform:none;text-shadow:none}}
 
+/* the tape runs out: a shadow of Vika selkä behind everything */
+.ghostvid{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity 2.4s ease}
+.ghostvid video{width:100%;height:100%;object-fit:cover;filter:grayscale(1) blur(1.5px) contrast(1.15);transform:scale(1.04)}
+.ghostvid.on{opacity:.16}
+.sndbtn{position:fixed;z-index:54;left:max(18px, env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));
+  font-family:var(--f-osd);font-size:20px;letter-spacing:.08em;color:var(--osd);background:rgba(11,11,10,.6);border:1px solid var(--line);
+  padding:4px 10px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .8s}
+.sndbtn.show{opacity:.85;pointer-events:auto}
+.sndbtn:hover{border-color:var(--cream);opacity:1}
 /* the ten matches from the cover, lighting up as the tape plays */
 .matches{position:fixed;z-index:52;right:max(22px, env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;pointer-events:none;--mh:110px;height:var(--mh)}
 .m{display:block;height:100%;background-image:url(assets/matches.png);background-repeat:no-repeat;filter:grayscale(1) brightness(.22);transition:filter .7s}
@@ -195,7 +204,8 @@ body.paused main{animation:hold .12s steps(2) infinite}
   .tape .meta,.tape .ch{font-size:17px}
   .press ul{gap:14px}
   .mail{font-size:14px;word-break:break-all}
-  footer{padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+  footer{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .sndbtn{font-size:17px}
   .tagline{letter-spacing:.28em}
   .tape .play{font-size:30px}
   .hero{min-height:auto;padding-block:140px 96px}
@@ -218,6 +228,9 @@ body.paused main{animation:hold .12s steps(2) infinite}
 <div class="osd tl" aria-hidden="true" id="mode"><span class="blink">▶</span> PLAY</div>
 <div class="osd tr" aria-hidden="true">SP<br><span id="counter">0:00:00</span></div>
 <div class="track" id="track" aria-hidden="true"></div>
+<div class="ghostvid" id="ghost" aria-hidden="true"><video id="gv" muted loop playsinline preload="none" data-src="assets/shadow.mp4"></video></div>
+<button class="sndbtn" id="snd" type="button" aria-pressed="false">ÄÄNI: POIS</button>
+<audio id="ga" loop preload="none" data-src="assets/outro.m4a"></audio>
 <div class="topband" aria-hidden="true"></div>
 <div class="matches" id="matches" aria-hidden="true"></div>
 <div class="pausebar" aria-hidden="true"></div>
@@ -387,6 +400,38 @@ window.VIISTONE_EMBED = true;
     li.addEventListener('mouseenter', cue); li.addEventListener('focus', cue);
     li.addEventListener('mouseleave', uncue); li.addEventListener('blur', uncue);
     li.addEventListener('click', cue);
+  });
+
+
+  // end of tape: the shadow of Vika selkä, sound only if asked for
+  var ghost = document.getElementById('ghost'), gv = document.getElementById('gv'), ga = document.getElementById('ga'), snd = document.getElementById('snd');
+  var ghostOn = false, soundOn = false, fadeT;
+  function load(el){ if(!el.src){ el.src = el.dataset.src; } }
+  function fadeAudio(to, done){
+    clearInterval(fadeT);
+    fadeT = setInterval(function(){
+      var v = ga.volume + (to > ga.volume ? 0.05 : -0.05);
+      if ((to > ga.volume && v >= to) || (to <= ga.volume && v <= to)) { ga.volume = to; clearInterval(fadeT); if(done) done(); }
+      else ga.volume = Math.max(0, Math.min(1, v));
+    }, 60);
+  }
+  function setGhost(on){
+    if (on === ghostOn) return; ghostOn = on;
+    ghost.classList.toggle('on', on); snd.classList.toggle('show', on);
+    if (on) { load(gv); var p = gv.play(); if (p && p.catch) p.catch(function(){}); if (soundOn) { ga.play().catch(function(){}); fadeAudio(.8); } }
+    else { setTimeout(function(){ if(!ghostOn) gv.pause(); }, 2500); if (soundOn) fadeAudio(0, function(){ ga.pause(); }); }
+  }
+  function checkEnd(){
+    var max = document.documentElement.scrollHeight - innerHeight;
+    setGhost(max > 0 && max - scrollY < 80);
+  }
+  addEventListener('scroll', checkEnd, {passive:true}); addEventListener('resize', checkEnd);
+  snd.addEventListener('click', function(){
+    soundOn = !soundOn;
+    snd.textContent = soundOn ? 'ÄÄNI: PÄÄLLÄ' : 'ÄÄNI: POIS';
+    snd.setAttribute('aria-pressed', soundOn);
+    if (soundOn) { load(ga); ga.volume = 0; ga.play().catch(function(){}); fadeAudio(.8); }
+    else fadeAudio(0, function(){ ga.pause(); });
   });
 
   // idle: pause after a while, then lose the signal
