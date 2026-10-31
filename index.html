@@ -1328,7 +1328,7 @@ body.gameopen{overflow:hidden}
 .posti .pbtn:hover{border-color:#e8e0c8}
 .posti .pbtn.off{opacity:.45;text-decoration:line-through;text-decoration-thickness:2px}
 .posti .ptop{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:4}
-.posti .peject{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:max(14px, env(safe-area-inset-right,0px));z-index:4}
+.posti .peject{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:max(14px, env(safe-area-inset-right,0px));z-index:7}
 .posti .psong{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:4;font-family:var(--f-osd);font-size:18px;letter-spacing:.06em;
   color:rgba(233,228,216,.75);white-space:nowrap}
 .posti .phud{position:absolute;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;align-items:center;gap:16px;z-index:4;
@@ -1391,6 +1391,7 @@ body.postiopen{overflow:hidden}
     <p class="sm">Jaa lappuja ja kerää kaljatölkit, niistä saa energiaa. Kun rotta tulee, selviä 20 sekuntia tai karkaa isolla hypyllä.<br>← → tai hiiri. Puhelimella sormi.</p>
     <div class="psw"><button type="button" id="pswm">MUSIIKKI <b>PÄÄLLÄ</b></button><button type="button" id="pswf">TEHOSTEET <b>PÄÄLLÄ</b></button></div>
     <button class="go" id="pgo" type="button">AJA ▶</button>
+    <button class="home" id="phome2" type="button">⏏ KOTISIVULLE</button>
   </div>
   <div class="ppanel blue" id="pover">
     <h2 id="povh">ROTTA SAI KIINNI</h2>
@@ -1748,7 +1749,7 @@ body.postiopen{overflow:hidden}
   };
 
   function drawPostman(){
-    var lean = -P.a * .55 - gust.v * .25, h = height();
+    var lean = P.a * .55 - gust.v * .25, h = height();
     ctx.fillStyle = 'rgba(0,0,0,' + (.3 - Math.min(.18, h / 400)) + ')'; ell(2 + h * .15, 14, 13 - h / 14, 5 - h / 40); ctx.fill();
     ctx.save(); ctx.translate(0, -h); var sc = 1 + h / 260; ctx.scale(sc, sc);
     if (P.down > 0){
@@ -1886,7 +1887,7 @@ body.postiopen{overflow:hidden}
     if (location.hash === '#posti') history.replaceState(null, '', location.pathname + location.search);
   }
   document.getElementById('peject').addEventListener('click', close);
-  document.getElementById('phome').addEventListener('click', function(){ close(); if (window.__showGames) window.__showGames(); });
+  ['phome', 'phome2'].forEach(function(id){ document.getElementById(id).addEventListener('click', function(){ close(); if (window.__showGames) window.__showGames(); }); });
   var vb = document.getElementById('ch06b'); if (vb) vb.addEventListener('click', open);
   addEventListener('resize', function(){ if (root.classList.contains('on')) resize(); });
   document.addEventListener('visibilitychange', function(){ if (!root.classList.contains('on')) return; if (document.hidden){ audio.pause(); windStop(); } else syncMusic(); });
