@@ -296,7 +296,7 @@ body.paused main{animation:hold .12s steps(2) infinite}
           <a class="btn" href="https://distrokid.com/hyperfollow/viistone/kymmenen-tikkuu" target="_blank" rel="noopener">Tallenna albumi</a>
         </div>
         <ul class="stream" aria-label="Kuuntele">
-          <li><a href="https://distrokid.com/hyperfollow/viistone/kymmenen-tikkuu" target="_blank" rel="noopener" data-svc="spotify">Spotify</a></li>
+          <li><a href="https://open.spotify.com/artist/6u7uLNnINNky7DDh3Ym3Ao" target="_blank" rel="noopener" data-svc="spotify">Spotify</a></li>
           <li><a href="https://distrokid.com/hyperfollow/viistone/kymmenen-tikkuu" target="_blank" rel="noopener" data-svc="apple">Apple Music</a></li>
           <li><a href="https://distrokid.com/hyperfollow/viistone/kymmenen-tikkuu" target="_blank" rel="noopener" data-svc="tidal">Tidal</a></li>
           <li><a href="https://distrokid.com/hyperfollow/viistone/kymmenen-tikkuu" target="_blank" rel="noopener" data-svc="ytmusic">YouTube Music</a></li>
@@ -348,6 +348,7 @@ body.paused main{animation:hold .12s steps(2) infinite}
   <footer>
     <span>© 2026 Viistone</span>
     <nav aria-label="Somekanavat">
+      <a href="https://open.spotify.com/artist/6u7uLNnINNky7DDh3Ym3Ao" target="_blank" rel="noopener">Spotify</a>
       <a href="https://www.youtube.com/@Viistone" target="_blank" rel="noopener">YouTube</a>
       <a href="https://www.instagram.com/lollari5000/" target="_blank" rel="noopener">Instagram</a>
       <button class="ch03" id="ch03" type="button">CH 03</button>
@@ -564,6 +565,7 @@ window.VIISTONE_EMBED = true;
 .game .eject{right:max(14px, env(safe-area-inset-right,0px))}
 .game .gmusic{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:4}
 .game .gmusic .gbtn{position:static}
+.game .gbtn.off{opacity:.45;text-decoration:line-through;text-decoration-thickness:2px}
 .game .gtitle{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);font-family:var(--f-osd);font-size:18px;letter-spacing:.06em;
   color:var(--osd);opacity:.6;white-space:nowrap;z-index:4;transition:opacity .6s}
 .game .gtitle.hide{opacity:0}
@@ -580,7 +582,7 @@ window.VIISTONE_EMBED = true;
 .tile.new{animation:tnew .2s ease-out}
 .tile.pop{animation:tpop .26s ease-out;z-index:2}
 @keyframes tnew{from{opacity:0}to{opacity:1}}
-@keyframes tpop{0%{opacity:.4;filter:brightness(2.4) drop-shadow(4px 0 0 rgba(255,60,60,.6)) drop-shadow(-4px 0 0 rgba(60,200,255,.6))}60%{filter:brightness(1.2)}100%{opacity:1}}
+@keyframes tpop{0%{opacity:.6;filter:brightness(1.35) drop-shadow(2px 0 0 rgba(255,60,60,.35)) drop-shadow(-2px 0 0 rgba(60,200,255,.35))}100%{opacity:1}}
 .chain{display:flex;gap:5px;justify-content:center;transform:rotate(.4deg)}
 .chain i{display:block;width:var(--cs,30px);height:var(--cs,30px);background:center/cover no-repeat;opacity:.14;filter:grayscale(1) blur(.4px);transition:opacity .5s, filter .5s;
   clip-path:polygon(3% 0, 100% 4%, 97% 100%, 0 96%)}
@@ -590,7 +592,7 @@ window.VIISTONE_EMBED = true;
 .gtrack{position:absolute;left:0;right:0;height:9%;top:-12%;pointer-events:none;z-index:3;opacity:0;mix-blend-mode:screen;
   background:repeating-linear-gradient(90deg, rgba(233,228,216,0) 0 5px, rgba(233,228,216,.3) 5px 6px, rgba(233,228,216,.04) 6px 13px),linear-gradient(to bottom, transparent, rgba(233,228,216,.08), transparent);filter:blur(.5px)}
 .gtrack.run{animation:gtr .55s linear 1}
-@keyframes gtr{0%{top:-12%;opacity:.9}100%{top:105%;opacity:.6}}
+@keyframes gtr{0%{top:-12%;opacity:.45}100%{top:105%;opacity:.25}}
 .board.jolt{animation:bj .3s steps(3) 1}
 @keyframes bj{0%{transform:rotate(-.6deg) translateX(0)}33%{transform:rotate(-.6deg) translateX(6px);filter:drop-shadow(3px 0 0 rgba(255,60,60,.45)) drop-shadow(-3px 0 0 rgba(60,200,255,.45))}66%{transform:rotate(-.6deg) translateX(-3px)}100%{transform:rotate(-.6deg)}}
 .game .over{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(9,9,8,.86);text-align:center;z-index:5}
@@ -598,8 +600,10 @@ window.VIISTONE_EMBED = true;
 .game .over h2{font-family:var(--f-osd);font-weight:400;font-size:64px;line-height:.9;letter-spacing:.04em;color:var(--osd);margin:0;transform:rotate(-1deg);
   text-shadow:3px 0 0 rgba(255,60,60,.45),-3px 0 0 rgba(60,200,255,.45)}
 .game .over .seg{height:56px}
-body.static #grain{opacity:.55 !important;display:block !important}
-body.static .scan{background:repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0 1px, rgba(0,0,0,.3) 1px 3px)}
+.game .gspot{font-family:var(--f-mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--grey);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px}
+.game .gspot:hover{color:var(--cream);border-color:var(--ember)}
+body.static #grain{opacity:.16 !important;display:block !important}
+body.static .scan{background:repeating-linear-gradient(to bottom, rgba(255,255,255,.025) 0 1px, rgba(0,0,0,.18) 1px 3px)}
 body.gameopen{overflow:hidden}
 .matches{pointer-events:auto;cursor:pointer}
 .ch03{background:none;border:0;padding:0;font:inherit;letter-spacing:inherit;color:var(--grey);cursor:pointer}
@@ -608,7 +612,7 @@ body.gameopen{overflow:hidden}
 .sparks{position:absolute;left:-30px;top:-30px;pointer-events:none;z-index:3}
 .gflash{position:absolute;inset:0;z-index:2;pointer-events:none;background:center/cover no-repeat;opacity:0;filter:grayscale(.3) blur(2px) contrast(1.2);mix-blend-mode:screen}
 .gflash.on{animation:gfl .7s steps(7,end) 1}
-@keyframes gfl{0%{opacity:0;transform:scale(1.15)}15%{opacity:.32;transform:scale(1.1)}30%{opacity:.08}45%{opacity:.22}100%{opacity:0;transform:scale(1)}}
+@keyframes gfl{0%{opacity:0;transform:scale(1.08)}20%{opacity:.11;transform:scale(1.05)}45%{opacity:.07}100%{opacity:0;transform:scale(1)}}
 .grec{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:max(18px, env(safe-area-inset-left,0px));font-family:var(--f-osd);font-size:24px;color:#ff4a3a;
   letter-spacing:.06em;opacity:0;z-index:4;text-shadow:0 0 8px rgba(255,60,40,.5)}
 .grec.on{animation:rec 2.6s steps(1) 1}
@@ -620,7 +624,7 @@ body.gameopen{overflow:hidden}
 .eyewrap canvas{display:block;width:100%;height:100%;filter:contrast(1.05) brightness(.9)}
 .eyewrap::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 40px 10px rgba(9,9,8,.85);
   background:linear-gradient(100deg, rgba(209,194,176,.05), transparent 45%, rgba(0,0,0,.2))}
-@media (max-width:720px){ .game .eject .lbl{display:none} .game .gosd{font-size:24px} .game .gbtn{font-size:21px} .seg{height:38px} }
+@media (max-width:720px){ .game .eject .lbl,.game #gnext .lbl,.game #gmus .lbl,.game #gfx .lbl{display:none} .game .gosd{font-size:24px} .game .gbtn{font-size:21px} .seg{height:38px} }
 @media (prefers-reduced-motion:reduce){ .gtrack,.gnoise{display:none} }
 /* channel ident: the logo at the start and the end of the tape */
 .ident{position:absolute;inset:0;z-index:7;display:none;align-items:center;justify-content:center;background:#090908;pointer-events:none}
@@ -641,7 +645,7 @@ body.gameopen{overflow:hidden}
   <div class="gscan" aria-hidden="true"></div>
   <div class="gtrack" id="gtrack" aria-hidden="true"></div>
   <div class="gosd l">CH 03</div>
-  <div class="gmusic"><button class="gbtn mus" id="gmus" type="button" aria-pressed="true">♪ POIS</button><button class="gbtn" id="gnext" type="button" aria-label="Seuraava kappale">⏭</button></div>
+  <div class="gmusic"><button class="gbtn mus" id="gmus" type="button" aria-pressed="true">♪<span class="lbl"> MUSIIKKI</span></button><button class="gbtn" id="gfx" type="button" aria-pressed="true">FX<span class="lbl"> ÄÄNET</span></button><button class="gbtn" id="gnext" type="button" aria-label="Seuraava kappale">⏭<span class="lbl"> SEURAAVA</span></button></div>
   <div class="gtitle hide" id="gtitle" aria-live="polite"></div>
   <button class="gbtn eject" id="eject" type="button" aria-label="Eject">⏏<span class="lbl"> EJECT</span></button>
   <div class="gbar" id="gbar"><svg class="seg" id="gscore" aria-label="Pisteet"></svg><span class="bs" id="gbest">PARAS 0</span></div>
@@ -654,9 +658,10 @@ body.gameopen{overflow:hidden}
     <h2>NAUHA<br>LOPPUI</h2>
     <svg class="seg" id="gfinal" aria-label="Pisteet"></svg>
     <button class="btn" id="gagain" type="button">Uudestaan</button>
+    <a class="gspot" href="https://open.spotify.com/artist/6u7uLNnINNky7DDh3Ym3Ao" target="_blank" rel="noopener">Viistone Spotifyssa ↗</a>
   </div>
   <div class="ident" id="ident" aria-hidden="true"><img alt=""></div>
-  <audio id="gaudio" preload="none" data-list='[{"n": "02", "t": "KYMMENEN TIKKUU", "src": "assets/kymmenentikkuu.m4a"}, {"n": "03", "t": "PITKÄSILTA", "src": "assets/pitkasilta.m4a"}, {"n": "04", "t": "SYMMETRISII UNII", "src": "assets/symmetrisiiunii.m4a"}, {"n": "09", "t": "VIKA SELKÄ", "src": "assets/vikaselka.m4a"}]'></audio>
+  <audio id="gaudio" preload="none" data-list='[{"n": "02", "t": "KYMMENEN TIKKUU", "src": "assets/kymmenentikkuu.m4a"}, {"n": "03", "t": "PITKÄSILTA", "src": "assets/pitkasilta.m4a"}, {"n": "04", "t": "SYMMETRISII UNII", "src": "assets/symmetrisiiunii.m4a"}, {"n": "07", "t": "HYMYTYTTÖ", "src": "assets/hymytytto.m4a"}, {"n": "08", "t": "KOTIINPALUU KAI JOTENKI JÄRJESTYY", "src": "assets/kotiinpaluu.m4a"}, {"n": "09", "t": "VIKA SELKÄ", "src": "assets/vikaselka.m4a"}]'></audio>
 </div>
 <script>
 (function(){
@@ -805,7 +810,12 @@ body.gameopen{overflow:hidden}
     try { mediaSrc = AC.createMediaElementSource(audio); mediaSrc.connect(mFilt); } catch(e){}
     mFilt.connect(mGain); mGain.connect(AC.destination); sfxBus.connect(AC.destination);
   }
-  function sfxOn(){ return musicOn && AC && AC.state === 'running'; }
+  function fxPref(v){ try { if (v != null) localStorage.setItem('viistone-2048-fx', v ? '1' : '0'); var s = localStorage.getItem('viistone-2048-fx'); return s == null ? true : s === '1'; } catch(e){ return true; } }
+  var fxOn = fxPref(), fxBtn = document.getElementById('gfx');
+  function syncFx(){ fxBtn.classList.toggle('off', !fxOn); fxBtn.setAttribute('aria-pressed', fxOn); fxBtn.title = fxOn ? 'Peliäänet pois' : 'Peliäänet päälle'; }
+  fxBtn.addEventListener('click', function(){ audioInit(); fxOn = !fxOn; fxPref(fxOn); syncFx(); if (fxOn) strike(2); });
+  syncFx();
+  function sfxOn(){ return fxOn && AC && AC.state === 'running'; }
   var noiseBuf = null;
   function noise(){
     if (noiseBuf) return noiseBuf;
@@ -997,8 +1007,8 @@ body.gameopen{overflow:hidden}
   audio.addEventListener('ended', function(){ setTrack(tIdx + 1); if (musicOn) audio.play().catch(function(){}); });
   nextBtn.addEventListener('click', function(){ setTrack(tIdx + 1); if (musicOn) { audio.play().catch(function(){}); } else { musicOn = true; musicPref(true); syncMusic(); } });
   function syncMusic(){
-    musBtn.textContent = musicOn ? '♪ POIS' : '♪ PÄÄLLE'; musBtn.setAttribute('aria-pressed', musicOn);
-    if (musicOn && game.classList.contains('on')){ if (!audio.src) setTrack(tIdx); audio.volume = 0.7; var p = audio.play(); if (p && p.catch) p.catch(function(){ musBtn.textContent = '♪ PÄÄLLE'; }); }
+    musBtn.classList.toggle('off', !musicOn); musBtn.setAttribute('aria-pressed', musicOn); musBtn.title = musicOn ? 'Musiikki pois' : 'Musiikki päälle';
+    if (musicOn && game.classList.contains('on')){ if (!audio.src) setTrack(tIdx); audio.volume = 0.7; var p = audio.play(); if (p && p.catch) p.catch(function(){ musBtn.classList.add('off'); }); }
     else audio.pause();
   }
   musBtn.addEventListener('click', function(){ audioInit(); musicOn = !musicOn; musicPref(musicOn); syncMusic(); });
