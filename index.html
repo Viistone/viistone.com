@@ -565,6 +565,11 @@ body.gameopen{overflow:hidden}
 .matches{pointer-events:auto;cursor:pointer}
 .ch03{background:none;border:0;padding:0;font:inherit;letter-spacing:inherit;color:var(--grey);cursor:pointer}
 .ch03:hover{color:var(--cream)}
+/* the eye watches where you push the tape */
+.eyewrap{position:relative;transform:rotate(-.6deg);clip-path:polygon(0.4% 2%, 41% 0%, 99.6% 1.5%, 100% 52%, 99.2% 98.5%, 58% 100%, 0% 98%, 0.6% 46%)}
+.eyewrap canvas{display:block;width:100%;height:100%;filter:contrast(1.05) brightness(.9)}
+.eyewrap::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 40px 10px rgba(9,9,8,.85);
+  background:linear-gradient(100deg, rgba(209,194,176,.05), transparent 45%, rgba(0,0,0,.2))}
 @media (max-width:720px){ .game .gosd{font-size:24px} .game .gbtn{font-size:21px} .seg{height:38px} }
 @media (prefers-reduced-motion:reduce){ .gtrack,.gnoise{display:none} }
 </style>
@@ -576,6 +581,7 @@ body.gameopen{overflow:hidden}
   <button class="gbtn mus" id="gmus" type="button" aria-pressed="true">♪ POIS</button>
   <button class="gbtn eject" id="eject" type="button">⏏ EJECT</button>
   <div class="gbar" id="gbar"><svg class="seg" id="gscore" aria-label="Pisteet"></svg><span class="bs" id="gbest">PARAS 0</span></div>
+  <div class="eyewrap" id="eyewrap" aria-hidden="true"><canvas id="eye"></canvas></div>
   <div class="board" id="board"></div>
   <div class="chain" id="chain" aria-hidden="true"></div>
   <div class="over" id="gover">
@@ -632,7 +638,8 @@ body.gameopen{overflow:hidden}
     el.style.transform = 'translate(' + (gap + c * (cell + gap) + w.dx) + 'px,' + (gap + r * (cell + gap) + w.dy) + 'px) rotate(' + w.rot + 'deg) scale(' + w.sc + ')';
   }
   function layout(){
-    size = Math.floor(Math.min(innerWidth - 36, innerHeight - 270, 480)); size = Math.max(240, size);
+    size = Math.floor(Math.min(innerWidth - 36, (innerHeight - 250) / 1.37, 480)); size = Math.max(220, size);
+    eyeSize();
     gap = Math.round(size * 0.022); cell = (size - gap * (N + 1)) / N;
     board.style.width = board.style.height = size + 'px';
     document.getElementById('gbar').style.width = size + 'px';
@@ -648,6 +655,7 @@ body.gameopen{overflow:hidden}
     place(el, r, c); board.appendChild(el);
     var t = {id:++uid, l:l, r:r, c:c, el:el}; tiles.push(t); grid[r][c] = t;
     if (l > top){ top = l; if (l >= 6){ flash(); track(); } }
+    if (cls === 'pop') startle(l >= 6);
     chain.children[l].classList.add('got');
     return t;
   }
@@ -686,6 +694,7 @@ body.gameopen{overflow:hidden}
       if (nr !== r || nc !== c){ moved = true; grid[r][c] = null; if (!into) grid[nr][nc] = t; t.r = nr; t.c = nc; place(t.el, nr, nc); }
     }); });
     if (!moved) return;
+    look([0,1,0,-1][dir], [-1,0,1,0][dir]);
     busy = true;
     setTimeout(function(){
       merges.forEach(function(m){
@@ -710,6 +719,73 @@ body.gameopen{overflow:hidden}
   function end(){
     if (score > best()) best(score);
     setScore(); setTimeout(function(){ over.classList.add('on'); seg(document.getElementById('gfinal'), score, 6); }, 350);
+  }
+
+  // ---- the eye ----
+  var EW = 1280, EH = 472, ECX = 642.5, ECY = 267, ER = 197;
+  var ec = document.getElementById('eye'), ex = ec.getContext('2d'), ewrap = document.getElementById('eyewrap');
+  var eImg = {}, eReady = 0, eOff = document.createElement('canvas'), eo = eOff.getContext('2d');
+  var lookX = 0, lookY = 0, tgtX = 0, tgtY = 0, pup = 0.3, pupT = 0.3, eRaf = 0, idleT;
+  [['plate','assets/peli/eye_plate.jpg'],['lids','assets/peli/eye_lids.jpg'],['mask','assets/peli/eye_mask.png'],['iris','assets/peli/eye_iris.jpg']].forEach(function(p){
+    var im = new Image(); im.onload = function(){ eReady++; if (eReady === 4){ prepLids(); drawEye(); } }; im.src = p[1]; eImg[p[0]] = im;
+  });
+  var lidsC = document.createElement('canvas');
+  function prepLids(){ // eyelids = original pixels outside the eye opening
+    lidsC.width = EW; lidsC.height = EH; var c = lidsC.getContext('2d');
+    c.drawImage(eImg.mask, 0, 0); var d = c.getImageData(0, 0, EW, EH);
+    c.clearRect(0, 0, EW, EH); c.drawImage(eImg.lids, 0, 0); var l = c.getImageData(0, 0, EW, EH);
+    for (var i = 0; i < l.data.length; i += 4) l.data[i+3] = d.data[i];
+    c.putImageData(l, 0, 0);
+  }
+  function eyeSize(){
+    ewrap.style.width = size + 'px'; ewrap.style.height = Math.round(size * EH / EW) + 'px';
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    ec.width = Math.round(size * dpr); ec.height = Math.round(size * EH / EW * dpr);
+    if (eReady === 4) drawEye();
+  }
+  function drawEye(){
+    if (eReady < 4) return;
+    var s = ec.width / EW; ex.setTransform(s, 0, 0, s, 0, 0);
+    ex.drawImage(eImg.plate, 0, 0);
+    var R2 = eImg.iris.width / 2, cx = ECX + lookX, cy = ECY + lookY;
+    eOff.width = eOff.height = Math.ceil(R2 * 2);
+    eo.clearRect(0, 0, eOff.width, eOff.height); eo.save();
+    eo.beginPath(); eo.arc(R2, R2, ER * 1.01, 0, 7); eo.clip();
+    eo.drawImage(eImg.iris, 0, 0);
+    var g = eo.createRadialGradient(R2, R2, ER * .82, R2, R2, ER * 1.01); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(5,10,25,.55)');
+    eo.fillStyle = g; eo.fillRect(0, 0, R2 * 2, R2 * 2);
+    var px = R2 + lookX * .22, py = R2 + lookY * .22, pr = ER * pup;
+    var pg = eo.createRadialGradient(px, py, pr * .75, px, py, pr * 1.08); pg.addColorStop(0, '#060607'); pg.addColorStop(1, 'rgba(6,6,7,0)');
+    eo.fillStyle = pg; eo.beginPath(); eo.arc(px, py, pr * 1.1, 0, 7); eo.fill();
+    eo.restore();
+    ex.drawImage(eOff, cx - R2, cy - R2);
+    // the light stays where the light is
+    var hx = ECX - ER * .2, hy = ECY - ER * .22;
+    var hg = ex.createRadialGradient(hx, hy, 0, hx, hy, ER * .085); hg.addColorStop(0, 'rgba(255,255,255,.85)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
+    ex.fillStyle = hg; ex.beginPath(); ex.arc(hx, hy, ER * .09, 0, 7); ex.fill();
+    if (lidsC.width) ex.drawImage(lidsC, 0, 0);
+  }
+  function eyeLoop(){
+    var k = reduce ? 1 : .16;
+    lookX += (tgtX - lookX) * k; lookY += (tgtY - lookY) * k; pup += (pupT - pup) * .08;
+    drawEye();
+    if (Math.abs(tgtX - lookX) + Math.abs(tgtY - lookY) + Math.abs(pupT - pup) > .2) eRaf = requestAnimationFrame(eyeLoop); else eRaf = 0;
+  }
+  function look(x, y){ // x,y in -1..1
+    tgtX = x * ER * .2; tgtY = y * ER * .15;
+    if (!eRaf) eRaf = requestAnimationFrame(eyeLoop);
+    clearTimeout(idleT); idleT = setTimeout(drift, 2600);
+  }
+  function drift(){ // back toward the middle, with the odd glance
+    if (!game.classList.contains('on')) return;
+    var r = Math.random(); look(r < .7 ? 0 : rr(-.5, .5), r < .7 ? 0 : rr(-.4, .4));
+    clearTimeout(idleT); idleT = setTimeout(drift, rr(3000, 7000));
+  }
+  function startle(big){ pupT = big ? .42 : .36; if (!eRaf) eRaf = requestAnimationFrame(eyeLoop); setTimeout(function(){ pupT = .3; if (!eRaf) eRaf = requestAnimationFrame(eyeLoop); }, 700); }
+  function lookAtPoint(clientX, clientY){
+    var r = ec.getBoundingClientRect(), ox = r.left + r.width * ECX / EW, oy = r.top + r.height * ECY / EH;
+    var dx = clientX - ox, dy = clientY - oy, m = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+    look(dx / m, dy / m);
   }
 
   // film grain and a tracking roll every now and then, never constantly
@@ -744,6 +820,7 @@ body.gameopen{overflow:hidden}
   var sx = 0, sy = 0, down = false;
   function nudge(){ if (musicOn && audio.paused && game.classList.contains('on')) syncMusic(); }
   game.addEventListener('pointerdown', nudge); addEventListener('keydown', nudge);
+  game.addEventListener('pointerdown', function(e){ if (!e.target.closest('.gbtn')) lookAtPoint(e.clientX, e.clientY); });
   board.addEventListener('pointerdown', function(e){ down = true; sx = e.clientX; sy = e.clientY; board.setPointerCapture && board.setPointerCapture(e.pointerId); });
   board.addEventListener('pointerup', function(e){
     if (!down) return; down = false;
@@ -761,7 +838,7 @@ body.gameopen{overflow:hidden}
     channel(function(){
       game.classList.add('on'); document.body.classList.add('gameopen');
       if (!started){ started = true; reset(); } else layout();
-      grainLoop(); trackLoop(); syncMusic();
+      grainLoop(); trackLoop(); syncMusic(); drift();
     });
     if (location.hash !== '#peli') history.replaceState(null, '', '#peli');
   }
