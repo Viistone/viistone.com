@@ -1429,7 +1429,7 @@ body.postiopen{overflow:hidden}
     <img id="pratimg" alt="Iso rotta makoilee kirjekasan päällä">
     <h2>POSTINKANTAJA</h2>
     <p class="ln">”Meil ei asu enää ketää. Vitu iso rotta pitää pesää.”</p>
-    <p class="sm">Jaa posti laatikoihin, joissa lippu on pystyssä. Ohi ajettu laatikko vie energiaa ja katkaisee kertoimen. Läheltä piti ja täysosumat nostavat kerrointa. Kun rotta tulee, selviä 20 sekuntia tai karkaa isolla hypyllä. Kun ruutu välkkyy punaisena, rotta läiskii tassuilla: väistä punaisista renkaista. Hidastuksessa väistö tuo eniten pisteitä.<br>← → tai hiiri, välilyönti hidastaa. Puhelimella näpäytä vasenta tai oikeaa reunaa, pidempi painallus kääntää jyrkemmin.</p>
+    <p class="sm">Jaa posti laatikoihin, joissa lippu on pystyssä. Ohi ajettu laatikko vie energiaa ja katkaisee kertoimen. Läheltä piti ja täysosumat nostavat kerrointa. Kun rotta tulee, selviä 20 sekuntia tai karkaa isolla hypyllä. Kun päällesi tulee tassun varjo, se seuraa sinua kunnes lukittuu punaiseksi: silloin väistä. Hidastuksessa väistö tuo eniten pisteitä.<br>← → tai hiiri, välilyönti hidastaa. Puhelimella paina vasenta tai oikeaa puolta, irti päästäessä pyörä oikenee.</p>
     <div class="psw"><button type="button" id="pswm">MUSIIKKI <b>PÄÄLLÄ</b></button><button type="button" id="pswf">TEHOSTEET <b>PÄÄLLÄ</b></button></div>
     <button class="go" id="pgo" type="button">AJA ▶</button>
     <button class="home" id="phome2" type="button">⏏ KOTISIVULLE</button>
@@ -1467,7 +1467,7 @@ body.postiopen{overflow:hidden}
   var OL = '#14130f', CREAM = '#e8e0c8', NAVY = '#4b5b8c', RUST = '#b4532a', BOX = '#b38a5a', BROWN = '#7a5a3c', GREY = '#8d8a82';
   var BLOOD = ['#c41a1a', '#9e1414', '#e0301e', '#7a0d0d'];
   var W = 0, H = 0, DPR = 1, S0 = 1, S = 1, grain = null;
-  var CHASE = 20, FIRST_RAT = 500, DRAIN = 2.6, CAN = 12, CRASH_E = 10, CATCH_E = 35, EMPTY = 6;
+  var CHASE = 20, FIRST_RAT = 500, DRAIN = 1.7, CAN = 16, CRASH_E = 10, CATCH_E = 35, EMPTY = 6;
   var PER = 480, ROAD = 120, WALK = 172, DARK = .7;
 
   // drawn at a low resolution and scaled up without smoothing: chunky, sharp pixels
@@ -1588,6 +1588,9 @@ body.postiopen{overflow:hidden}
   function pick(r, zone){ var w = TABLE[zone], tot = 0; w.forEach(function(x){ tot += x[1]; }); var v = r() * tot;
     for (var k = 0; k < w.length; k++){ v -= w[k][1]; if (v <= 0) return w[k][0]; } return w[0][0]; }
   function add(o, list){ list.push(o); objs.push(o); }
+  function crowded(o){ if (!(OBST[o.type] || o.type === 'car')) return false;
+    for (var q = objs.length - 1, m = 0; q >= 0 && m < 500; q--, m++){ var b = objs[q]; if (!(OBST[b.type] || b.type === 'car' || b.type === 'mcar')) continue;
+      if (Math.abs(b.x - o.x) < 72 && Math.abs(b.y - o.y) < 95) return true; } return false; }
   function genCell(i, j){
     var key = i + ',' + j; if (cells.has(key)) return; var r = rng(i, j), list = [];
     var d = j * CELL / 10, n = r() < .3 ? 0 : r() < .7 ? 1 : 2; if (d > 400 && r() < .3) n++;
@@ -1603,6 +1606,7 @@ body.postiopen{overflow:hidden}
       else if (type === 'mailbox'){ o.x = c + side * (ROAD + 12); }
       if (o.type === 'mailbox') o.m = r() < .5;
       else if (type === 'lamp'){ o.x = c + side * (ROAD + 30); o.side = side; }
+      if (crowded(o)) continue;
       add(o, list);
     }
     // traffic along the street, some toward you with their lights on
@@ -1666,7 +1670,7 @@ body.postiopen{overflow:hidden}
     if (P.e > 0 && P.empty){ P.empty = 0; clock.classList.remove('on'); say('JAKSAA TAAS', false, 1200); }
     if (P.e <= 0 && !P.empty){ P.empty = tsec + EMPTY; sfx.low(); say('TYHJÄ TANKKI', true, 2200, 'Etsi kaljatölkki ' + EMPTY + ' sekunnissa'); } }
   function helpCan(){
-    if (P.e > 20 || tsec < nextHelp) return; nextHelp = tsec + 4.5;
+    if (P.e > 28 || tsec < nextHelp) return; nextHelp = tsec + 3.5;
     var ahead = P.y + (H / S) * .45, far = P.y + (H / S) * .62 + 80;
     for (var i = 0; i < objs.length; i++){ var o = objs[i]; if (o.type === 'can' && !o.done && !o.h && o.y > P.y + 60 && o.y < far && Math.abs(o.x - P.x) < 140) return; }
     var x = safeX(P.x - Math.sin(P.a) * 160 + (Math.random() - .5) * 90, ahead);
@@ -1697,9 +1701,9 @@ body.postiopen{overflow:hidden}
   }
   // the rat slams big paws down where you are going; a red ring shows where, then it lands
   var paws = [];
-  function slamStart(){ rat.ls = 'slam'; var n = 3 + (rat.gen > 1 ? 1 : 0); playBuf('rat', .9, false, 1.3); pop(rat.x, rat.y - 130, 'LÄISK LÄISK', '#ff4a2a');
-    var gap = rat.gen > 1 ? .48 : .56;
-    for (var i = 0; i < n; i++) paws.push({t0:tsec + .25 + i * gap, tl:tsec + .25 + i * gap + .8, r:34, set:false, side:i % 2 ? 1 : -1});
+  function slamStart(){ rat.ls = 'slam'; var n = rat.gen > 0 ? 3 : 2; playBuf('rat', .9, false, 1.3); pop(rat.x, rat.y - 130, 'LÄISK LÄISK', '#ff4a2a');
+    var gap = rat.gen > 1 ? .85 : 1.0;
+    for (var i = 0; i < n; i++) paws.push({t0:tsec + .3 + i * gap, tl:tsec + .3 + i * gap + 1.5, r:34, set:false, side:i % 2 ? 1 : -1});
     rumble(); }
   function rumble(){ if (!fxOn || !AC) return; var o = AC.createOscillator(), g = AC.createGain(), n = AC.currentTime; o.type = 'sawtooth';
     o.frequency.setValueAtTime(38, n); o.frequency.linearRampToValueAtTime(95, n + 1.1); g.gain.setValueAtTime(.0001, n); g.gain.exponentialRampToValueAtTime(.12, n + .8); g.gain.exponentialRampToValueAtTime(.0001, n + 1.3);
@@ -1709,7 +1713,7 @@ body.postiopen{overflow:hidden}
     for (var i = paws.length - 1; i >= 0; i--){ var w = paws[i];
       if (!w.set && tsec >= w.t0){ w.set = true; tone(110, .5, 'sine', .08, 60); }
       if (w.set && !w.lock){ var lead = Math.max(0, w.tl - tsec), vx = -Math.sin(P.a) * P.v, vy = Math.cos(P.a) * P.v;
-        w.x = P.x + vx * lead; w.y = P.y + 8 + vy * lead; if ((tsec - w.t0) / (w.tl - w.t0) > .62) w.lock = true; }
+        w.x = P.x + vx * lead; w.y = P.y + 8 + vy * lead; if ((tsec - w.t0) / (w.tl - w.t0) > .58){ w.lock = true; tone(1500, .05, 'square', .05); tone(900, .12, 'square', .04); } }
       if (w.set && !w.done && tsec >= w.tl){ w.done = true; w.end = tsec + .45;
         var dd = Math.hypot(P.x - w.x, P.y + 8 - w.y), h = height();
         if (!reduce){ shake = Math.max(shake, .6); freezeUntil = performance.now() + 70; flash = 1; } playBuf('smash', .7, false, .6 + Math.random() * .2); tone(60, .4, 'sine', .5, 30); noise(.35, .3);
@@ -1739,8 +1743,9 @@ body.postiopen{overflow:hidden}
         var ss = (.45 + .9 * k) * 1.35, sa = .4 + .5 * k; ctx.save(); ctx.translate(Math.round(w.x), Math.round(w.y)); ctx.scale(ss * w.side, ss * .6);
         ctx.fillStyle = 'rgba(0,0,0,' + sa + ')'; ell(0, -2, 26, 18); ctx.fill(); [[-20, -16], [-7, -22], [7, -22], [20, -16]].forEach(function(t){ ell(t[0], t[1], 8, 8); ctx.fill(); });
         ctx.restore();
-        if (k > .25 && Math.floor(tsec * (6 + k * 16)) % 2){ ctx.strokeStyle = 'rgba(255,50,30,' + (.4 + .6 * k) + ')'; ctx.lineWidth = 2; ell(w.x, w.y, w.r * 1.25, w.r * .7); ctx.stroke(); }
-        if (k > .62){ var f2 = (k - .62) / .38; ctx.save(); ctx.translate(Math.round(w.x), Math.round(w.y - (1 - f2) * (1 - f2) * 420)); var sc = 3.2 - 1.8 * f2; ctx.scale(sc * w.side, sc); paw(); ctx.restore(); } }
+        if (w.lock){ ctx.strokeStyle = 'rgba(255,50,30,.95)'; ctx.lineWidth = 3; ell(w.x, w.y, w.r * 1.2, w.r * .68); ctx.stroke(); ctx.fillStyle = 'rgba(255,40,20,' + (.12 + .1 * (Math.floor(tsec * 16) % 2)) + ')'; ell(w.x, w.y, w.r * 1.2, w.r * .68); ctx.fill(); }
+        else if (Math.floor(tsec * 6) % 2){ ctx.strokeStyle = 'rgba(255,90,60,.55)'; ctx.lineWidth = 1.5; ell(w.x, w.y, w.r * 1.3, w.r * .74); ctx.stroke(); }
+        if (k > .78){ var f2 = (k - .78) / .22; ctx.save(); ctx.translate(Math.round(w.x), Math.round(w.y - (1 - f2) * (1 - f2) * 420)); var sc = 3.2 - 1.8 * f2; ctx.scale(sc * w.side, sc); paw(); ctx.restore(); } }
       else { var f = Math.max(0, (w.end - tsec) / .45); ctx.globalAlpha = f; ctx.save(); ctx.translate(Math.round(w.x), Math.round(w.y)); ctx.scale(1.4 * w.side, 1.4); paw(); ctx.restore(); ctx.globalAlpha = 1; } });
   }
   function paw(){ line(2.2); ell(0, -6, 24, 15); fillStroke('#5f5a50'); ctx.fillStyle = '#7a756a'; ctx.fillRect(-12, -14, 8, 3); ctx.fillRect(4, -10, 7, 2);
@@ -1765,7 +1770,8 @@ body.postiopen{overflow:hidden}
       if (input.ptr){ var sx = W / 2 + (P.x - cam.x) * S, sy = H * .38 + (P.y - cam.y) * S, dx = input.ptr.x - sx, dy = Math.max(70, input.ptr.y - sy);
         var target = Math.max(-AMAX, Math.min(AMAX, -Math.atan2(dx, dy))); P.a += (target - P.a) * Math.min(1, dt * 7); }
       var tl = input.left || touchL > 0, tr = input.right || touchR > 0;
-      if (tl !== tr){ hold += dt; var turn = 1.5 + Math.min(2.3, hold * 4.5); if (tl) P.a = Math.min(AMAX, P.a + turn * dt); else P.a = Math.max(-AMAX, P.a - turn * dt); } else hold = 0;
+      if (tl !== tr){ hold += dt; var tgt = (tl ? 1 : -1) * Math.min(AMAX, .9 + hold * .7); P.a += (tgt - P.a) * Math.min(1, dt * 11); }
+      else { hold = 0; if (!input.ptr) P.a += (0 - P.a) * Math.min(1, dt * 6); }
       if (input.down) P.a *= Math.max(0, 1 - dt * 5);
       var eff = vmax * (.35 + .65 * Math.cos(P.a)) * (P.boost > 0 ? 1.4 : 1) * (input.up ? .55 : 1) * (input.down ? 1.08 : 1);
       P.v += (eff - P.v) * Math.min(1, dt * (eff > P.v ? 1.3 : 3));
@@ -1807,9 +1813,9 @@ body.postiopen{overflow:hidden}
       if (o.type === 'mcar'){ o.y += o.dir * o.sp * dt; if (biome(o.y) !== 'city'){ o.type = 'tuft'; continue; } carSounds(o); }
       if (Math.abs(o.y - P.y) > 110) continue;
       var dx = P.x - o.x, dy = (P.y + 8) - o.y;
-      if (o.type === 'mailbox' && o.m && !o.done && !o.miss && P.y + 8 > o.y + 26 && roadC(o.x) === roadC(P.x)){ o.miss = 1; P.missed++; energy(-6); breakCombo(); pop(o.x, o.y - 50, 'UNOHTUI −6', '#ff6a33'); tone(140, .25, 'sawtooth', .05, 90); }
+      if (o.type === 'mailbox' && o.m && !o.done && !o.miss && P.y + 8 > o.y + 26 && roadC(o.x) === roadC(P.x)){ o.miss = 1; P.missed++; energy(-4); breakCombo(); pop(o.x, o.y - 50, 'UNOHTUI −4', '#ff6a33'); tone(140, .25, 'sawtooth', .05, 90); }
       if (o.type === 'mailbox' && o.m && !o.done && !o.miss && py0 + 8 <= o.y && P.y + 8 > o.y && Math.abs(dx) < 80 && P.down <= 0){
-        o.done = true; P.letters++; sfx.deliver(); if (Math.abs(dx) < 42){ P.perfect++; btGain(12); streak(100, 4, o.x, o.y - 46, 'TÄYSOSUMA'); } else streak(40, 1, o.x, o.y - 46, '✉'); parts.push({k:'letter', x:P.x, y:P.y - 10 - hNow, tx:o.x, ty:o.y - 30, t:0}); if (rat && rat.mode === 'chase') rat.anger++;
+        o.done = true; P.letters++; sfx.deliver(); if (Math.abs(dx) < 42){ P.perfect++; btGain(12); streak(100, 5, o.x, o.y - 46, 'TÄYSOSUMA'); } else streak(40, 2, o.x, o.y - 46, '✉'); parts.push({k:'letter', x:P.x, y:P.y - 10 - hNow, tx:o.x, ty:o.y - 30, t:0}); if (rat && rat.mode === 'chase') rat.anger++;
       }
       if (o.done || DECOR[o.type]) continue;
       var floatH = (o.h || 16), reach = Math.abs(hNow - floatH) < 30 || (floatH <= 16 && hNow < 40);
