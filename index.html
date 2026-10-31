@@ -1450,7 +1450,7 @@ body.postiopen{overflow:hidden}
   var OL = '#14130f', CREAM = '#e8e0c8', NAVY = '#4b5b8c', RUST = '#b4532a', BOX = '#b38a5a', BROWN = '#7a5a3c', GREY = '#8d8a82';
   var BLOOD = ['#c41a1a', '#9e1414', '#e0301e', '#7a0d0d'];
   var W = 0, H = 0, DPR = 1, S0 = 1, S = 1, grain = null;
-  var CHASE = 20, FIRST_RAT = 500, DRAIN = 1.25, CAN = 20, CRASH_E = 10, CATCH_E = 35, EMPTY = 6;
+  var CHASE = 20, FIRST_RAT = 500, DRAIN = 2.0, CAN = 16, CRASH_E = 10, CATCH_E = 35, EMPTY = 6;
   var PER = 480, ROAD = 120, WALK = 172, DARK = .7;
 
   // drawn at a low resolution and scaled up without smoothing: chunky, sharp pixels
@@ -1543,8 +1543,8 @@ body.postiopen{overflow:hidden}
   var OBST = {box:1, bear:1, shoes:1, chairs:1, stone:1, car:1, mcar:1, bin:1, cone:1};
   var DECOR = {manhole:1, crack:1, paper:1, tuft:1};
   var TABLE = {
-    road:[['car', 10], ['cone', 4], ['box', 5], ['shoes', 3], ['stone', 2], ['can', 13], ['coffee', 3], ['ramp', 4], ['manhole', 7], ['crack', 8], ['paper', 6]],
-    walk:[['mailbox', 24], ['lamp', 8], ['bin', 7], ['bear', 6], ['chairs', 6], ['box', 7], ['shoes', 3], ['can', 7], ['paper', 6], ['crack', 4]],
+    road:[['car', 12], ['box', 7], ['can', 6], ['coffee', 3], ['ramp', 4], ['manhole', 7], ['crack', 8], ['paper', 6]],
+    walk:[['mailbox', 24], ['lamp', 8], ['bin', 7], ['bear', 6], ['chairs', 6], ['box', 7], ['can', 3], ['paper', 6], ['crack', 4]],
     block:[['tuft', 10], ['paper', 5], ['crack', 4]]
   };
   function pick(r, zone){ var w = TABLE[zone], tot = 0; w.forEach(function(x){ tot += x[1]; }); var v = r() * tot;
@@ -1581,7 +1581,7 @@ body.postiopen{overflow:hidden}
     var x = roadC(P.x) + (Math.random() - .5) * 90, y = P.y + (H / S0) * .75 + 120;
     objs = objs.filter(function(o){ return !(OBST[o.type] && Math.abs(o.x - x) < 70 && o.y > y - 90 && o.y < y + 40); });
     objs.push({type:'bigramp', x:x, y:y, v:Math.random(), done:false});
-    for (var k = 0; k < 5; k++) objs.push({type:'can', x:x + Math.sin(k) * 14, y:y + 140 + k * 95, v:Math.random(), done:false, h:66});
+    for (var k = 0; k < 3; k++) objs.push({type:'can', x:x + Math.sin(k) * 14, y:y + 140 + k * 95, v:Math.random(), done:false, h:66});
     nextBig = P.dist + 260 + Math.random() * 260;
   }
   function ensureWorld(){
@@ -1617,7 +1617,7 @@ body.postiopen{overflow:hidden}
     if (P.e > 0 && P.empty){ P.empty = 0; clock.classList.remove('on'); say('JAKSAA TAAS', false, 1200); }
     if (P.e <= 0 && !P.empty){ P.empty = tsec + EMPTY; sfx.low(); say('TYHJÄ TANKKI', true, 2200, 'Etsi kaljatölkki ' + EMPTY + ' sekunnissa'); } }
   function helpCan(){
-    if (P.e > 33 || tsec < nextHelp) return; nextHelp = tsec + 2.4;
+    if (P.e > 20 || tsec < nextHelp) return; nextHelp = tsec + 4.5;
     var ahead = P.y + (H / S) * .45, far = P.y + (H / S) * .62 + 80;
     for (var i = 0; i < objs.length; i++){ var o = objs[i]; if (o.type === 'can' && !o.done && !o.h && o.y > P.y + 60 && o.y < far && Math.abs(o.x - P.x) < 140) return; }
     var x = safeX(P.x - Math.sin(P.a) * 160 + (Math.random() - .5) * 90);
@@ -1687,7 +1687,7 @@ body.postiopen{overflow:hidden}
     if (P.dist > nextBig) placeBig();
     ensureWorld();
 
-    energy(-DRAIN * dt * (P.e < 30 ? .55 : 1)); helpCan();
+    energy(-DRAIN * dt * (P.e < 20 ? .75 : 1)); helpCan();
     if (P.empty){ var lefte = P.empty - tsec; clock.textContent = 'TÖLKKI ' + Math.max(0, Math.ceil(lefte)); clock.classList.add('on'); if (lefte <= 0){ gameOver('energy'); return; } }
     if (P.e < 25 && P.e > 0 && tsec > lowWarn){ lowWarn = tsec + 6; sfx.low(); say('ENERGIA VÄHISSÄ', true, 1300, 'Kerää kaljatölkkejä'); }
 
