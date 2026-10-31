@@ -608,7 +608,12 @@ window.VIISTONE_EMBED = true;
 .glab{font-family:var(--f-mono) !important;font-size:11px !important;letter-spacing:.24em !important;color:var(--dim) !important;text-transform:uppercase;margin:0 0 6px !important}
 .ginit{display:none;flex-direction:column;align-items:center;gap:10px}
 .ginit.on{display:flex}
-.gslots{display:flex;gap:14px}
+.gname{font-family:var(--f-osd);font-size:64px;line-height:1;letter-spacing:.25em;text-transform:uppercase;text-align:center;
+  width:5.2ch;padding:4px 0 6px .25em;box-sizing:border-box;background:transparent;color:var(--osd);border:0;border-bottom:2px solid #ff6a33;border-radius:0;outline:none;caret-color:#ff6a33;
+  text-shadow:2px 0 0 rgba(255,60,60,.35),-2px 0 0 rgba(60,200,255,.35);-webkit-appearance:none;appearance:none}
+.gname::placeholder{color:rgba(209,194,176,.25)}
+.game{touch-action:manipulation}
+.game .over .btn{min-height:48px;min-width:160px;font-size:14px}
 .gslot{display:flex;flex-direction:column;align-items:center;gap:2px}
 .gslot button{background:none;border:0;color:var(--grey);font-size:18px;cursor:pointer;padding:2px 10px;line-height:1}
 .gslot button:hover{color:var(--cream)}
@@ -689,7 +694,7 @@ body.gameopen{overflow:hidden}
     <div class="gown" id="gown"></div>
     <div class="ginit" id="ginit">
       <p class="glab">Pääsit listalle. Nimikirjaimet:</p>
-      <div class="gslots" id="gslots"></div>
+      <input class="gname" id="gname" type="text" maxlength="3" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done" aria-label="Kolme nimikirjainta" placeholder="___">
       <button class="btn" id="gsave" type="button">Tallenna</button>
     </div>
     <div class="gboards" id="gboards">
@@ -898,36 +903,21 @@ body.gameopen{overflow:hidden}
   }
   function renderBoards(d, failed){ fill('gtoday', d && d.today, failed); fill('gall', d && d.all, failed); }
   function savedName(){ try { return localStorage.getItem('viistone-2048-name') || ''; } catch(e){ return ''; } }
+  var nameIn = document.getElementById('gname');
   function openInit(){
-    var n = savedName(); slots = [0, 0, 0];
-    for (var i = 0; i < 3 && i < n.length; i++){ var k = LETTERS.indexOf(n[i]); if (k >= 0) slots[i] = k; }
-    cur = 0; drawSlots(); document.getElementById('ginit').classList.add('on');
+    nameIn.value = savedName().slice(0, 3);
+    document.getElementById('ginit').classList.add('on');
+    if (!matchMedia('(pointer: coarse)').matches) setTimeout(function(){ nameIn.focus(); nameIn.select(); }, 50);
   }
-  function drawSlots(){
-    var h = '';
-    for (var i = 0; i < 3; i++) h += '<div class="gslot' + (i === cur ? ' cur' : '') + '" data-i="' + i + '"><button type="button" data-d="1" aria-label="Edellinen kirjain">▲</button><span>' + LETTERS[slots[i]] + '</span><button type="button" data-d="-1" aria-label="Seuraava kirjain">▼</button></div>';
-    document.getElementById('gslots').innerHTML = h;
-  }
-  document.getElementById('gslots').addEventListener('click', function(e){
-    var s = e.target.closest('.gslot'); if (!s) return;
-    cur = +s.dataset.i; var d = e.target.dataset.d;
-    if (d) slots[cur] = (slots[cur] - (+d) + LETTERS.length) % LETTERS.length;
-    drawSlots();
+  nameIn.addEventListener('input', function(){
+    var v = nameIn.value.toUpperCase().replace(/[^A-ZÅÄÖ]/g, '').slice(0, 3);
+    if (v !== nameIn.value) nameIn.value = v;
   });
-  addEventListener('keydown', function(e){
-    if (!document.getElementById('ginit').classList.contains('on')) return;
-    var k = e.key;
-    if (k === 'ArrowUp'){ slots[cur] = (slots[cur] - 1 + LETTERS.length) % LETTERS.length; }
-    else if (k === 'ArrowDown'){ slots[cur] = (slots[cur] + 1) % LETTERS.length; }
-    else if (k === 'ArrowLeft'){ cur = (cur + 2) % 3; }
-    else if (k === 'ArrowRight'){ cur = (cur + 1) % 3; }
-    else if (k === 'Enter'){ save(); }
-    else if (k.length === 1 && LETTERS.indexOf(k.toUpperCase()) >= 0){ slots[cur] = LETTERS.indexOf(k.toUpperCase()); cur = Math.min(2, cur + 1); }
-    else return;
-    e.preventDefault(); e.stopPropagation(); drawSlots();
-  }, true);
+  nameIn.addEventListener('keydown', function(e){ e.stopPropagation(); if (e.key === 'Enter'){ e.preventDefault(); save(); } }, true);
   function save(){
-    var n = slots.map(function(i){ return LETTERS[i]; }).join(''), btn = document.getElementById('gsave');
+    var n = nameIn.value.toUpperCase(), btn = document.getElementById('gsave');
+    if (!/^[A-ZÅÄÖ]{3}$/.test(n)){ btn.textContent = 'Kolme kirjainta'; nameIn.focus(); setTimeout(function(){ btn.textContent = 'Tallenna'; }, 1600); return; }
+    nameIn.blur();
     btn.disabled = true; btn.textContent = 'Tallennetaan';
     try { localStorage.setItem('viistone-2048-name', n); } catch(e){}
     fetch(API, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({n: n, s: score, l: Math.max(0, top)})})
