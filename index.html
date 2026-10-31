@@ -644,10 +644,8 @@ body.gameopen{overflow:hidden}
 .seg.roll{animation:segf .35s steps(4) 1}
 @keyframes segf{50%{opacity:.6}}
 /* ash blocks */
-.tile.ash{background-image:none !important;background-color:#2b2825;filter:none !important;opacity:calc(.45 + .55 * var(--life,1));box-shadow:inset 0 0 0 1px rgba(168,122,80,.35), inset 0 0 18px rgba(0,0,0,.9)}
-.tile.ash::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(circle at 30% 70%, rgba(190,180,165,.55) 0 2px, transparent 3px),radial-gradient(circle at 62% 40%, rgba(190,180,165,.5) 0 1.5px, transparent 2.5px),radial-gradient(circle at 45% 25%, rgba(190,180,165,.4) 0 1px, transparent 2px),radial-gradient(ellipse at 50% 55%, rgba(168,122,80,.18), transparent 60%),
-  radial-gradient(circle at 75% 78%, rgba(242,140,60,.6) 0 1.5px, transparent 3px),repeating-linear-gradient(115deg, rgba(0,0,0,.35) 0 2px, transparent 2px 6px),repeating-linear-gradient(25deg, rgba(255,255,255,.04) 0 1px, transparent 1px 5px)}
+.tile.ash{background:#141312 url(assets/peli/mark.png) center/95% no-repeat !important;filter:none !important;opacity:calc(.45 + .55 * var(--life,1));box-shadow:inset 0 0 0 1px rgba(168,122,80,.35), inset 0 0 18px rgba(0,0,0,.9)}
+.tile.ash::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%, rgba(168,122,80,.14), transparent 65%),repeating-linear-gradient(to bottom, rgba(0,0,0,.25) 0 1px, transparent 1px 3px)}
 .tile.crumble{animation:crumble .6s ease-in forwards}
 @keyframes crumble{to{opacity:0}}
 /* the eye watches where you push the tape */
@@ -783,8 +781,8 @@ body.gameopen{overflow:hidden}
     if (free.length < 2) return;
     var p = free[Math.floor(Math.random() * free.length)];
     var el = document.createElement('div'); el.className = 'tile ash new';
-    var w = wear(); el._w = w; el.style.backgroundImage = 'url(' + IMG[0] + ')'; el.style.width = el.style.height = cell + 'px';
-    el.style.clipPath = w.clip; el.setAttribute('aria-label', 'tuhka'); el.setAttribute('role', 'img');
+    var w = wear(); el._w = w; el.style.width = el.style.height = cell + 'px';
+    el.style.clipPath = w.clip; el.setAttribute('aria-label', 'Viistone-este'); el.setAttribute('role', 'img');
     place(el, p[0], p[1]); board.appendChild(el);
     var a = {id: ++uid, l: -1, r: p[0], c: p[1], el: el, life: ASH_LIFE}; tiles.push(a); grid[p[0]][p[1]] = a;
     el.style.setProperty('--life', 1);
