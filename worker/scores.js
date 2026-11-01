@@ -1,7 +1,7 @@
 // viistone.com CH 03 leaderboard: today (Helsinki time) and all time, three-letter names.
 // Storage: one KV namespace bound as SCORES. Two games: CH 03 (default keys) and CH 06 Postinkantaja (keys prefixed with posti:).
 
-const ORIGINS = ['https://viistone.com', 'https://www.viistone.com', 'http://localhost:8080'];
+const ORIGINS = ['https://viistone.com', 'https://www.viistone.com', 'http://localhost:8080', 'http://localhost:8811'];
 const KEEP = 10;
 const BLOCK = new Set(['ASS','FAG','FUK','FUC','GAY','JEW','KKK','NAZ','NIG','NGR','SEX','XXX','CUM','DIK','DIC','COK','KYS','PIS','PEE','POO',
   'VIT','VTU','HOR','HUO','KUS','PAS','PIL','PIM','NAI','NEK','NEG','RAP','TIT','WTF','FCK','FKU','SUK','HIT','SSS','SS ','KYK']);
@@ -60,6 +60,7 @@ export default {
   async fetch(req, env) {
     const url = new URL(req.url);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(req) });
+    if (url.pathname.startsWith('/api/kirilii/') && typeof kiriliiOnline === 'function') return kiriliiOnline(req, env, url);
     if (url.pathname !== '/api/scores') return json(req, { error: 'not found' }, 404);
 
     const day = today();

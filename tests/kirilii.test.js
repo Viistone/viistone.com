@@ -174,3 +174,9 @@ test('22. tallennettu peli palautuu', () => {
   assert.deepStrictEqual(back, JSON.parse(JSON.stringify(st)));
   K.botMove(back, Math.random); assert.strictEqual(back.roundLog.length, 8);
 });
+test('moninpeli: paikat ja persoonat', () => {
+  const seats = [{ name: 'AAA', human: true }, { human: false }, { name: 'BBB', human: true }, { human: false }, { human: false }, { human: false }];
+  const st = K.newGame({ seed: 40, seats });
+  assert.deepStrictEqual(st.players.map(p => p.human), [true, false, true, false, false, false]);
+  assert.strictEqual(st.players[2].name, 'BBB'); assert.strictEqual(st.players[1].persona, 'varovainen'); assert.strictEqual(st.players[5].persona, 'taktikko');
+});

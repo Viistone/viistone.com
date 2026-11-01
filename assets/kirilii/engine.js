@@ -71,8 +71,13 @@
       roundLog: [], history: [], result: null, winner: null, headsUp: false,
       settings: { difficulty: opts.difficulty || 'normal', tieRule: opts.tieRule || DEFAULT_TIE_RULE }
     };
-    st.players.push({ id: 0, name: opts.humanName || 'SINÄ', human: true, persona: null, pts: 0, out: false, outRound: null, hand: [], played: [] });
-    for (var i = 0; i < 5; i++) st.players.push({ id: i + 1, name: PERSONAS[i].name, human: false, persona: PERSONAS[i].key, pts: 0, out: false, outRound: null, hand: [], played: [] });
+    // seats: optional list of six {name, human}; bots take the personas in order
+    var seats = opts.seats || [{ name: opts.humanName || 'SINÄ', human: true }].concat(PERSONAS.map(function (p) { return { name: p.name, human: false }; }));
+    var bi = 0;
+    for (var i = 0; i < SEATS; i++) {
+      var s0 = seats[i], per = s0.human ? null : PERSONAS[bi++ % PERSONAS.length];
+      st.players.push({ id: i, name: s0.human ? s0.name : (s0.name || per.name), human: !!s0.human, persona: per ? per.key : null, pts: 0, out: false, outRound: null, hand: [], played: [] });
+    }
     st.starter = Math.floor(rand(st) * SEATS);
     startRound(st);
     return st;
