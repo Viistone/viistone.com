@@ -6,4 +6,8 @@
     <image:image><image:loc>https://viistone.com/assets/cover.jpg</image:loc></image:image>
     <image:image><image:loc>https://viistone.com/assets/logo.png</image:loc></image:image>
   </url>
+  <url>
+    <loc>https://viistone.com/tietosuoja.html</loc>
+    <lastmod>2026-11-01</lastmod>
+  </url>
 </urlset>
