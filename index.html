@@ -101,7 +101,8 @@ main{max-width:980px;margin:0 auto;position:relative;z-index:1}
 .hiscores[hidden],.gamepick[hidden] + .hiscores{display:none}
 .hiscores .hg{display:block;padding:0 4px}
 .hiscores .hg[hidden]{display:block;visibility:hidden}
-.hiscores .hgn{display:none}
+.hiscores .hgn{display:block;margin:0 0 6px;padding-bottom:4px;border-bottom:1px solid rgba(209,194,176,.25);color:var(--cream);font-size:15px;letter-spacing:.08em;line-height:1.15}
+@media (max-width:520px){ .hiscores .hgn{font-size:13px} }
 .hiscores .hl{display:block;color:var(--dim);font-size:13px;letter-spacing:.2em;margin:6px 0 1px}
 .hiscores .hg > div:first-of-type .hl{margin-top:0}
 .hiscores .e{display:block;white-space:nowrap}
