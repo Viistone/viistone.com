@@ -455,7 +455,7 @@ export default {
 
 // CH 09 Kirilii online. One room per table, the whole state lives in D1 (binding KDB).
 // The server runs the same engine as the browser, deals, checks every move and plays the bots.
-// Players can only send a card number, one of six fixed shouts (each once per lap), or bang the table (a rhythm of knocks, no limit). Anyone may join a running table to watch.
+// Players can only send a card number, one of six fixed shouts (each once per lap), bang the table (a rhythm of knocks, no limit), or throw a beer bottle at someone (once per lap). Anyone may join a running table to watch.
 // There is no chat and no free text: names are three letters.
 // A player never receives anyone else's hidden cards or the shuffle seed.
 
@@ -545,6 +545,8 @@ function koView(room, seat) {
   base.canShout = seat >= 0 ? [0, 1, 2, 3, 4, 5].map(k => used.indexOf(k) < 0) : [false, false, false, false, false, false];
   base.watchers = (room.watch || []).length;
   base.bangs = (room.bangs || []).filter(x => now - x.at < 6000).map(x => ({ id: x.id, seat: x.seat, p: x.p }));
+  base.throws = (room.throws || []).filter(x => now - x.at < 6000).map(x => ({ id: x.id, from: x.from, to: x.to }));
+  base.canThrow = seat >= 0 && !(room.throws || []).some(x => x.from === seat && x.lap === lk);
   base.st = {
     v: 1, players, round: st.round, starter: st.starter, turn: st.turn, last: st.last, lastBy: st.lastBy, lastId: st.lastId,
     lapN: st.lapN, lapPos: st.lapPos, lap: st.lap, phase: st.phase, headsUp: st.headsUp, winner: st.winner, settings: st.settings,
@@ -658,6 +660,19 @@ async function kiriliiOnline(req, env, url) {
       if (room.shouts.some(x => x.seat === seat && x.lap === key && x.k === k)) return json(req, Object.assign(koView(room, seat), { error: 'used' }), 409);
       room.shoutN = (room.shoutN || 0) + 1;
       room.shouts.push({ id: room.shoutN, seat, k, lap: key, at: now });
+      if (await koUpdate(db, room, got.v)) return json(req, koView(room, seat));
+      continue;
+    }
+
+    if (op === 'throw') {
+      const to = b.to;
+      if (!Number.isInteger(to) || to < 0 || to > 5 || to === seat) return json(req, { error: 'throw' }, 400);
+      if (room.phase !== 'game' || room.st.phase === 'over') return json(req, { error: 'throw' }, 409);
+      const key = koLapKey(room.st);
+      room.throws = (room.throws || []).filter(x => now - x.at < 60000);
+      if (room.throws.some(x => x.from === seat && x.lap === key)) return json(req, Object.assign(koView(room, seat), { error: 'used' }), 409);
+      room.throwN = (room.throwN || 0) + 1;
+      room.throws.push({ id: room.throwN, from: seat, to, lap: key, at: now });
       if (await koUpdate(db, room, got.v)) return json(req, koView(room, seat));
       continue;
     }

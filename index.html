@@ -2837,6 +2837,20 @@ body.kiropen{overflow:hidden}
 .kir .kmatch.on{opacity:1}
 .kir .kmatch svg{display:block;width:100%;height:100%}
 @media (min-aspect-ratio: 1/1){ .kir .kmatch{width:70px;height:12px;margin:-6px 0 0 -35px} }
+
+/* ---------- beer bottles: one throw per lap, anyone at anyone ---------- */
+.kir .kbtl{position:absolute;top:50%;left:calc(100% + 5px);width:22px;height:46px;margin-top:-23px;padding:0;border:0;background:none;cursor:pointer;z-index:4;transform:rotate(8deg);filter:drop-shadow(0 0 2px rgba(255,214,150,.55)) drop-shadow(1px 2px 1px rgba(0,0,0,.6));transition:opacity .3s, transform .15s;touch-action:manipulation}
+.kir .seat.rs .kbtl{left:auto;right:calc(100% + 5px);transform:rotate(-8deg)}
+.kir .kbtl svg{display:block;width:100%;height:100%}
+.kir .kbtl:hover{transform:rotate(0) scale(1.08)}
+.kir .kbtl:disabled{opacity:.25;cursor:default;transform:rotate(8deg)}
+.kir .seat.out .kbtl,.kir.watch .kbtl,.kir.idle .kbtl{display:none}
+.kir .kfb{position:absolute;z-index:12;left:0;top:0;width:28px;height:62px;margin:-31px 0 0 -14px;pointer-events:none;filter:drop-shadow(2px 4px 2px rgba(0,0,0,.55))}
+.kir .kfb svg{display:block;width:100%;height:100%}
+.kir .kshard{position:absolute;z-index:12;left:0;top:0;pointer-events:none}
+.kir .kcrack{position:absolute;z-index:12;pointer-events:none;width:360px;height:360px;margin:-180px 0 0 -180px}
+.kir .kdrip{position:absolute;z-index:12;pointer-events:none;width:7px;border-radius:0 0 4px 4px;background:linear-gradient(rgba(214,150,40,.0),rgba(214,150,40,.75))}
+.kir .kauts{position:absolute;z-index:12;pointer-events:none;font-family:var(--f-osd);font-size:30px;letter-spacing:.05em;color:#fff3df;text-shadow:2px 2px 0 #14130f, -1px 0 #c22a1a;transform:translate(-50%,-50%) rotate(-6deg)}
 </style>
 <div class="kir idle" id="kir" role="dialog" aria-label="Peli: Kirilii">
   <div class="kwood" id="kwood"></div>
@@ -3022,13 +3036,17 @@ body.kiropen{overflow:hidden}
     var base = g.style.transform; g.style.transform = base.replace(/rotate\([^)]*\)/, 'rotate(78deg)') + ' translate(14px,6px)'; playS('burp', .5);
     setTimeout(function(){ g.style.transform = base; g.classList.remove('tip'); }, 4200); }
 
+  var BOTTLE = '<svg viewBox="0 0 22 46" aria-hidden="true"><rect x="8" y="1" width="6" height="4" rx="1" fill="#c9a23a" stroke="#14130f" stroke-width="1.2"/><path d="M8.5 5h5v8c0 2 5 4 5 9v20c0 2-1.5 3-3 3h-9c-1.5 0-3-1-3-3V22c0-5 5-7 5-9z" fill="#9a5420" stroke="#14130f" stroke-width="1.4"/>'
+    + '<path d="M6 13.5c1-1 2-1.5 2.5-2.5" stroke="rgba(255,220,160,.5)" stroke-width="1" fill="none"/><rect x="4.3" y="24" width="13.4" height="12" fill="#ece6d4" stroke="#14130f" stroke-width=".8"/>'
+    + '<rect x="6.6" y="28.5" width="1.2" height="3" fill="#14130f"/><rect x="8.6" y="27.3" width="1.2" height="5.4" fill="#14130f"/><rect x="10.6" y="26" width="1.2" height="8" fill="#14130f"/><rect x="12.6" y="27.3" width="1.2" height="5.4" fill="#14130f"/><rect x="14.6" y="28.5" width="1.2" height="3" fill="#14130f"/>'
+    + '<path d="M6 38v3" stroke="rgba(255,220,160,.35)" stroke-width="1.4"/></svg>';
   // ---------- seats: clockwise from me at the bottom ----------
   var POS_P = [null, {l:'6px', t:'49%'}, {l:'6px', t:'19%'}, {l:'50%', t:'7.5%', c:1}, {r:'6px', t:'19%'}, {r:'6px', t:'49%'}];
   var POS_L = [null, {l:'3%', t:'40%'}, {l:'17%', t:'6%'}, {l:'50%', t:'3%', c:1}, {r:'17%', t:'6%'}, {r:'3%', t:'40%'}];
   function buildSeats(){
     var land = innerWidth > innerHeight, P = land ? POS_L : POS_P, h = '';
     for (var i = 1; i <= 5; i++){ var p = P[i], s = 'top:' + p.t + ';' + (p.l != null ? 'left:' + p.l + ';' : '') + (p.r != null ? 'right:' + p.r + ';' : '') + (p.c ? 'transform:translateX(-50%);' : '');
-      h += '<div class="seat" id="kseat' + i + '" style="' + s + '"><div class="plate" id="kplate' + i + '"><b></b><small></small><em class="tag"></em></div><div class="backs" id="kbacks' + i + '"></div><div class="final" id="kfinal' + i + '"></div><div class="played" id="kplayed' + i + '"></div></div>'; }
+      h += '<div class="seat' + (p.r != null ? ' rs' : '') + '" id="kseat' + i + '" style="' + s + '"><div class="plate" id="kplate' + i + '"><b></b><small></small><em class="tag"></em><button class="kbtl" type="button" data-p="' + i + '" aria-label="Heitä pullolla">' + BOTTLE + '</button></div><div class="backs" id="kbacks' + i + '"></div><div class="final" id="kfinal' + i + '"></div><div class="played" id="kplayed' + i + '"></div></div>'; }
     $('kseats').innerHTML = h;
     var ph = $('kphone'); if (land){ ph.style.left = 'calc(50% - 68px)'; ph.style.top = '33%'; } else { ph.style.left = 'calc(50% - 61px)'; ph.style.top = '29%'; }
   }
@@ -3080,6 +3098,7 @@ body.kiropen{overflow:hidden}
     impossible:'kirilii/sfx/impossible.mp3', laughr:'kirilii/sfx/laughr.mp3', laughe:'kirilii/sfx/laughe.mp3', aboard:'kirilii/sfx/aboard.mp3',
     nouhh:'kirilii/sfx/nouhh.mp3', no1:'kirilii/sfx/no1.mp3', no2:'kirilii/sfx/no2.mp3', yes:'kirilii/sfx/yes.mp3', idiots:'kirilii/sfx/idiots.mp3', sonofa:'kirilii/sfx/sonofa.mp3',
     hehe1:'kirilii/sfx/hehe1.mp3', hehe2:'kirilii/sfx/hehe2.mp3', hehe3:'kirilii/sfx/hehe3.mp3', holomo:'kirilii/sfx/holomo.mp3',
+    throw1:'kirilii/sfx/throw1.mp3', throw2:'kirilii/sfx/throw2.mp3', throw3:'kirilii/sfx/throw3.mp3', glass1:'kirilii/sfx/glass1.mp3', glass2:'kirilii/sfx/glass2.mp3', glass3:'kirilii/sfx/glass3.mp3', ouch:'kirilii/sfx/ouch.mp3', ouch2:'kirilii/sfx/ouch2.mp3', ouch3:'kirilii/sfx/ouch3.mp3', ouch4:'kirilii/sfx/ouch4.mp3', ouch5:'kirilii/sfx/ouch5.mp3', ouch6:'kirilii/sfx/ouch6.mp3',
     bang1:'kirilii/sfx/bang1.mp3', bang2:'kirilii/sfx/bang2.mp3',
     put1:'kirilii/sfx/put1.mp3', put2:'kirilii/sfx/put2.mp3', put3:'kirilii/sfx/put3.mp3', put4:'kirilii/sfx/put4.mp3'};
   function ac(){ if (!AC){ try { AC = new (window.AudioContext || window.webkitAudioContext)(); Object.keys(FILES).forEach(function(k){ fetch('assets/' + FILES[k]).then(function(r){ return r.arrayBuffer(); }).then(function(a){ return new Promise(function(ok, no){ AC.decodeAudioData(a, ok, no); }); }).then(function(b){ bufs[k] = b; }).catch(function(){}); }); } catch(e){} }
@@ -3245,7 +3264,7 @@ body.kiropen{overflow:hidden}
     $('kmyplate').querySelector('b').textContent = online ? me.name : 'SINÄ';
     var mt = $('kmyplate').querySelector('.tag'); if (mt) mt.textContent = online && online.watch ? 'PÖYTÄ' : ''; $('kmypts').textContent = me.pts; $('kmyplate').classList.toggle('turn', st.phase === 'play' && st.turn === 0);
     $('kmyplayed').innerHTML = me.played.map(function(c){ return cardHTML(c, cls(c)); }).join('');
-    renderHand(); renderPhone(); hint(); placeMatch();
+    renderHand(); renderPhone(); hint(); placeMatch(); syncBottles(); botThrows();
   }
   var handDirty = false;
   function renderHand(){
@@ -3581,7 +3600,7 @@ body.kiropen{overflow:hidden}
     online = {room:d.room, token:d.token, seat:d.seat, name:name, view:null, away:{}, watch:!!d.watch}; lsSet(OSAVE, {room:d.room, token:d.token, seat:d.seat, name:name, watch:!!d.watch});
     root.classList.toggle('watch', !!d.watch);
     try { localStorage.setItem('viistone-2048-name', name); } catch(e){}
-    root.classList.add('online'); seenShouts = {}; (d.shouts || []).forEach(function(x){ seenShouts[x.id] = 1; }); seenBangs = {}; (d.bangs || []).forEach(function(x){ seenBangs[x.id] = 1; });
+    root.classList.add('online'); seenThrows = {}; (d.throws || []).forEach(function(x){ seenThrows[x.id] = 1; }); seenShouts = {}; (d.shouts || []).forEach(function(x){ seenShouts[x.id] = 1; }); seenBangs = {}; (d.bangs || []).forEach(function(x){ seenBangs[x.id] = 1; });
     history.replaceState(null, '', '#kirilii-' + d.room); applyView(d); poll();
   }
   $('konline').addEventListener('click', function(){ ac(); showLobby(''); });
@@ -3627,7 +3646,7 @@ body.kiropen{overflow:hidden}
     online.view = v; online.away = {};
     if (v.phase === 'lobby'){ renderLobby(v); return; }
     v.seats.forEach(function(s0, i){ if (s0.away) online.away[(i - Math.max(0, v.me) + 6) % 6] = 1; });
-    showShouts(v); showBangs(v);
+    showShouts(v); showBangs(v); showThrows(v);
     var ns = fromView(v);
     if (revealing){ pending = ns; return; }
     applyState(ns);
@@ -3713,6 +3732,73 @@ body.kiropen{overflow:hidden}
     big('HÖYLÄ<br>McBUENO!!!', name + ' huutaa', true);
     if (navigator.vibrate) try { navigator.vibrate([40, 60, 40, 60, 90]); } catch(e){}
   }
+
+  // ---------- bottles over the table: one per lap each; when it is you, it comes at the screen ----------
+  var thrownLap = {}, seenThrows = {};
+  function lapKeyC(){ return st ? st.round + ':' + (st.phase === 'play' ? st.lap : 'r') : ''; }
+  function plateEl(pid){ return pid === 0 ? $('kmyplate') : $('kplate' + pid); }
+  function center(el){ var r = el.getBoundingClientRect(), R = root.getBoundingClientRect(); return [r.left - R.left + r.width / 2, r.top - R.top + r.height / 2]; }
+  function canThrowNow(){ if (!st || st.phase === 'over' || root.classList.contains('idle')) return false; if (online) return !online.watch && !!(online.view && online.view.canThrow); return !thrownLap[lapKeyC()]; }
+  function syncBottles(){ var ok = canThrowNow(), l = root.querySelectorAll('.kbtl'); for (var i = 0; i < l.length; i++){ var pid = +l[i].dataset.p; l[i].disabled = !ok || !st || !st.players[pid] || st.players[pid].out; } }
+  function throwBottle(from, to){
+    var a = plateEl(from), b = plateEl(to); if (!a || !b) return;
+    var A = center(a), B = center(b), atMe = to === 0, el = document.createElement('div'); el.className = 'kfb'; el.innerHTML = BOTTLE; root.appendChild(el);
+    playS(['throw1', 'throw2', 'throw3'][Math.floor(Math.random() * 3)], .55, .95 + Math.random() * .15);
+    var spin = (Math.random() < .5 ? -1 : 1) * (720 + Math.random() * 540), dist = Math.hypot(B[0] - A[0], B[1] - A[1]), arc = Math.min(160, 60 + dist * .35), frames = [], N = 14, dur = 620 + dist * .45;
+    for (var i = 0; i <= N; i++){ var t = i / N, x = A[0] + (B[0] - A[0]) * t, y = A[1] + (B[1] - A[1]) * t - Math.sin(Math.PI * t) * arc, sc = 1 + Math.sin(Math.PI * t) * .55;
+      if (atMe) sc += Math.pow(t, 3) * 3.2;
+      frames.push({transform:'translate(' + x + 'px,' + y + 'px) rotate(' + spin * t + 'deg) scale(' + sc + ')', offset:t}); }
+    if (reduce){ el.remove(); smash(B, atMe, to); return; }
+    var an = el.animate(frames, {duration:dur, easing:'linear'});
+    an.onfinish = function(){ el.remove(); smash(atMe ? [B[0], B[1] - 120] : B, atMe, to); };
+  }
+  function smash(P0, atMe, to){
+    playS(['glass1', 'glass2', 'glass3'][Math.floor(Math.random() * 3)], .7, .95 + Math.random() * .1);
+    setTimeout(function(){ if (bufs.ouch) vox(['ouch', 'ouch2', 'ouch3', 'ouch4', 'ouch5', 'ouch6'], .55, true); }, 160);
+    var pl = plateEl(to); if (pl) pl.animate([{transform:'translate(0,0)'}, {transform:'translate(-5px,3px) rotate(-3deg)'}, {transform:'translate(4px,-2px) rotate(2deg)'}, {transform:'translate(0,0)'}], {duration:360});
+    var tx = document.createElement('div'); tx.className = 'kauts'; tx.textContent = ['AUTS!', 'AU!', 'HEI!'][Math.floor(Math.random() * 3)]; tx.style.left = P0[0] + 'px'; tx.style.top = (P0[1] - 34) + 'px'; root.appendChild(tx);
+    tx.animate([{opacity:0, transform:'translate(-50%,-30%) rotate(-6deg) scale(.6)'}, {opacity:1, transform:'translate(-50%,-80%) rotate(-6deg) scale(1.1)', offset:.2}, {opacity:0, transform:'translate(-50%,-160%) rotate(-6deg) scale(1)'}], {duration:1100}).onfinish = function(){ tx.remove(); };
+    if (reduce) return;
+    // shards and foam
+    var n = atMe ? 26 : 16;
+    for (var i = 0; i < n; i++){ var sd = document.createElement('div'); sd.className = 'kshard'; var glass = i % 3 !== 0, w = glass ? 3 + Math.random() * (atMe ? 9 : 5) : 4 + Math.random() * 6;
+      sd.style.width = w + 'px'; sd.style.height = (glass ? w * (1 + Math.random()) : w) + 'px'; sd.style.background = glass ? (Math.random() < .6 ? 'rgba(110,60,22,.9)' : 'rgba(230,240,235,.8)') : 'rgba(246,236,200,.9)'; sd.style.borderRadius = glass ? '1px' : '50%';
+      root.appendChild(sd); var a = Math.random() * 6.28, r = (atMe ? 140 : 60) + Math.random() * (atMe ? 260 : 70), dx = Math.cos(a) * r, dy = Math.sin(a) * r * .8 + (atMe ? 120 : 40);
+      sd.animate([{transform:'translate(' + P0[0] + 'px,' + P0[1] + 'px) rotate(0)', opacity:1}, {transform:'translate(' + (P0[0] + dx) + 'px,' + (P0[1] + dy) + 'px) rotate(' + (Math.random() * 720) + 'deg)', opacity:0}], {duration:600 + Math.random() * 500, easing:'cubic-bezier(.2,.7,.4,1)'}).onfinish = (function(e){ return function(){ e.remove(); }; })(sd); }
+    if (atMe){
+      // it hit the glass of the screen: a crack star, beer running down
+      var c = document.createElement('div'); c.className = 'kcrack'; c.style.left = P0[0] + 'px'; c.style.top = P0[1] + 'px';
+      var svg = '<svg viewBox="-180 -180 360 360"><g stroke="rgba(235,245,250,.85)" stroke-width="1.6" fill="none" stroke-linecap="round">';
+      for (var k = 0; k < 11; k++){ var ang = k / 11 * 6.28 + Math.random() * .3, len = 90 + Math.random() * 90, x = 0, y = 0, d = 'M0 0';
+        for (var q = 1; q <= 4; q++){ x = Math.cos(ang + (Math.random() - .5) * .35) * len * q / 4; y = Math.sin(ang + (Math.random() - .5) * .35) * len * q / 4; d += ' L' + x.toFixed(1) + ' ' + y.toFixed(1); } svg += '<path d="' + d + '"/>'; }
+      for (k = 1; k <= 2; k++){ var rr = 24 * k + Math.random() * 10, d2 = ''; for (var q2 = 0; q2 <= 12; q2++){ var a2 = q2 / 12 * 6.28, r2 = rr + (Math.random() - .5) * 8; d2 += (q2 ? ' L' : 'M') + (Math.cos(a2) * r2).toFixed(1) + ' ' + (Math.sin(a2) * r2).toFixed(1); } svg += '<path d="' + d2 + '" stroke-width="1.1" opacity=".8"/>'; }
+      c.innerHTML = svg + '</g><circle r="9" fill="rgba(255,255,255,.35)"/></svg>'; root.appendChild(c);
+      c.animate([{opacity:0, transform:'scale(.6)'}, {opacity:1, transform:'scale(1)', offset:.06}, {opacity:1, offset:.75}, {opacity:0}], {duration:2600}).onfinish = function(){ c.remove(); };
+      for (var dq = 0; dq < 7; dq++){ var dr = document.createElement('div'); dr.className = 'kdrip'; dr.style.left = (P0[0] - 70 + Math.random() * 140) + 'px'; dr.style.top = (P0[1] - 20 + Math.random() * 40) + 'px'; root.appendChild(dr);
+        dr.animate([{height:'0px', opacity:1}, {height:(60 + Math.random() * 160) + 'px', opacity:.9, offset:.7}, {height:(80 + Math.random() * 180) + 'px', opacity:0}], {duration:1800 + Math.random() * 900, easing:'ease-in'}).onfinish = (function(e){ return function(){ e.remove(); }; })(dr); }
+      shake(true); if (navigator.vibrate) try { navigator.vibrate([30, 40, 60]); } catch(e){}
+    } else shake(false);
+  }
+  root.addEventListener('click', function(e){
+    var b = e.target.closest && e.target.closest('.kbtl'); if (!b || b.disabled) return; e.stopPropagation(); ac();
+    var to = +b.dataset.p; if (!canThrowNow()) return;
+    if (online){ var me = Math.max(0, online.view.me); online.view.canThrow = false; syncBottles(); throwBottle(0, to);
+      opost('throw', {room:online.room, t:online.token, to:(to + me) % 6}).then(function(d){ if (d.st) applyView(d); }).catch(function(){}); return; }
+    thrownLap[lapKeyC()] = 1; syncBottles(); throwBottle(0, to);
+  }, true);
+  function showThrows(v){
+    (v.throws || []).forEach(function(x){ if (seenThrows[x.id]) return; seenThrows[x.id] = 1; if (x.from === v.me) return;
+      var me = Math.max(0, v.me), f = (x.from - me + 6) % 6, t = (x.to - me + 6) % 6; throwBottle(f, t); });
+  }
+  // offline: the bots throw too, now and then, most often right after someone planed them
+  var botThrown = {};
+  function botThrows(){
+    if (online || !st || st.phase === 'over') return; var key = lapKeyC();
+    st.players.forEach(function(p){ if (p.id === 0 || p.out || botThrown[key + p.id] || Math.random() > .035) return; botThrown[key + p.id] = 1;
+      var targets = st.players.filter(function(q){ return q.id !== p.id && !q.out; }); if (!targets.length) return;
+      var t = targets[Math.floor(Math.random() * targets.length)]; setTimeout(function(){ if (st && st.phase !== 'over') throwBottle(p.id, t.id); }, 300 + Math.random() * 900); });
+  }
+
   function showShouts(v){
     (v.shouts || []).forEach(function(x){ if (seenShouts[x.id]) return; seenShouts[x.id] = 1;
       var pid = (x.seat - Math.max(0, v.me) + 6) % 6, name = v.seats[x.seat] ? v.seats[x.seat].name : '';
