@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="fi"><head><meta charset="utf-8">
+<title>Viistone · CH 02 · Heitä Viistone</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#1d1b24">
+<link rel="icon" href="favicon.ico">
+<style>
+@font-face{font-family:'VT323';font-style:normal;font-weight:400;font-display:block;src:url(assets/fonts/vt323-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+2000-206F,U+2190-21FF}
+@font-face{font-family:'VT323';font-style:normal;font-weight:400;font-display:block;src:url(assets/fonts/vt323-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-02BA}
+html,body{margin:0;height:100%;background:#1d1b24;overflow:hidden;overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{font-family:'VT323',monospace;color:#ece4cc}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.hud{position:fixed;pointer-events:none;text-shadow:-2px 0 rgba(255,40,40,.45),2px 0 rgba(40,220,255,.4),2px 3px 0 #1b1714;letter-spacing:.04em}
+#tl{left:max(16px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top))}
+#tl b{display:block;font-weight:400;font-size:clamp(26px,4.4vw,44px);line-height:1}
+#tl span{display:block;font-size:clamp(17px,2.4vw,26px);opacity:.85;margin-top:4px;text-shadow:none}
+#tr{right:max(16px,env(safe-area-inset-right));top:calc(max(12px,env(safe-area-inset-top)) + 50px);text-align:right}
+#score{font-size:clamp(30px,5vw,54px);line-height:1;color:#ff6a33}
+#dist{font-size:clamp(18px,2.6vw,28px);text-shadow:none}
+#mid{left:0;right:0;top:16%;text-align:center}
+#combo{font-size:clamp(40px,8vw,84px);line-height:1;color:#ffb35c;opacity:0;transition:opacity .25s}
+#combo.on{opacity:1}
+#combo small{display:block;font-size:.55em;color:#ece4cc}
+#viisi{position:fixed;left:0;right:0;top:30%;text-align:center;font-size:clamp(90px,20vw,200px);line-height:1;color:#ff2e2e;opacity:0;pointer-events:none;text-shadow:-4px 0 rgba(255,40,40,.5),4px 0 rgba(40,220,255,.45),3px 5px 0 #1b1714;transition:opacity .2s}
+#viisi.on{opacity:1}
+#btns{position:fixed;right:max(12px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));display:flex;gap:8px}
+#btns button,#btns a{font:inherit;font-size:22px;color:#ece4cc;background:rgba(27,23,20,.55);border:2px solid rgba(236,228,204,.45);border-radius:4px;width:44px;height:38px;display:grid;place-items:center;cursor:pointer;text-decoration:none;padding:0}
+#btns .off{opacity:.4;text-decoration:line-through}
+.panel{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:rgba(15,13,16,.55);padding:20px}
+.panel.on{display:flex}
+.panel h1{font-weight:400;font-size:clamp(46px,9vw,100px);line-height:.95;margin:0 0 10px;text-shadow:-3px 0 rgba(255,40,40,.5),3px 0 rgba(40,220,255,.45),2px 4px 0 #1b1714}
+.panel p{font-size:clamp(20px,3vw,28px);margin:4px 0;opacity:.9}
+.panel .pts{font-size:clamp(40px,7vw,64px);color:#ff6a33;margin:4px 0 8px}
+.panel .rows{font-size:clamp(18px,2.6vw,24px);color:#b3b0aa;line-height:1.35;margin-bottom:16px}
+.panel .rec{color:#e7c25a}
+.panel .act{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.panel button,.panel a{font:inherit;font-size:clamp(24px,3.4vw,32px);padding:8px 26px;border-radius:4px;cursor:pointer;text-decoration:none}
+.panel .go{background:#ffb35c;color:#14130f;border:2px solid #ffb35c}
+.panel .alt{background:transparent;color:#ece4cc;border:2px solid #ece4cc}
+#hint{position:fixed;left:50%;top:22%;transform:translateX(-50%);font-size:clamp(22px,3.4vw,32px);border:2px solid rgba(236,228,204,.45);background:rgba(27,23,20,.6);padding:10px 22px;border-radius:6px;text-align:center;display:none;pointer-events:none}
+#hint.on{display:block;animation:hb 1.2s ease-in-out infinite}
+@keyframes hb{50%{opacity:.6}}
+#start .note{font-size:18px;opacity:.6;margin-top:18px}
+</style></head><body>
+<canvas id="cv"></canvas>
+<div class="hud" id="tl"><b>HEITÄ VIISTONE</b><span id="song">CH 02</span></div>
+<div class="hud" id="tr"><div id="score">0</div><div id="dist">0 M</div></div>
+<div class="hud" id="mid"><div id="combo"></div></div>
+<div id="viisi">VIISI</div>
+<div id="hint">TARTU VIISTOSEEN<br>PYÖRITÄ JA PÄÄSTÄ IRTI</div>
+<div id="btns"><button id="bmus" aria-label="Musiikki">♪</button><button id="bfx" aria-label="Äänet">FX</button><a href="/" aria-label="Kotisivulle">⏏</a></div>
+<div class="panel on" id="start"><h1>HEITÄ<br>VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Mitä enemmän rytisee, sitä enemmän pisteitä.</p><div class="act" style="margin-top:18px"><button class="go" id="bgo">ALOITA</button></div><div class="note">testiversio</div></div>
+<div class="panel" id="over"><h1>VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div class="act"><button class="go" id="bagain">UUDESTAAN</button><a class="alt" href="/">KOTISIVULLE</a></div></div>
+<script src="assets/lib/matter.min.js"></script>
+<script>
+(function(){
+'use strict';
+const M = Matter, Engine = M.Engine, Bodies = M.Bodies, Body = M.Body, Composite = M.Composite, Constraint = M.Constraint, Events = M.Events, Sleeping = M.Sleeping;
+const $ = id => document.getElementById(id);
+const cv = $('cv'), g = cv.getContext('2d');
+const PXM = 50;                      // world px per metre
+const INK = '#1b1714';
+const C = {wood:'#b98a55', woodD:'#8a6238', woodL:'#d4a86f', glass:'rgba(160,205,215,.55)', glassL:'#e4f3f5', stone:'#8f8a80', stoneD:'#6c675e', stoneL:'#aaa59a', metal:'#6f7d86', metalD:'#4e5a62', red:'#b8402e', hood:'#2a2b30', hood2:'#3a3c43', jeans:'#3f5079', jeansD:'#34436a', skin:'#e0b08e', shoe:'#ece8dc', cream:'#ece4cc', beard:'#4a3426', beanie:'#3a3d38', grass:'#3d4a32', grassD:'#2f3a28'};
+let seed = 1; const R = () => { seed = (seed * 16807) % 2147483647; return (seed & 0xffff) / 0x10000; };
+const rnd = Math.random;
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- drawing helpers (world units, outlines scale with the camera) ----------
+let LW = 3;
+function path(p){ g.beginPath(); p.forEach((q, i) => i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1])); g.closePath(); }
+function ink(fill, lw){ if (fill){ g.fillStyle = fill; g.fill(); } g.lineWidth = lw || LW; g.strokeStyle = INK; g.lineJoin = 'round'; g.lineCap = 'round'; g.stroke(); }
+function rr(x, y, w, h, r){ g.beginPath(); if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h); }
+function at(x, y, a, fn){ g.save(); g.translate(x, y); if (a) g.rotate(a); fn(); g.restore(); }
+function line(x1, y1, x2, y2, col, lw){ g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.strokeStyle = col || INK; g.lineWidth = lw || LW; g.lineCap = 'round'; g.stroke(); }
+function disc(x, y, r, fill, lw){ g.beginPath(); g.arc(x, y, r, 0, 7); if (lw === 0){ g.fillStyle = fill; g.fill(); return; } ink(fill, lw); }
+
+// ---------- sound ----------
+const SFX_LIST = ['boom_bright','boom_rocky','boom_tan','crowd_aww','crowd_cheer','crowd_murmur','crowd_shout','dumpster','electric','fireball','fireball_glitch','fireworks','fireworks_crackle','fireworks_red','flame_burst','fuse','gas_hiss','gas_release','glass_break','glass_debris','glass_heavy','grab','groan1','groan2','groan3','groan4','groan5','groan6','groan7','metal_slam','metal_strike','metal_table1','metal_table2','plywood_crumble','thud_heavy','thud_soft','victory1','victory2','wind_loop','wood_creak','wood_explode','wood_metal_smash','wood_pile','yell_strained'];
+const EXTRA = {ouch1:'assets/kirilii/sfx/ouch.mp3', ouch2:'assets/kirilii/sfx/ouch2.mp3', ouch3:'assets/kirilii/sfx/ouch3.mp3', ouch4:'assets/kirilii/sfx/ouch4.mp3', ouch5:'assets/kirilii/sfx/ouch5.mp3', ouch6:'assets/kirilii/sfx/ouch6.mp3', slow:'assets/posti/sfx/slow.mp3', sonofa:'assets/kirilii/sfx/sonofa.mp3', alarm:'assets/posti/sfx/alarm1.mp3'};
+const SONGS = [['02','KYMMENEN TIKKUU','kymmenentikkuu'],['03','PITKÄSILTA','pitkasilta'],['04','SYMMETRISII UNII','symmetrisiiunii'],['05','VÄLII VUODELLA','valiivuodella'],['06','POSTINKANTAJA','postinkantaja'],['07','HYMYTYTTÖ','hymytytto'],['08','KOTIINPALUU KAI JOTENKI JÄRJESTYY','kotiinpaluu'],['09','VIKA SELKÄ','vikaselka']];
+let AC = null, master, fxBus, musBus, buf = {}, voices = 0, lastPlay = {};
+let musOn = true, fxOn = true;
+try { musOn = localStorage.getItem('viistone-heita-mus') !== '0'; fxOn = localStorage.getItem('viistone-heita-fx') !== '0'; } catch(e){}
+let song = null, songSrc = null, songFilt = null, songGain = null, crowd = null, wind = null;
+function audioInit(){
+  if (AC){ if (AC.state === 'suspended') AC.resume(); return; }
+  const A = window.AudioContext || window.webkitAudioContext; if (!A) return;
+  AC = new A(); master = AC.createGain(); master.connect(AC.destination);
+  fxBus = AC.createGain(); fxBus.gain.value = fxOn ? 1 : 0; fxBus.connect(master);
+  musBus = AC.createGain(); musBus.gain.value = musOn ? 1 : 0; musBus.connect(master);
+  const load = (k, url) => fetch(url).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => AC.decodeAudioData(a, ok, no))).then(b => { buf[k] = b; if (k === 'crowd_murmur') startCrowd(); if (k === 'wind_loop') startWind(); }).catch(() => {});
+  SFX_LIST.forEach(k => load(k, 'assets/heita/sfx/' + k + '.mp3'));
+  Object.keys(EXTRA).forEach(k => load(k, EXTRA[k]));
+}
+// a positioned one-shot: quieter the further it is from the camera
+function sfx(k, vol, opt){ opt = opt || {}; if (!AC || !buf[k] || !fxOn) return null; const now = AC.currentTime;
+  if (lastPlay[k] && now - lastPlay[k] < (opt.gap != null ? opt.gap : .06)) return null; if (voices > 16 && !opt.force) return null; lastPlay[k] = now;
+  let v = vol == null ? 1 : vol; if (opt.x != null){ const d = Math.hypot(opt.x - cam.x, (opt.y - cam.y) * .7); v *= 1 / (1 + Math.max(0, d - 300) / 900); }
+  if (v < .02) return null;
+  const s = AC.createBufferSource(), gn = AC.createGain(); s.buffer = buf[k]; s.playbackRate.value = (opt.rate || 1) * (opt.vary === false ? 1 : .94 + rnd() * .12); gn.gain.value = v;
+  let out = gn; if (opt.x != null && AC.createStereoPanner){ const p = AC.createStereoPanner(); p.pan.value = clamp((opt.x - cam.x) / (viewW() * .6), -.8, .8); gn.connect(p); out = p; }
+  s.connect(gn); out.connect(fxBus); voices++; s.onended = () => voices--; s.start(now + (opt.delay || 0)); return s; }
+function loop(k, vol){ if (!AC || !buf[k]) return null; const s = AC.createBufferSource(), gn = AC.createGain(); s.buffer = buf[k]; s.loop = true; gn.gain.value = vol; s.connect(gn); gn.connect(fxBus); s.start(); return {s, g:gn}; }
+function startCrowd(){ if (!crowd) crowd = loop('crowd_murmur', 0); }
+function startWind(){ if (!wind) wind = loop('wind_loop', 0); }
+function startSong(){
+  const pick = SONGS[Math.floor(rnd() * SONGS.length)]; $('song').textContent = 'CH 02  ▶ ' + pick[0] + ' ' + pick[1];
+  if (!AC) return; if (!song){ song = new Audio(); song.loop = true; song.preload = 'auto'; song.crossOrigin = 'anonymous';
+    songSrc = AC.createMediaElementSource(song); songFilt = AC.createBiquadFilter(); songFilt.type = 'lowpass'; songFilt.frequency.value = 18000; songGain = AC.createGain(); songGain.gain.value = .9;
+    songSrc.connect(songFilt); songFilt.connect(songGain); songGain.connect(musBus); }
+  song.src = 'assets/' + pick[2] + '.m4a'; const p = song.play(); if (p && p.catch) p.catch(() => {}); }
+// the song stays on the stage: it fades and dulls the further he is from it
+function mixUpdate(){ if (!AC) return; const t = AC.currentTime;
+  const d = rag ? Math.max(0, Math.hypot(rag.torso.position.x - STAGE.x, (rag.torso.position.y - STAGE.y) * .6) - 250) : 0;
+  const ear = Math.max(d, Math.max(0, Math.abs(cam.x - STAGE.x) - 400));
+  if (songGain){ songGain.gain.setTargetAtTime(.9 / Math.pow(1 + ear / 1400, 1.3), t, .15); songFilt.frequency.setTargetAtTime(clamp(16000 * Math.exp(-ear / 2600), 260, 16000), t, .15); }
+  if (crowd) crowd.g.gain.setTargetAtTime(state === 'start' ? 0 : .35 / Math.pow(1 + ear / 700, 1.6), t, .2);
+  if (wind){ const sp = rag && state === 'fly' ? Math.hypot(rag.torso.velocity.x, rag.torso.velocity.y) : 0; wind.g.gain.setTargetAtTime(clamp((sp - 6) / 30, 0, 1) * .5, t, .1); wind.s.playbackRate.setTargetAtTime(.8 + clamp(sp / 40, 0, .5), t, .2); } }
+$('bmus').onclick = () => { musOn = !musOn; $('bmus').classList.toggle('off', !musOn); if (musBus) musBus.gain.value = musOn ? 1 : 0; try { localStorage.setItem('viistone-heita-mus', musOn ? '1' : '0'); } catch(e){} };
+$('bfx').onclick = () => { fxOn = !fxOn; $('bfx').classList.toggle('off', !fxOn); if (fxBus) fxBus.gain.value = fxOn ? 1 : 0; try { localStorage.setItem('viistone-heita-fx', fxOn ? '1' : '0'); } catch(e){} };
+$('bmus').classList.toggle('off', !musOn); $('bfx').classList.toggle('off', !fxOn);
+
+// ---------- the course: a hilltop stage, then a long way down ----------
+const STAGE = {x:0, y:0, w:300};
+let PTS = [];
+function buildCurve(){ seed = 20251113; PTS = [[-1600, -700], [-700, -60], [-420, 0], [330, 0], [700, 170], [1150, 470], [1500, 560], [1800, 760], [2300, 1080], [2700, 1150], [3100, 1060], [3400, 1050], [3800, 1330], [4300, 1700], [4700, 1760], [5200, 2050], [5800, 2230], [6250, 2120], [6700, 2200], [7300, 2560], [7900, 2700]];
+  let x = 7900, y = 2700; while (x < 30000){ const dx = 400 + R() * 600; x += dx; const k = R(); y += k < .2 ? -dx * (.1 + R() * .15) : dx * (.15 + R() * .3); PTS.push([x, y]); } }
+let FLATS = [];
+function gy(x){ const r = gyRaw(x); for (const f of FLATS){ if (x < f.a - 160 || x > f.b + 220) continue; if (x >= f.a && x <= f.b) return f.y; if (x < f.a){ const u = (x - (f.a - 160)) / 160, e = u * u * (3 - 2 * u); return r + (f.y - r) * e; } const u = (x - f.b) / 220, e = u * u * (3 - 2 * u); return f.y + (r - f.y) * e; } return r; }
+function gyRaw(x){ if (x <= PTS[0][0]) return PTS[0][1] - (PTS[0][0] - x) * 2;
+  let lo = 0, hi = PTS.length - 1; if (x >= PTS[hi][0]) return PTS[hi][1];
+  while (hi - lo > 1){ const m = (lo + hi) >> 1; if (PTS[m][0] <= x) lo = m; else hi = m; }
+  const [x0, y0] = PTS[lo], [x1, y1] = PTS[hi], u = (1 - Math.cos((x - x0) / (x1 - x0) * Math.PI)) / 2; return y0 + (y1 - y0) * u; }
+
+// ---------- world state ----------
+let engine, world, bodies = [], parts = [], rockets = [], timers = [], structs = [], pops = [], booms = [], arcs = [], fires = [];
+let rag = null, grab = null, state = 'start', score = 0, best = 0, combo = 0, lastHit = -9, maxCombo = 0, comboShown = 0;
+let tally = {self:0, env:0, boom:0}, simT = 0, flyT = 0, restT = 0, slowT = 0, shake = 0, maxDist = 0, ended = false, lastGroan = -9, lastOuch = -9, viisiCount = 0;
+try { best = +localStorage.getItem('viistone-heita-best') || 0; } catch(e){}
+const cam = {x:0, y:-120, z:1, tx:0, ty:-120, tz:1};
+let W = 0, H = 0, DPR = 1;
+function viewW(){ return W / (baseZ() * cam.z); }
+function baseZ(){ const z = Math.min(W, H * 1.6) / 1250; return H > W ? Math.max(z, W / 720) : z; }
+
+function resize(){ DPR = Math.min(2, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); makeOverlay(); }
+addEventListener('resize', resize);
+
+// ---------- materials and things ----------
+const MAT = {
+  wood: {density:.0011, hp:16, friction:.8, restitution:.08, pts:150, snd:['wood_explode','plywood_crumble'], crack:'wood_creak'},
+  glass:{density:.0010, hp:4, friction:.4, restitution:.05, pts:120, snd:['glass_break','glass_heavy']},
+  stone:{density:.0024, hp:44, friction:.9, restitution:.02, pts:300, snd:['thud_heavy']},
+  metal:{density:.0018, hp:30, friction:.6, restitution:.15, pts:100, snd:['metal_slam','metal_strike','dumpster']},
+  crate:{density:.0008, hp:6, friction:.6, restitution:.1, pts:80, snd:['wood_pile']}
+};
+function addBody(b, kind, mat, w, h, extra){ b.plugin = Object.assign({kind, mat, w, h, hp: mat ? MAT[mat].hp * (w * h > 3200 ? 1.6 : 1) : 20, dmg:0, st:0, sd: Math.floor(rnd() * 1e6), pv:{x:0, y:0}, born:simT, x0:b.position.x, y0:b.position.y, a0:b.angle}, extra || {});
+  Composite.add(world, b); bodies.push(b); return b; }
+function block(mat, x, y, w, h, a, extra){ const m = MAT[mat]; const b = Bodies.rectangle(x, y, w, h, {angle:a || 0, density:m.density, friction:m.friction, restitution:m.restitution, chamfer:{radius:Math.min(3, Math.min(w, h) / 3)}, sleepThreshold:40});
+  return addBody(b, 'block', mat, w, h, extra); }
+function explosive(kind, x, y, a){ const dims = {gas:[22, 38], fw:[52, 24], jerry:[26, 30], cab:[34, 50], drum:[26, 34]}[kind];
+  const b = Bodies.rectangle(x, y, dims[0], dims[1], {angle:a || 0, density:kind === 'cab' ? .003 : .0016, friction:.6, restitution:.15, chamfer:{radius:4}, sleepThreshold:40});
+  return addBody(b, kind, kind === 'drum' ? 'metal' : null, dims[0], dims[1], {hp:{gas:3, fw:3, jerry:3.5, cab:6, drum:30}[kind], armed:false}); }
+function car(x, y){ const b = Bodies.rectangle(x, y, 150, 42, {density:.0016, friction:.7, restitution:.1, chamfer:{radius:8}, sleepThreshold:40}); return addBody(b, 'car', 'metal', 150, 42, {hp:40}); }
+
+// a slab of concrete dug into the hill so things stand level
+function pad(x0, x1){ return gy((x0 + x1) / 2); }
+const SPAN = {roskakatos:[-20, 150], mokki:[-70, 200], halkopino:[-20, 160], bussi:[-20, 200], kioski:[-80, 140], telineet:[-20, 210], muuri:[-20, 290], auto:[-30, 240], sauna:[-30, 180], kerrostalo:[-20, 290], kaljat:[-20, 180]};
+function makeFlats(){ FLATS = []; for (const s of structs){ const sp = SPAN[s.t], a = s.x + sp[0] - 30, b = s.x + sp[1] + 30; FLATS.push({a, b, y:gyRaw(a)}); } }
+
+// ---------- structures: each one a little pile of blocks with a name ----------
+const T = {
+  roskakatos(x){ const y = pad(x - 20, x + 150); const s = [];
+    s.push(block('wood', x + 6, y - 32, 10, 64), block('wood', x + 124, y - 32, 10, 64), block('wood', x + 65, y - 69, 150, 10));
+    s.push(block('metal', x + 30, y - 17, 28, 34), block('metal', x + 64, y - 17, 28, 34), block('metal', x + 98, y - 17, 28, 34)); return ['ROSKAKATOS', s, 900]; },
+  mokki(x){ const y = pad(x - 70, x + 200); const s = [];
+    s.push(explosive('gas', x - 40, y - 19));
+    s.push(block('wood', x + 8, y - 52, 14, 104), block('wood', x + 160, y - 52, 14, 104), block('glass', x + 84, y - 60, 46, 50), block('wood', x + 84, y - 17, 70, 34), block('wood', x + 84, y - 111, 180, 14));
+    s.push(block('wood', x + 40, y - 145, 104, 12, -.55), block('wood', x + 128, y - 145, 104, 12, .55), block('stone', x + 135, y - 135, 18, 30));
+    return ['MÖKKI', s, 1200]; },
+  halkopino(x){ const y = pad(x - 20, x + 130); const s = []; for (let r = 0; r < 4; r++) for (let k = 0; k < 3 - (r > 2 ? 1 : 0); k++) s.push(block('wood', x + 20 + k * 34 + (r % 2) * 10, y - 6 - r * 12, 32, 11));
+    s.push(explosive('jerry', x + 140, y - 15)); return ['HALKOPINO', s, 500]; },
+  bussi(x){ const y = pad(x - 20, x + 160); const s = [];
+    s.push(block('metal', x + 4, y - 42, 8, 84), block('metal', x + 136, y - 42, 8, 84), block('glass', x + 40, y - 40, 56, 72), block('glass', x + 100, y - 40, 56, 72), block('metal', x + 70, y - 89, 156, 10));
+    s.push(explosive('cab', x + 175, y - 25)); return ['BUSSIPYSÄKKI', s, 1500]; },
+  kioski(x){ const y = pad(x - 80, x + 140); const s = [];
+    s.push(explosive('fw', x - 50, y - 12), explosive('fw', x - 50, y - 36));
+    s.push(block('stone', x + 50, y - 15, 96, 30), block('wood', x + 6, y - 75, 12, 90), block('wood', x + 94, y - 75, 12, 90), block('glass', x + 50, y - 58, 66, 56), block('wood', x + 50, y - 126, 118, 12));
+    for (let i = 0; i < 4; i++) s.push(block('crate', x + 20 + i * 22, y - 99, 18, 14)); return ['KIOSKI', s, 1000]; },
+  telineet(x){ const y = pad(x - 20, x + 210); const s = [];
+    for (let l = 0; l < 3; l++){ const yb = y - l * 88; s.push(block('metal', x + 4, yb - 40, 8, 80), block('metal', x + 96, yb - 40, 8, 80), block('metal', x + 188, yb - 40, 8, 80), block('wood', x + 96, yb - 84, 204, 8)); }
+    s.push(explosive('gas', x + 60, y - 283), explosive('gas', x + 140, y - 283), block('crate', x + 100, y - 272, 24, 16)); return ['TELINEET', s, 2200]; },
+  muuri(x){ const y = pad(x - 20, x + 260); const s = [];
+    for (let r = 0; r < 6; r++) for (let k = 0; k < 5; k++){ if (r % 2 && k === 4) continue; s.push(block('stone', x + 22 + k * 42 + (r % 2) * 21, y - 15 - r * 30, 40, 29)); }
+    s.push(explosive('cab', x + 236, y - 25), explosive('gas', x + 270, y - 19)); return ['MUURI', s, 1800]; },
+  auto(x){ const y = pad(x - 30, x + 230); const s = [];
+    s.push(car(x + 80, y - 21), explosive('drum', x + 190, y - 17), explosive('drum', x + 222, y - 17), explosive('drum', x + 206, y - 51)); return ['AUTO', s, 1600]; },
+  sauna(x){ const y = pad(x - 30, x + 170); const s = [];
+    s.push(block('wood', x + 6, y - 40, 12, 80), block('wood', x + 124, y - 40, 12, 80), block('wood', x + 65, y - 86, 142, 12), block('glass', x + 65, y - 50, 30, 30), block('stone', x + 65, y - 17, 40, 34));
+    s.push(block('wood', x + 30, y - 116, 82, 10, -.6), block('wood', x + 100, y - 116, 82, 10, .6), explosive('gas', x + 150, y - 19), explosive('gas', x + 165, y - 57)); return ['SAUNA', s, 1100]; },
+  kerrostalo(x){ const y = pad(x - 20, x + 260); const s = [];
+    for (let f = 0; f < 5; f++){ const yb = y - f * 86; s.push(block('stone', x + 12, yb - 35, 20, 70), block('stone', x + 120, yb - 35, 20, 70), block('stone', x + 228, yb - 35, 20, 70), block('glass', x + 66, yb - 35, 80, 54), block('glass', x + 174, yb - 35, 80, 54), block('stone', x + 120, yb - 78, 250, 16)); }
+    s.push(explosive('cab', x + 270, y - 25)); return ['KERROSTALO', s, 6000]; },
+  kaljat(x){ const y = pad(x - 20, x + 150); const s = []; for (let r = 0; r < 5; r++) for (let k = 0; k < 5 - r; k++) s.push(block('crate', x + 14 + k * 26 + r * 13, y - 9 - r * 18, 24, 17));
+    s.push(explosive('fw', x + 160, y - 12)); return ['KALJAKORIT', s, 600]; }
+};
+// the course layout: the same every time, so the street can be learned
+const ORDER = ['roskakatos', 'mokki', 'halkopino', 'bussi', 'kioski', 'telineet', 'muuri', 'auto', 'sauna', 'kerrostalo', 'kaljat'];
+function planCourse(){ seed = 777; structs = []; let x = 640, i = 0;
+  while (x < 29000){ const t = i < ORDER.length ? ORDER[i] : ORDER[1 + Math.floor(R() * (ORDER.length - 1))]; structs.push({t, x, spawned:false, done:false}); x += (i < 5 ? 430 : 560) + R() * (i < 5 ? 220 : 480) + (t === 'kerrostalo' ? 200 : 0); i++; } }
+function spawnAhead(){ const edge = cam.x + viewW() * .5 + 2600; for (const s of structs){ if (!s.spawned && s.x < edge){ s.spawned = true; const r = T[s.t](s.x); s.name = r[0]; s.list = r[1]; s.bonus = r[2]; s.list.forEach(b => Sleeping.set(b, true)); } } }
+
+// ramps: a couple of wooden kickers along the way
+const RAMPS = [2550, 6050, 9800, 14500];
+function ramp(x){ const y = gy(x), y2 = gy(x + 140); const v = [{x:x, y:y + 4}, {x:x + 140, y:y2 - 70}, {x:x + 140, y:y2 + 6}]; const b = Bodies.fromVertices(x + 90, (y + y2) / 2 - 15, [v], {isStatic:true, friction:.4});
+  b.plugin = {kind:'ramp', v}; Composite.add(world, b); bodies.push(b); }
+
+// ---------- terrain bodies ----------
+function terrain(){ const step = 60, th = 160; for (let x = -1700; x < 30200; x += step){ const x1 = x, x2 = x + step, y1 = gy(x1), y2 = gy(x2), dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L;
+    const b = Bodies.rectangle((x1 + x2) / 2 + nx * th / 2, (y1 + y2) / 2 + ny * th / 2, L + 4, th, {isStatic:true, angle:Math.atan2(dy, dx), friction:.5, restitution:.08}); b.plugin = {kind:'ground'}; Composite.add(world, b); } }
+
+// the stage itself: a platform with two speakers
+function stage(){ const b = Bodies.rectangle(STAGE.x, STAGE.y - 15, STAGE.w, 30, {isStatic:true, friction:.9}); b.plugin = {kind:'stage'}; Composite.add(world, b); bodies.push(b);
+  const wall = Bodies.rectangle(STAGE.x - 190, STAGE.y - 260, 40, 560, {isStatic:true, friction:.3, restitution:.5}); wall.plugin = {kind:'backdrop'}; Composite.add(world, wall); bodies.push(wall);
+  addBody(Bodies.rectangle(STAGE.x - 125, STAGE.y - 70, 40, 80, {density:.002, friction:.8, chamfer:{radius:4}}), 'speaker', null, 40, 80, {hp:999});
+  addBody(Bodies.rectangle(STAGE.x + 125, STAGE.y - 70, 40, 80, {density:.002, friction:.8, chamfer:{radius:4}}), 'speaker', null, 40, 80, {hp:999}); }
+
+// ---------- Viistone as a ragdoll ----------
+const GROUP = -7;
+function makeRag(hx, hy){ const opt = (d) => ({collisionFilter:{group:GROUP}, density:d || .0016, friction:.32, frictionAir:.006, restitution:.18, chamfer:{radius:3}, sleepThreshold:Infinity});
+  const P = {};
+  P.torso = Bodies.rectangle(hx, hy - 17, 24, 34, opt(.002));
+  P.head = Bodies.circle(hx, hy - 49, 17, Object.assign(opt(.0014), {restitution:.25}));
+  const limb = (ax, ay, deg, len, w, d) => { const r = deg * Math.PI / 180, dx = Math.sin(r), dy = Math.cos(r); const b = Bodies.rectangle(ax + dx * len / 2, ay + dy * len / 2, w, len, Object.assign(opt(d), {angle:-r})); b.plugin = {len, ex:ax + dx * len, ey:ay + dy * len}; return b; };
+  P.ua1 = limb(hx + 6, hy - 28, 150, 14, 8); P.fa1 = limb(P.ua1.plugin.ex, P.ua1.plugin.ey, 172, 13, 7.5);
+  P.ua2 = limb(hx - 5, hy - 28, 25, 14, 8); P.fa2 = limb(P.ua2.plugin.ex, P.ua2.plugin.ey, 160, 13, 7.5);
+  P.th1 = limb(hx + 4, hy - 1, 22, 15, 9); P.sh1 = limb(P.th1.plugin.ex, P.th1.plugin.ey, -20, 15, 8.5);
+  P.th2 = limb(hx - 4, hy - 1, -18, 15, 9); P.sh2 = limb(P.th2.plugin.ex, P.th2.plugin.ey, 22, 15, 8.5);
+  const cons = [];
+  const pin = (A, B, wx, wy, k) => { const c = Constraint.create({bodyA:A, pointA:{x:wx - A.position.x, y:wy - A.position.y}, bodyB:B, pointB:{x:wx - B.position.x, y:wy - B.position.y}, stiffness:k || .7, damping:.15, length:0}); cons.push(c); return c; };
+  pin(P.torso, P.head, hx, hy - 33, .8);
+  pin(P.torso, P.ua1, hx + 6, hy - 28); pin(P.ua1, P.fa1, P.ua1.plugin.ex, P.ua1.plugin.ey);
+  pin(P.torso, P.ua2, hx - 5, hy - 28); pin(P.ua2, P.fa2, P.ua2.plugin.ex, P.ua2.plugin.ey);
+  pin(P.torso, P.th1, hx + 4, hy - 1); pin(P.th1, P.sh1, P.th1.plugin.ex, P.th1.plugin.ey);
+  pin(P.torso, P.th2, hx - 4, hy - 1); pin(P.th2, P.sh2, P.th2.plugin.ex, P.th2.plugin.ey);
+  // the mic hangs on the back hand until something knocks it loose
+  const he = P.fa2.plugin; const mic = Bodies.rectangle(he.ex + 4, he.ey - 6, 5, 16, Object.assign(opt(.001), {angle:.5}));
+  const micC = Constraint.create({bodyA:P.fa2, pointA:{x:he.ex - P.fa2.position.x, y:he.ey - P.fa2.position.y}, bodyB:mic, pointB:{x:-2, y:5}, stiffness:.6, damping:.05, length:0});
+  const all = [P.torso, P.head, P.ua1, P.fa1, P.ua2, P.fa2, P.th1, P.sh1, P.th2, P.sh2, mic];
+  all.forEach(b => { b.plugin = Object.assign(b.plugin || {}, {kind:'rag', pv:{x:0, y:0}}); }); mic.plugin.kind = 'mic';
+  Composite.add(world, all); Composite.add(world, cons); Composite.add(world, micC);
+  return Object.assign(P, {all, cons, mic, micC, hat:true, face:'shock'}); }
+function handPos(b){ const L = b.plugin.len / 2; return {x:b.position.x - Math.sin(b.angle) * L, y:b.position.y + Math.cos(b.angle) * L}; }
+function ends(b){ const L = (b.plugin.len || 14) / 2, s = Math.sin(b.angle), c = Math.cos(b.angle); return [b.position.x + s * L, b.position.y - c * L, b.position.x - s * L, b.position.y + c * L]; }
+
+// ---------- scoring ----------
+function award(pts, x, y, label, col){ if (ended) return 0; const now = simT; if (now - lastHit < 1.1) combo++; else combo = 1; lastHit = now; maxCombo = Math.max(maxCombo, combo);
+  const mult = 1 + (Math.min(combo, 12) - 1) * .25, p = Math.round(pts * mult / 10) * 10; score += p;
+  if (label) pops.push({x, y, t:0, s:label + ' +' + p.toLocaleString('fi-FI'), col:col || '#ffd28a'});
+  if (combo > 1 && combo !== comboShown){ comboShown = combo; const el = $('combo'); el.innerHTML = 'COMBO x' + combo; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 1300); }
+  if ((combo === 5 || (combo > 5 && combo % 10 === 5)) && combo !== viisiCount){ viisiCount = combo; viisi(); }
+  return p; }
+function viisi(){ slowT = 1.3; $('viisi').classList.add('on'); setTimeout(() => $('viisi').classList.remove('on'), 1250); sfx('slow', .7, {force:true, vary:false}); sfx(rnd() < .5 ? 'victory1' : 'victory2', .7, {delay:.9, force:true}); }
+
+// ---------- damage and breaking ----------
+function hurt(b, amount, x, y){ const p = b.plugin; if (!p || p.gone || amount <= 0) return;
+  if (p.kind === 'rag' || p.kind === 'mic' || p.kind === 'pad' || p.kind === 'ground' || p.kind === 'stage' || p.kind === 'ramp' || p.kind === 'backdrop') return;
+  if (p.kind === 'speaker') return;
+  p.dmg += amount;
+  if (p.kind === 'gas' || p.kind === 'fw' || p.kind === 'jerry' || p.kind === 'cab'){ if (p.dmg >= p.hp) arm(b); return; }
+  const f = p.dmg / p.hp, st = f >= 1 ? 2 : f >= .45 ? 1 : 0;
+  if (st > p.st){ const old = p.st; p.st = st;
+    if (p.kind === 'car'){ if (old === 0){ sfx('glass_break', .7, {x, y}); shards(x, y - 20, 10); sfx('alarm', .35, {x, y, gap:3}); } if (st === 2){ sfx('metal_strike', .8, {x, y}); award(900, b.position.x, b.position.y - 40, 'AUTO'); } else award(300, b.position.x, b.position.y - 40); return; }
+    if (p.mat === 'metal'){ sfx(MAT.metal.snd[Math.floor(rnd() * 3)], .6, {x, y}); award(st === 2 ? 160 : 80, x, y); return; }
+    if (st === 1){ if (p.mat === 'wood' && rnd() < .3) sfx('wood_creak', .35, {x, y, gap:.8}); if (p.mat === 'stone') sfx('thud_heavy', .35, {x, y}); return; }
+    breakBody(b); } }
+function breakBody(b){ const p = b.plugin; if (p.gone) return; p.gone = true; const x = b.position.x, y = b.position.y, m = MAT[p.mat];
+  sfx(m.snd[Math.floor(rnd() * m.snd.length)], p.mat === 'glass' ? .65 : .7, {x, y});
+  if (p.mat === 'glass'){ sfx('glass_debris', .35, {x, y, delay:.12, gap:.3}); shards(x, y, 12 + Math.floor(p.w * p.h / 300)); }
+  else chips(x, y, p.mat, 8);
+  award(m.pts * (p.w * p.h > 3000 ? 1.5 : 1), x, y);
+  removeBody(b);
+  // wood and stone split in two along the long side if there's enough of them
+  if (p.mat === 'wood' || p.mat === 'stone' || p.mat === 'crate'){ const long = Math.max(p.w, p.h), short = Math.min(p.w, p.h);
+    if (long >= 40 && p.mat !== 'crate'){ const along = p.w >= p.h, half = long / 2, ca = Math.cos(b.angle), sa = Math.sin(b.angle);
+      for (const sgn of [-1, 1]){ const ox = along ? ca * half / 2 * sgn : -sa * half / 2 * sgn, oy = along ? sa * half / 2 * sgn : ca * half / 2 * sgn;
+        const nb = block(p.mat, x + ox, y + oy, along ? half - 2 : short, along ? short : half - 2, b.angle + (rnd() - .5) * .2); nb.plugin.hp = p.hp * .5; nb.plugin.st = 0; nb.plugin.frag = true;
+        Body.setVelocity(nb, {x:b.velocity.x + ox * .04 + (rnd() - .5) * 2, y:b.velocity.y + oy * .04 - rnd() * 2}); Body.setAngularVelocity(nb, (rnd() - .5) * .25); } } } }
+function removeBody(b){ b.plugin.gone = true; Composite.remove(world, b); const i = bodies.indexOf(b); if (i >= 0) bodies.splice(i, 1); }
+
+// ---------- explosives ----------
+function arm(b){ const p = b.plugin; if (p.armed) return; p.armed = true; p.armT = simT; const x = b.position.x, y = b.position.y;
+  if (p.kind === 'gas'){ p.hiss = sfx(rnd() < .5 ? 'gas_hiss' : 'gas_release', .7, {x, y, force:true}); later(.9 + rnd() * .5, () => blow(b, 300, 26, 'boom_' + ['bright', 'rocky', 'tan'][Math.floor(rnd() * 3)], 'KAASUPULLO', 2000)); }
+  else if (p.kind === 'fw'){ sfx('fuse', .6, {x, y, force:true}); later(.7, () => fireworks(b)); }
+  else if (p.kind === 'jerry'){ sfx('flame_burst', .8, {x, y, force:true}); later(.25, () => { fires.push({x:b.position.x, y:b.position.y + 10, t:0, life:4}); blow(b, 220, 18, 'fireball', 'BENSAKANISTERI', 1200); }); }
+  else if (p.kind === 'cab'){ zap(b); } }
+function later(t, fn){ timers.push({t:simT + t, fn}); }
+function blow(b, r, power, snd, label, pts){ if (b.plugin.boomed) return; b.plugin.boomed = true; const x = b.position.x, y = b.position.y; if (!b.plugin.gone) removeBody(b);
+  explode(x, y, r, power, snd); tally.boom += award(pts, x, y - 30, label, '#ff8a5c'); }
+function explode(x, y, r, power, snd){ booms.push({x, y, r, t:0}); shake = Math.max(shake, Math.min(26, power * .9));
+  sfx(snd || 'boom_tan', 1, {x, y, force:true, gap:.02}); for (let i = 0; i < 10; i++) smoke(x + (rnd() - .5) * r * .5, y - rnd() * r * .4, 1);
+  for (let i = 0; i < 26; i++){ const a = rnd() * 6.28, v = 4 + rnd() * 10; parts.push({x, y, vx:Math.cos(a) * v, vy:Math.sin(a) * v - 3, life:.6 + rnd() * .5, t:0, k:'spark', c:rnd() < .5 ? '#ffd27a' : '#ff8a2a', s:3}); }
+  const near = Composite.allBodies(world);
+  for (const b of near){ if (b.isStatic || (b.plugin && b.plugin.gone)) continue; const dx = b.position.x - x, dy = b.position.y - y, d = Math.hypot(dx, dy); if (d > r) continue;
+    const k = 1 - d / r, nx = dx / (d || 1), ny = dy / (d || 1) - .35, dv = power * k / Math.sqrt(Math.max(.4, b.mass));
+    Sleeping.set(b, false); Body.setVelocity(b, {x:b.velocity.x + nx * dv, y:b.velocity.y + ny * dv}); Body.setAngularVelocity(b, b.angularVelocity + (rnd() - .5) * .3 * k);
+    const p = b.plugin; if (!p) continue;
+    if (p.kind === 'rag' && b === rag.torso){ tally.self += award(power * k * 40, x, y - 60, 'POKS'); ouch(true); }
+    else if (p.kind === 'gas' || p.kind === 'fw' || p.kind === 'jerry' || p.kind === 'cab'){ const bb = b; if (!p.armed) later(.25 + d / r * .35, () => arm(bb)); }
+    else hurt(b, power * k * 2.4, b.position.x, b.position.y); } }
+function fireworks(b){ if (b.plugin.boomed) return; b.plugin.boomed = true; const x = b.position.x, y = b.position.y; removeBody(b);
+  explode(x, y, 120, 8, 'fireworks'); tally.boom += award(1500, x, y - 30, 'PAUKKU', '#ff8a5c');
+  for (let i = 0; i < 7; i++) later(.15 + i * .38, () => { const a = -Math.PI / 2 + (rnd() - .5) * 2.2, r = Bodies.rectangle(x, y - 20, 18, 6, {angle:a, density:.002, frictionAir:.01, collisionFilter:{group:-3}});
+    r.plugin = {kind:'rocket', t:0, pv:{x:0, y:0}}; Composite.add(world, r); rockets.push(r); Body.setVelocity(r, {x:Math.cos(a) * 14, y:Math.sin(a) * 14}); sfx(rnd() < .5 ? 'fireworks_red' : 'fireworks_crackle', .45, {x, y, gap:.15}); }); }
+function zap(b){ const p = b.plugin; if (p.zapped) return; p.zapped = true; const x = b.position.x, y = b.position.y; sfx('electric', .8, {x, y, force:true});
+  tally.boom += award(800, x, y - 40, 'SÄHKÖKAAPPI', '#7ab0d0');
+  for (let i = 0; i < 18; i++){ const a = rnd() * 6.28, v = 3 + rnd() * 8; parts.push({x, y:y - 20, vx:Math.cos(a) * v, vy:Math.sin(a) * v, life:.4 + rnd() * .3, t:0, k:'spark', c:'#7ab0d0', s:3}); }
+  // the current jumps to anything explosive or electric nearby, and to him if he's close
+  for (const o of bodies){ const q = o.plugin; if (!q || o === b || q.gone) continue; const d = Math.hypot(o.position.x - x, o.position.y - y); if (d > 420) continue;
+    if (q.kind === 'gas' || q.kind === 'fw' || q.kind === 'jerry' || q.kind === 'cab'){ arcs.push({x1:x, y1:y - 20, x2:o.position.x, y2:o.position.y, t:0}); const oo = o; later(.3, () => arm(oo)); } }
+  if (rag){ const d = Math.hypot(rag.torso.position.x - x, rag.torso.position.y - y); if (d < 260){ arcs.push({x1:x, y1:y - 20, x2:rag.torso.position.x, y2:rag.torso.position.y, t:0}); tally.self += award(700, rag.torso.position.x, rag.torso.position.y - 60, 'ZÄP'); Body.setVelocity(rag.torso, {x:rag.torso.velocity.x + (rnd() - .3) * 8, y:rag.torso.velocity.y - 10}); ouch(true); } }
+  later(.4, () => blow(b, 160, 12, 'fireball_glitch', null, 0)); }
+
+// ---------- particles ----------
+function shards(x, y, n){ for (let i = 0; i < n; i++){ const a = rnd() * 6.28, v = 2 + rnd() * 7; parts.push({x:x + (rnd() - .5) * 30, y:y + (rnd() - .5) * 30, vx:Math.cos(a) * v, vy:Math.sin(a) * v - 3, life:1.2 + rnd(), t:0, k:'shard', s:4 + rnd() * 7, r:rnd() * 6, vr:(rnd() - .5) * .4}); } }
+function chips(x, y, mat, n){ const col = mat === 'stone' ? C.stone : mat === 'crate' ? '#c23b3b' : C.woodL; for (let i = 0; i < n; i++){ const a = rnd() * 6.28, v = 2 + rnd() * 6; parts.push({x, y, vx:Math.cos(a) * v, vy:Math.sin(a) * v - 2.5, life:1 + rnd(), t:0, k:mat === 'stone' ? 'rubble' : 'chip', c:col, s:3 + rnd() * 5, r:rnd() * 6, vr:(rnd() - .5) * .5}); } }
+function smoke(x, y, n){ for (let i = 0; i < n; i++) parts.push({x, y, vx:(rnd() - .5) * 1.2, vy:-.6 - rnd() * .8, life:1.6 + rnd() * 1.4, t:0, k:'smoke', s:14 + rnd() * 20, c:rnd() < .5 ? '#5d5852' : '#6e6860'}); }
+
+// ---------- collisions: impacts become damage, sound and points ----------
+function onCollide(e){ for (const pr of e.pairs){ let a = pr.bodyA, b = pr.bodyB; a = a.parent || a; b = b.parent || b; const pa = a.plugin || {}, pb = b.plugin || {};
+    if (pa.kind === 'rocket' || pb.kind === 'rocket'){ const r = pa.kind === 'rocket' ? a : b; const o = r === a ? b : a; if (o.plugin && o.plugin.kind === 'rag') continue; if (!r.plugin.gone && r.plugin.t > .12){ r.plugin.gone = true; Composite.remove(world, r); explode(r.position.x, r.position.y, 110, 7, 'fireworks_crackle'); } continue; }
+    const n = pr.collision.normal, va = pa.pv || a.velocity, vb = a.isStatic ? {x:0, y:0} : null;
+    const vA = a.isStatic ? {x:0, y:0} : (pa.pv || a.velocity), vB = b.isStatic ? {x:0, y:0} : (pb.pv || b.velocity);
+    const rv = Math.abs((vA.x - vB.x) * n.x + (vA.y - vB.y) * n.y); if (rv < 2) continue;
+    const ma = a.isStatic ? Infinity : a.mass, mb = b.isStatic ? Infinity : b.mass, mr = ma === Infinity ? mb : mb === Infinity ? ma : ma * mb / (ma + mb);
+    const imp = rv * mr; if (imp < 2.2) continue;
+    const sp = pr.collision.supports && pr.collision.supports[0], x = sp ? sp.x : (a.position.x + b.position.x) / 2, y = sp ? sp.y : (a.position.y + b.position.y) / 2;
+    const ragA = pa.kind === 'rag', ragB = pb.kind === 'rag';
+    if (ragA || ragB){ const rb = ragA ? a : b, other = ragA ? b : a; ragHit(rb, other, imp, rv, x, y); if (!other.isStatic) hurt(other, imp * 1.15, x, y); continue; }
+    if (pa.kind === 'mic' || pb.kind === 'mic') continue;
+    if (!a.isStatic) hurt(a, imp * .9, x, y); if (!b.isStatic) hurt(b, imp * .9, x, y);
+    if (imp > 6 && rnd() < .5){ const m = (pa.mat || pb.mat); if (m === 'metal') sfx('metal_table' + (1 + Math.floor(rnd() * 2)), clamp(imp / 40, .1, .5), {x, y, gap:.15}); else if (m === 'wood') sfx('wood_pile', clamp(imp / 50, .08, .4), {x, y, gap:.12}); else if (m === 'stone') sfx('thud_heavy', clamp(imp / 60, .08, .5), {x, y, gap:.12}); } } }
+function ragHit(part, other, imp, rv, x, y){ if (state !== 'fly' || (rag.torso.position.x < STAGE.x + 190 && rag.torso.position.y < STAGE.y + 40)) return; const big = imp > 7;
+  if (big){ const pts = Math.min(1500, imp * 9); tally.self += award(pts, x, y - 40, imp > 22 ? 'AUTS' : null);
+    sfx(rv > 14 ? 'thud_heavy' : 'thud_soft', clamp(imp / 30, .2, .9), {x, y, gap:.07}); shake = Math.max(shake, Math.min(10, imp * .25));
+    if (imp > 16) ouch(); if (rag.hat && (part === rag.head) && imp > 12) loseHat(); }
+  if (rag.micC && imp > 18 && rnd() < .5) loseMic(); }
+function ouch(force){ const t = simT; if (!force && t - lastOuch < 1.4) return; lastOuch = t; rag.face = 'ouch'; rag.faceT = t;
+  const k = rnd() < .65 ? 'groan' + (1 + Math.floor(rnd() * 7)) : 'ouch' + (1 + Math.floor(rnd() * 6)); sfx(k, .75, {x:rag.torso.position.x, y:rag.torso.position.y, force:true, gap:0}); lastGroan = t; }
+function loseHat(){ rag.hat = false; const h = rag.head, b = Bodies.rectangle(h.position.x, h.position.y - 14, 30, 14, {density:.0006, friction:.5, chamfer:{radius:6}, angle:h.angle}); b.plugin = {kind:'hat', pv:{x:0, y:0}}; Composite.add(world, b);
+  Body.setVelocity(b, {x:h.velocity.x * 1.1 + (rnd() - .5) * 4, y:h.velocity.y - 5}); Body.setAngularVelocity(b, (rnd() - .5) * .5); bodies.push(b); }
+function loseMic(){ if (!rag.micC) return; Composite.remove(world, rag.micC); rag.micC = null; rag.mic.plugin.kind = 'micloose'; rag.mic.collisionFilter.group = 0; }
+
+// ---------- input: grab the raised hand, swing, let go ----------
+function toWorld(cx, cy){ const z = baseZ() * cam.z; return {x:(cx - W / 2) / z + cam.x, y:(cy - H / 2) / z + cam.y}; }
+let ptr = null, ptrHist = [];
+function clampGrab(p){ const cx = STAGE.x, cy = STAGE.y - 150, dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy), R0 = 230; return d > R0 ? {x:cx + dx / d * R0, y:cy + dy / d * R0} : p; }
+cv.addEventListener('pointerdown', e => { if (state !== 'stage') return; audioInit(); const w = toWorld(e.clientX, e.clientY);
+  if (Math.hypot(w.x - (STAGE.x + 10), w.y - (STAGE.y - 110)) > 160) return;
+  e.preventDefault(); cv.setPointerCapture(e.pointerId); ptr = e.pointerId; doGrab(w); });
+cv.addEventListener('pointermove', e => { if (e.pointerId !== ptr || !grab) return; const w = clampGrab(toWorld(e.clientX, e.clientY)); grab.pointA.x = w.x; grab.pointA.y = w.y; ptrHist.push({t:performance.now(), x:w.x, y:w.y}); if (ptrHist.length > 8) ptrHist.shift(); });
+const endPtr = e => { if (e.pointerId !== ptr) return; ptr = null; if (grab) release(); };
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+
+function doGrab(w){ state = 'grab'; $('hint').classList.remove('on'); rag = makeRag(STAGE.x + 10, STAGE.y - 60); rag.face = 'shock';
+  const f = rag.fa1, hp = handPos(f); grab = Constraint.create({pointA:{x:hp.x, y:hp.y}, bodyB:f, pointB:{x:hp.x - f.position.x, y:hp.y - f.position.y}, stiffness:.32, damping:.08, length:0}); Composite.add(world, grab);
+  const t = clampGrab(w); grab.pointA.x = t.x; grab.pointA.y = t.y; ptrHist = [];
+  sfx('grab', .9, {force:true}); sfx('crowd_cheer', .55, {force:true, x:STAGE.x, y:STAGE.y}); }
+function release(){ Composite.remove(world, grab); grab = null; state = 'fly'; flyT = 0; restT = 0;
+  // a good swing gets a little extra, as if he helped
+  let pvx = 0, pvy = 0; const now = performance.now(), h = ptrHist.filter(q => now - q.t < 90); if (h.length > 1){ const a = h[0], b = h[h.length - 1], dt = Math.max(8, b.t - a.t); pvx = (b.x - a.x) / dt * 16.67; pvy = (b.y - a.y) / dt * 16.67; }
+  rag.all.forEach(b => { let vx = b.velocity.x * .4 + pvx * 1.6, vy = b.velocity.y * .4 + pvy * 1.6; const s = Math.hypot(vx, vy); if (s > 70){ vx *= 70 / s; vy *= 70 / s; } Body.setVelocity(b, {x:vx, y:vy}); });
+  rag.throwV = Math.hypot(pvx, pvy);
+  rag.face = 'ouch'; sfx('yell_strained', .85, {force:true}); sfx('crowd_shout', .6, {force:true, x:STAGE.x, y:STAGE.y}); }
+
+// ---------- game flow ----------
+function newGame(){ if (engine){ Composite.clear(engine.world, false); Engine.clear(engine); }
+  engine = Engine.create({enableSleeping:true}); engine.gravity.scale = .00085; engine.positionIterations = 10; engine.velocityIterations = 8; engine.constraintIterations = 4; world = engine.world;
+  bodies = []; parts = []; rockets = []; timers = []; pops = []; booms = []; arcs = []; fires = []; rag = null; grab = null;
+  score = 0; combo = 0; maxCombo = 0; comboShown = 0; viisiCount = 0; lastHit = -9; tally = {self:0, env:0, boom:0}; simT = 0; flyT = 0; restT = 0; slowT = 0; shake = 0; maxDist = 0; ended = false;
+  buildCurve(); planCourse(); makeFlats(); terrain(); stage(); RAMPS.forEach(x => { if (!FLATS.some(f => x > f.a - 260 && x < f.b + 240)) ramp(x); });
+  Events.on(engine, 'collisionStart', onCollide);
+  Events.on(engine, 'afterUpdate', () => { for (const b of world.bodies){ if (b.plugin && b.plugin.pv){ b.plugin.pv.x = b.velocity.x; b.plugin.pv.y = b.velocity.y; } } });
+  cam.x = cam.tx = STAGE.x + 60; cam.y = cam.ty = STAGE.y - 130; cam.z = cam.tz = 1.35; spawnAhead();
+  state = 'stage'; $('over').classList.remove('on'); $('hint').classList.add('on'); $('score').textContent = '0'; $('dist').textContent = '0 M'; }
+function finish(){ if (ended) return; ended = true; state = 'over';
+  const d = Math.round(maxDist), rec = score > best; if (rec){ best = score; try { localStorage.setItem('viistone-heita-best', String(best)); } catch(e){} }
+  sfx('groan' + (1 + Math.floor(rnd() * 7)), .7, {force:true, x:rag.torso.position.x, y:rag.torso.position.y}); sfx('crowd_aww', .45, {force:true, delay:.9});
+  if (rec && score > 0) sfx(rnd() < .5 ? 'victory1' : 'victory2', .6, {force:true, delay:2.4});
+  tally.env = Math.max(0, score - tally.self - tally.boom);
+  $('opts').textContent = score.toLocaleString('fi-FI') + ' PTS';
+  $('orows').innerHTML = d + ' M · COMBO x' + Math.max(1, maxCombo) + '<br>VIISTONE ITSE ' + tally.self.toLocaleString('fi-FI') + ' · YMPÄRISTÖ ' + tally.env.toLocaleString('fi-FI') + ' · RÄJÄHDYKSET ' + tally.boom.toLocaleString('fi-FI') + '<br>' + (rec && score > 0 ? '<span class="rec">UUSI ENNÄTYS</span>' : 'ENNÄTYS ' + best.toLocaleString('fi-FI'));
+  setTimeout(() => $('over').classList.add('on'), 1400); }
+$('bgo').onclick = () => { audioInit(); $('start').classList.remove('on'); startSong(); newGame(); };
+$('bagain').onclick = () => { audioInit(); newGame(); };
+
+// ---------- simulation step ----------
+const STEP = 1000 / 120;
+function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= dt;
+  engine.timing.timeScale = ts; const n = 2; for (let i = 0; i < n; i++){ Engine.update(engine, STEP); }
+  const sdt = dt * ts; simT += sdt;
+  for (let i = timers.length - 1; i >= 0; i--) if (timers[i].t <= simT){ const f = timers[i].fn; timers.splice(i, 1); f(); }
+  // armed gas bottles fly around like rockets while they hiss
+  // anything explosive that gets knocked over goes off
+  for (const b of bodies){ const p = b.plugin; if (p && !p.armed && (p.kind === 'gas' || p.kind === 'fw' || p.kind === 'jerry') && !b.isSleeping && Math.abs(b.angle - p.a0) > 1.1) arm(b); }
+  for (const b of bodies){ const p = b.plugin; if (p && p.kind === 'gas' && p.armed && !p.boomed){ const a = b.angle - Math.PI / 2; Body.applyForce(b, b.position, {x:Math.cos(a) * .0016 * b.mass * 40, y:Math.sin(a) * .0016 * b.mass * 40}); Body.setAngularVelocity(b, b.angularVelocity + (rnd() - .5) * .02);
+      if (rnd() < .6) parts.push({x:b.position.x - Math.cos(a) * 20, y:b.position.y - Math.sin(a) * 20, vx:-Math.cos(a) * 3 + (rnd() - .5), vy:-Math.sin(a) * 3 + (rnd() - .5), life:.4, t:0, k:'smoke', s:6 + rnd() * 6, c:'#d8d4ca'}); } }
+  for (let i = rockets.length - 1; i >= 0; i--){ const r = rockets[i], p = r.plugin; p.t += sdt; if (p.gone){ rockets.splice(i, 1); continue; }
+    if (p.t < 1.1){ const a = r.angle; Body.applyForce(r, r.position, {x:Math.cos(a) * .0012 * r.mass * 10, y:Math.sin(a) * .0012 * r.mass * 10 - .0006 * r.mass}); parts.push({x:r.position.x, y:r.position.y, vx:(rnd() - .5), vy:(rnd() - .5), life:.35, t:0, k:'spark', c:'#ffd27a', s:2.5}); }
+    else { p.gone = true; Composite.remove(world, r); rockets.splice(i, 1); explode(r.position.x, r.position.y, 110, 7, 'fireworks_crackle'); } }
+  for (const f of fires){ f.t += sdt; if (rnd() < .5) parts.push({x:f.x + (rnd() - .5) * 60, y:f.y - 4, vx:(rnd() - .5) * .6, vy:-1.5 - rnd() * 2, life:.5 + rnd() * .4, t:0, k:'flame', s:6 + rnd() * 8}); }
+  fires = fires.filter(f => f.t < f.life);
+  // the mic lets go if it gets yanked
+  if (rag && rag.micC){ const c = rag.micC, A = c.bodyA, B = c.bodyB; const ax = A.position.x + c.pointA.x, ay = A.position.y + c.pointA.y, bx = B.position.x + c.pointB.x, by = B.position.y + c.pointB.y; if (Math.hypot(ax - bx, ay - by) > 14) loseMic(); }
+  if (state === 'fly'){ flyT += dt; const t = rag.torso, d = (t.position.x - STAGE.x) / PXM; maxDist = Math.max(maxDist, d);
+    let mv = 0; rag.all.forEach(b => { if (b !== rag.mic) mv = Math.max(mv, Math.hypot(b.velocity.x, b.velocity.y)); });
+    const busy = timers.length > 0 || rockets.length > 0 || bodies.some(b => b.plugin && b.plugin.armed && !b.plugin.boomed && !b.plugin.zapped);
+    const tv = Math.hypot(t.velocity.x, t.velocity.y); const quiet = !busy && simT - lastHit > 1.2; restT = tv < .7 && mv < 2 && quiet ? restT + dt : 0; rag.slowT = tv < .8 && quiet ? (rag.slowT || 0) + dt : 0; if (rag.slowT > 3.5) restT = 99;
+    if (rag.face === 'ouch' && simT - (rag.faceT || 0) > 1.2) rag.face = 'shock';
+    if (restT > 1.6 || flyT > 60){ if (maxDist < 6 && flyT < 20){ backOnStage(); } else { rag.face = 'out'; finish(); } } }
+  // fallen bits far behind the camera are let go
+  const left = cam.x - viewW() * .5 - 2500; for (let i = bodies.length - 1; i >= 0; i--){ const b = bodies[i]; if (!b.isStatic && b.position.x < left && b.plugin && b.plugin.kind !== 'speaker'){ removeBody(b); } }
+  for (const b of bodies){ if (!b.isStatic && b.position.y > gy(b.position.x) + 600) removeBody(b); }
+  parts.forEach(p => { p.t += sdt; p.x += p.vx * ts; p.y += p.vy * ts; if (p.k === 'smoke' || p.k === 'flame'){ p.vx *= .98; p.vy *= .98; } else { p.vy += .35 * ts; const gyx = gy(p.x); if (p.y > gyx){ p.y = gyx; p.vy *= -.3; p.vx *= .6; } } if (p.r != null) p.r += (p.vr || 0) * ts; });
+  parts = parts.filter(p => p.t < p.life); if (parts.length > 700) parts.splice(0, parts.length - 700);
+  pops.forEach(p => p.t += dt); pops = pops.filter(p => p.t < 1.6);
+  booms.forEach(b => b.t += sdt); booms = booms.filter(b => b.t < .7); arcs.forEach(a => a.t += dt); arcs = arcs.filter(a => a.t < .35);
+  // once any part of a structure stirs, the whole thing wakes up so nothing is left hanging in the air
+  for (const s of structs){ if (!s.spawned || s.awake || !s.list) continue; if (s.list.some(b => b.plugin.gone || !b.isSleeping)){ s.awake = true; s.list.forEach(b => { if (!b.plugin.gone) Sleeping.set(b, false); }); } }
+  // structure bonus once most of it has gone over
+  for (const s of structs){ if (!s.spawned || s.done || !s.list) continue; let moved = 0; for (const b of s.list){ const p = b.plugin; if (p.gone || p.boomed || Math.hypot(b.position.x - p.x0, b.position.y - p.y0) > 50 || Math.abs(b.angle - p.a0) > .6) moved++; }
+    if (moved >= s.list.length * .6){ s.done = true; tally.env += 0; award(s.bonus, s.x + 60, gy(s.x) - 170, s.name, '#ffd28a'); sfx('wood_metal_smash', .4, {x:s.x, y:gy(s.x), gap:.4}); } } }
+function backOnStage(){ // a weak throw: he gets back up and you can try again
+  rag.all.forEach(b => Composite.remove(world, b)); rag.cons.forEach(c => Composite.remove(world, c)); if (rag.micC) Composite.remove(world, rag.micC); rag = null; state = 'stage'; $('hint').classList.add('on');
+  score = 0; tally = {self:0, env:0, boom:0}; combo = 0; maxCombo = 0; maxDist = 0; pops.push({x:STAGE.x, y:STAGE.y - 200, t:0, s:'HEITÄ KUNNOLLA', col:'#ece4cc'}); }
+
+// ---------- camera ----------
+function camStep(dt){ if (rag && state !== 'stage'){ const t = rag.torso, v = t.velocity, sp = Math.hypot(v.x, v.y);
+    cam.tx = t.position.x + clamp(v.x * 14, -260, 520); cam.ty = t.position.y + clamp(v.y * 8, -200, 260) - 40; const above = Math.max(0, gy(t.position.x) - t.position.y); cam.tz = Math.min(clamp(1.1 - sp / 70, .5, 1.1), clamp(H * .42 / baseZ() / (above + 160), H > W ? .72 : .5, 1.1));
+    cam.ty = Math.max(cam.ty, gy(t.position.x) - H * .36 / (baseZ() * cam.z)) ;
+    if (state === 'grab'){ cam.tx = STAGE.x + 100; cam.ty = STAGE.y - 150; cam.tz = 1.15; } }
+  else { cam.tx = STAGE.x + 60; cam.ty = STAGE.y - 130; cam.tz = 1.35; }
+  const k = 1 - Math.pow(.02, dt), kz = 1 - Math.pow(.2, dt); cam.x += (cam.tx - cam.x) * k; cam.y += (cam.ty - cam.y) * k; cam.z += (cam.tz - cam.z) * kz;
+  shake *= Math.pow(.02, dt); }
+
+// ---------- background, made once ----------
+let farC = null, midC = null, grainC = null, vig = null;
+function makeBg(){ const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+  seed = 99; farC = mk(2400, 420); let q = farC.getContext('2d'); const og = g;
+  const hill = (ctx, w, h, base, amp, col, lw) => { ctx.beginPath(); ctx.moveTo(0, h); for (let x = 0; x <= w; x += 8) ctx.lineTo(x, base + Math.sin(x / w * Math.PI * 4) * amp + Math.sin(x / w * Math.PI * 10 + 1) * amp * .35); ctx.lineTo(w, h); ctx.closePath(); ctx.fillStyle = col; ctx.fill(); ctx.lineWidth = lw; ctx.strokeStyle = INK; ctx.stroke(); };
+  hill(q, 2400, 420, 230, 50, '#2b2f2a', 3);
+  const pineAt = (ctx, x, y, h, col) => { for (let i = 0; i < 3; i++){ const w = h * (.38 - i * .09), yy = y - h * .15 - i * h * .26; ctx.beginPath(); ctx.moveTo(x - w, yy); ctx.lineTo(x, yy - h * .42); ctx.lineTo(x + w, yy); ctx.closePath(); ctx.fillStyle = col; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = INK; ctx.stroke(); } };
+  const by = x => 230 + Math.sin(x / 2400 * Math.PI * 4) * 50 + Math.sin(x / 2400 * Math.PI * 10 + 1) * 17.5;
+  [[300, 120, 110], [1350, 100, 150], [1990, 130, 120]].forEach(([x, w, h]) => { const y = by(x + w / 2) + 20; q.fillStyle = '#2a2a2c'; q.fillRect(x, y - h, w, h); q.lineWidth = 3; q.strokeStyle = INK; q.strokeRect(x, y - h, w, h);
+    for (let yy = y - h + 14; yy < y - 14; yy += 22) for (let xx = x + 12; xx < x + w - 16; xx += 24){ q.fillStyle = R() < .35 ? '#e8b35c' : '#1b1b1e'; q.fillRect(xx, yy, 10, 10); } });
+  q.lineWidth = 3; q.strokeStyle = INK; q.beginPath(); q.moveTo(830, by(840)); q.lineTo(838, by(840) - 60); q.moveTo(860, by(840)); q.lineTo(852, by(840) - 60); q.stroke(); q.fillStyle = '#3a3a3a'; q.fillRect(824, by(840) - 90, 44, 30); q.strokeRect(824, by(840) - 90, 44, 30);
+  for (let i = 0; i < 46; i++){ const x = R() * 2400; pineAt(q, x, by(x) + 8, 26 + R() * 22, '#222820'); }
+  midC = mk(2000, 360); q = midC.getContext('2d'); hill(q, 2000, 360, 200, 40, '#283024', 3);
+  const by2 = x => 200 + Math.sin(x / 2000 * Math.PI * 4) * 40 + Math.sin(x / 2000 * Math.PI * 10 + 1) * 14;
+  for (let i = 0; i < 30; i++){ const x = R() * 2000; pineAt(q, x, by2(x) + 10, 40 + R() * 40, '#1f271c'); }
+  grainC = mk(256, 256); q = grainC.getContext('2d'); const im = q.createImageData(256, 256); for (let i = 0; i < im.data.length; i += 4){ const v = Math.random() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; } q.putImageData(im, 0, 0); }
+function makeOverlay(){ vig = null; }
+
+// ---------- rendering ----------
+let tufts = null;
+function draw(t){ g.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#1d1b24'); sky.addColorStop(.55, '#3a3236'); sky.addColorStop(1, '#4b3e36'); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  // stars and moon, nearly fixed
+  g.fillStyle = 'rgba(236,228,204,.45)'; for (let i = 0; i < 60; i++){ const sx = ((i * 197.3 - cam.x * .02) % W + W) % W, sy = (i * 61.7) % (H * .45); g.fillRect(sx, sy, 2, 2); }
+  const mz = Math.min(W, H) / 720; g.lineWidth = 3; disc(W * .8 - cam.x * .005 % 40, H * .16, 38 * mz, '#d8c79a', 3);
+  // far and mid hills, sliding slower than the ground
+  const z = baseZ() * cam.z, hor = H * .62;
+  const strip = (c, par, py, sc, col) => { const w = c.width * sc, off = ((-cam.x * par * z) % w + w) % w - w, y = hor - c.height * sc + py - cam.y * par * .08 * z; for (let x = off; x < W; x += w) g.drawImage(c, x, y, w + 1, c.height * sc); g.fillStyle = col; g.fillRect(0, y + c.height * sc - 1, W, H); };
+  strip(farC, .08, 40, mz * .9, '#2b2f2a'); strip(midC, .22, 140, mz * 1.1, '#283024');
+  g.save(); const ox = W / 2 + (rnd() - .5) * shake, oy = H / 2 + (rnd() - .5) * shake; g.translate(ox, oy); g.scale(z, z); g.translate(-cam.x, -cam.y);
+  LW = clamp(3 / Math.sqrt(z), 2.5, 5);
+  const x0 = cam.x - W / 2 / z - 60, x1 = cam.x + W / 2 / z + 60, yb = cam.y + H / 2 / z + 60;
+  // ground
+  g.beginPath(); g.moveTo(x0, yb + 400); for (let x = x0; x <= x1; x += 16) g.lineTo(x, gy(x)); g.lineTo(x1, yb + 400); g.closePath(); g.fillStyle = C.grass; g.fill(); g.lineWidth = LW * 1.4; g.strokeStyle = INK; g.stroke();
+  g.beginPath(); g.moveTo(x0, yb + 400); for (let x = x0; x <= x1; x += 24) g.lineTo(x, gy(x) + 70); g.lineTo(x1, yb + 400); g.closePath(); g.fillStyle = C.grassD; g.fill();
+  for (let x = Math.floor(x0 / 23) * 23; x < x1; x += 23){ const h = 5 + ((x * 7919) % 9); line(x, gy(x) + 2, x + 3, gy(x) - h, '#55663f', 2.5); }
+  drawStage();
+  for (const b of bodies) drawBody(b);
+  for (const f of fires){ /* flames come as particles */ }
+  if (rag) drawRag(); else if (state === 'stage' || state === 'start') drawRapper(STAGE.x + 10, STAGE.y - 60, t);
+  for (const r of rockets) at(r.position.x, r.position.y, r.angle, () => { rr(-10, -3.5, 16, 7, 2); ink('#e8572a', 2.5); path([[6, -3.5], [12, 0], [6, 3.5]]); ink(C.cream, 2.5); });
+  if (Math.abs(cam.x - STAGE.x) < 1800) drawCrowd(t);
+  drawParts(); drawBooms(); drawArcs(); drawPops();
+  g.restore();
+  // grain, scanlines, vignette
+  g.globalAlpha = .07; const gx = Math.floor(rnd() * 256), gyy = Math.floor(rnd() * 256); g.fillStyle = g.createPattern(grainC, 'repeat'); g.save(); g.translate(-gx, -gyy); g.fillRect(gx, gyy, W, H); g.restore(); g.globalAlpha = 1;
+  g.fillStyle = 'rgba(0,0,0,.08)'; for (let y = 0; y < H; y += 3) g.fillRect(0, y, W, 1);
+  if (!vig){ vig = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .75); vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(0,0,0,.55)'); }
+  g.fillStyle = vig; g.fillRect(0, 0, W, H);
+  if (slowT > 0){ g.fillStyle = 'rgba(120,0,0,.18)'; g.fillRect(0, 0, W, H); }
+  cv.style.filter = slowT > 0 ? 'grayscale(.85) contrast(1.1)' : ''; }
+
+function drawStage(){ const x = STAGE.x, y = STAGE.y;
+  // posts and roof with a banner
+  line(x - 150, y - 30, x - 150, y - 250, INK, 9); line(x - 150, y - 30, x - 150, y - 250, C.woodD, 5); line(x + 150, y - 30, x + 150, y - 250, INK, 9); line(x + 150, y - 30, x + 150, y - 250, C.woodD, 5);
+  path([[x - 175, y - 250], [x + 175, y - 250], [x + 160, y - 272], [x - 160, y - 272]]); ink('#5a4a3a');
+  rr(x - 120, y - 245, 240, 50, 3); ink('#d8cfb4'); g.fillStyle = INK; [[-2, 9], [-1, 17], [0, 25], [1, 17], [2, 9]].forEach(([k, h]) => g.fillRect(x - 96 + (k + 2) * 7, y - 220 - h / 2, 4, h)); g.font = '30px VT323'; g.textAlign = 'left'; g.fillText('VIISTONE', x - 52, y - 210);
+  for (let i = 0; i < 6; i++){ const lx = x - 120 + i * 48; disc(lx, y - 186 + Math.sin(i) * 3, 5, '#ffe08a', 2); }
+  rr(x - STAGE.w / 2, y - 30, STAGE.w, 34, 3); ink('#5c4a35'); for (let i = -STAGE.w / 2 + 20; i < STAGE.w / 2; i += 26) line(x + i, y - 26, x + i, y, '#4a3a2a', 2);
+  // the crowd in front
+  if (rag && Math.abs(cam.x - x) > 2500) return; }
+function drawCrowd(t){ const x = STAGE.x, y = STAGE.y; for (let i = 0; i < 9; i++){ const cx = x - 150 + i * 36 + (i % 2) * 8, cy = y + 34 + (i % 3) * 8, bob = Math.sin(t * 6 + i) * 2.5;
+    rr(cx - 15, cy - 6 + bob, 30, 40, 12); ink(['#2e2b2a', '#3a3530', '#2a2d33'][i % 3]); disc(cx, cy - 14 + bob, 11, '#c7a184', 2.5); if (i % 2) { g.beginPath(); g.arc(cx, cy - 16 + bob, 11.5, Math.PI, 0); ink('#3a3d38', 2.5); }
+    if (i % 4 === 1){ line(cx + 10, cy + bob, cx + 18, cy - 30 + bob + Math.sin(t * 6 + i) * 6, INK, 8); line(cx + 10, cy + bob, cx + 18, cy - 30 + bob + Math.sin(t * 6 + i) * 6, '#3a3530', 4); } } }
+
+function drawBody(b){ const p = b.plugin; if (!p || p.gone) return; const x = b.position.x, y = b.position.y, a = b.angle, w = p.w, h = p.h;
+  switch (p.kind){
+  case 'pad': at(x, y, 0, () => { rr(-w / 2, -h / 2, w, h + 40, 4); ink('#5f5a52'); g.fillStyle = '#6e6960'; g.fillRect(-w / 2 + 4, -h / 2 + 4, w - 8, 5); }); return;
+  case 'ramp': path(p.v.map(v => [v.x, v.y])); ink(C.wood); for (let i = 1; i < 5; i++){ const u = i / 5; line(p.v[0].x + (p.v[1].x - p.v[0].x) * u, p.v[0].y + (p.v[1].y - p.v[0].y) * u, p.v[0].x + (p.v[2].x - p.v[0].x) * u, p.v[0].y + (p.v[2].y - p.v[0].y) * u, C.woodD, 2); } return;
+  case 'stage': return;
+  case 'backdrop': at(x, y, 0, () => { rr(-20, -280, 40, 560, 3); ink('#3a302a'); for (let i = -260; i < 270; i += 40) line(-16, i, 16, i + 10, '#2a221d', 2); }); return;
+  case 'speaker': at(x, y, a, () => { rr(-20, -40, 40, 80, 4); ink('#1f1f22'); disc(0, -18, 11, '#2c2c30', 2.5); disc(0, -18, 4, '#111', 0); disc(0, 16, 14, '#2c2c30', 2.5); disc(0, 16, 5, '#111', 0); }); return;
+  case 'hat': at(x, y, a, () => { g.beginPath(); g.arc(0, 4, 15, Math.PI, 0); ink(C.beanie); rr(-16, 0, 32, 7, 3); ink('#555a52', 2.5); disc(3, -12, 3.5, C.beanie, 2); }); return;
+  case 'car': at(x, y, a, () => { path([[-75, 10], [-72, -8], [-48, -10], [-30, -36], [36, -36], [52, -12], [75, -8], [75, 14], [-75, 14]]); ink(p.st === 2 ? '#5a1a14' : '#7a2c22');
+      const glassCol = p.st ? '#1d1e22' : 'rgba(160,205,215,.7)'; path([[-26, -12], [-14, -31], [2, -31], [2, -12]]); ink(glassCol, 2.5); path([[8, -12], [8, -31], [32, -31], [44, -12]]); ink(glassCol, 2.5);
+      if (p.st){ line(10, -28, 24, -16, C.glassL, 1.5); line(-20, -16, -6, -28, C.glassL, 1.5); } if (p.st === 2){ path([[-10, -36], [4, -26], [18, -36]]); ink('#4a120d', 2); }
+      disc(-46, 14, 13, '#1a1a1a', LW); disc(-46, 14, 5, '#8d8a82', 2); disc(46, 14, 13, '#1a1a1a', LW); disc(46, 14, 5, '#8d8a82', 2); rr(66, -6, 8, 5, 1); ink('#fff1c4', 1.5); }); return;
+  case 'gas': at(x, y, a, () => { rr(-11, -15, 22, 34, 9); ink(C.red); rr(-5, -23, 10, 9, 2); ink(C.metal, 2.5); line(-6, -6, -6, 12, '#d86a52', 2.5); g.fillStyle = INK; g.font = '11px VT323'; g.textAlign = 'center'; g.fillText('GAS', 0, 6);
+      if (p.armed){ for (let i = 0; i < 4; i++) line(0, -23, (rnd() - .5) * 18, -28 - rnd() * 14, i % 2 ? '#ffd27a' : '#ff8a2a', 2); } }); return;
+  case 'fw': at(x, y, a, () => { rr(-26, -12, 52, 24, 3); ink('#c23b3b'); for (let i = 0; i < 4; i++) disc(-18 + i * 12, -12, 4.5, '#2a2620', 2); g.fillStyle = C.cream; g.font = '13px VT323'; g.textAlign = 'center'; g.fillText('PAUKKU', 0, 6);
+      if (p.armed){ line(22, -12, 26 + rnd() * 6, -22 - rnd() * 6, '#ffd27a', 2); } }); return;
+  case 'jerry': at(x, y, a, () => { path([[-13, -15], [7, -15], [13, -9], [13, 15], [-13, 15]]); ink('#3f6a3a'); rr(-9, -22, 8, 7, 2); ink(C.metal, 2.5); line(-8, -7, 6, 9, '#2b4a28', 2.5); line(6, -7, -8, 9, '#2b4a28', 2.5); }); return;
+  case 'cab': at(x, y, a, () => { rr(-17, -25, 34, 50, 3); ink('#8d8a6a'); line(-6, -12, 6, 0, INK, 2.5); line(6, -4, -4, 10, INK, 2.5); if (rnd() < .04){ line(17, -20, 28 + rnd() * 10, -26 + rnd() * 12, '#7ab0d0', 2); } }); return;
+  case 'drum': at(x, y, a, () => { rr(-13, -17, 26, 34, 4); ink(p.st === 2 ? '#2f5068' : '#3d6f96'); line(-13, -6, 13, -6, INK, 2); line(-13, 6, 13, 6, INK, 2); g.fillStyle = '#7ab0d0'; g.fillRect(-10, -14, 4, 28); }); return;
+  case 'block': drawBlock(b, p, x, y, a, w, h); return; } }
+function drawBlock(b, p, x, y, a, w, h){ at(x, y, a, () => { const m = p.mat;
+  if (m === 'wood'){ rr(-w / 2, -h / 2, w, h, 3); ink(C.wood); g.save(); g.clip(); const along = w >= h; for (let i = 1; i < 3; i++){ if (along){ const yy = -h / 2 + h * i / 3; line(-w / 2 + 4, yy, w / 2 - 4, yy, C.woodD, 1.6); } else { const xx = -w / 2 + w * i / 3; line(xx, -h / 2 + 4, xx, h / 2 - 4, C.woodD, 1.6); } } g.fillStyle = C.woodL; if (along) g.fillRect(-w / 2 + 3, -h / 2 + 2, w - 6, 2); else g.fillRect(-w / 2 + 2, -h / 2 + 3, 2, h - 6); g.restore(); }
+  else if (m === 'glass'){ rr(-w / 2, -h / 2, w, h, 2); ink(C.glass); line(-w / 2 + 5, -h / 2 + 9, -w / 2 + 12, -h / 2 + 4, C.glassL, 2.5); line(-w / 2 + 5, -h / 2 + 18, -w / 2 + 20, -h / 2 + 5, C.glassL, 1.8); }
+  else if (m === 'stone'){ rr(-w / 2, -h / 2, w, h, 4); ink(C.stone); g.fillStyle = C.stoneL; g.fillRect(-w / 2 + 3, -h / 2 + 3, w - 6, 3); disc(-w * .2, h * .15, 1.8, C.stoneD, 0); disc(w * .25, -h * .1, 1.4, C.stoneD, 0); }
+  else if (m === 'metal'){ rr(-w / 2, -h / 2, w, h, 3); ink(p.st === 2 ? C.metalD : C.metal); const along = w >= h; if (along) for (let i = -w / 2 + 8; i < w / 2 - 4; i += 9) line(i, -h / 2 + 3, i, h / 2 - 3, C.metalD, 1.4); else for (let i = -h / 2 + 8; i < h / 2 - 4; i += 9) line(-w / 2 + 3, i, w / 2 - 3, i, C.metalD, 1.4);
+    if (p.st >= 1){ g.beginPath(); g.ellipse(0, 0, w * .2, h * .2, .4, 0, 7); ink(C.metalD, 1.6); } }
+  else if (m === 'crate'){ rr(-w / 2, -h / 2, w, h, 2); ink('#c23b3b'); for (let i = 0; i < 3; i++) disc(-w / 2 + 5 + i * (w - 10) / 2, -h / 2 + 4, 2, '#3a1210', 0); }
+  if (p.st === 1 && m !== 'metal'){ seed = p.sd; g.beginPath(); let cx = (R() - .5) * w * .3, cy = -h / 2; const along = w >= h; if (along){ cx = -w / 2 + w * (.3 + R() * .4); cy = -h / 2; g.moveTo(cx, cy); for (let i = 0; i < 3; i++){ cx += (R() - .5) * 8; cy += h / 3; g.lineTo(cx, cy); } } else { cx = -w / 2; cy = -h / 2 + h * (.3 + R() * .4); g.moveTo(cx, cy); for (let i = 0; i < 3; i++){ cy += (R() - .5) * 8; cx += w / 3; g.lineTo(cx, cy); } } g.lineWidth = 1.8; g.strokeStyle = INK; g.stroke(); } }); }
+
+// the ragdoll, drawn from its bodies
+function limbDraw(b, col, w, endFn){ const e = ends(b); line(e[0], e[1], e[2], e[3], INK, w + LW * 1.6); line(e[0], e[1], e[2], e[3], col, w); if (endFn) endFn(e[2], e[3], b.angle); }
+function shoe(x, y, a){ at(x, y, a, () => { rr(-5, -3, 13, 7, 3); ink(C.shoe, 2.2); }); }
+function drawRag(){ const r = rag;
+  limbDraw(r.ua2, C.hood2, 7); limbDraw(r.fa2, C.hood2, 6.5, (x, y) => disc(x, y, 4, C.skin, 2));
+  if (r.mic && !r.mic.plugin.gone) at(r.mic.position.x, r.mic.position.y, r.mic.angle, () => { line(0, 6, 0, -3, INK, 4); disc(0, -6, 4.5, '#8d8a82', 2); });
+  limbDraw(r.th2, C.jeansD, 8.5); limbDraw(r.sh2, C.jeansD, 8, shoe);
+  const t = r.torso; at(t.position.x, t.position.y, t.angle, () => { rr(-12, -17, 24, 34, 9); ink(C.hood); g.beginPath(); g.ellipse(0, -16, 10, 4, 0, 0, Math.PI); ink(C.hood2, 2); rr(-6, 4, 12, 6, 2.5); ink(C.hood2, 1.8);
+    [[-7.5, 3], [-4.5, 6], [-1.5, 10], [1.5, 6], [4.5, 3]].forEach(([bx, hh]) => { g.fillStyle = C.cream; g.fillRect(bx, -5 - hh / 2, 2, hh); }); });
+  limbDraw(r.th1, C.jeans, 8.5); limbDraw(r.sh1, C.jeans, 8, shoe);
+  head(r.head.position.x, r.head.position.y, r.head.angle, r.face, r.hat);
+  limbDraw(r.ua1, C.hood2, 7); limbDraw(r.fa1, C.hood2, 6.5, (x, y) => disc(x, y, 4.2, C.skin, 2)); }
+function head(x, y, a, face, hat){ at(x, y, a, () => { const L = Math.max(2, LW * .8);
+  disc(0, 0, 17, C.skin, L);
+  g.beginPath(); g.moveTo(-16.5, 2); g.quadraticCurveTo(-17, 18, 0, 19); g.quadraticCurveTo(17, 18, 16.5, 2); g.quadraticCurveTo(12, 9, 6, 8); g.quadraticCurveTo(0, 6, -6, 8); g.quadraticCurveTo(-12, 9, -16.5, 2); ink(C.beard, L);
+  if (face === 'ouch'){ line(-8, -1, -3, 2, INK, 2); line(-8, 3, -3, -1, INK, 2); line(3, -1, 8, 2, INK, 2); line(3, 3, 8, -1, INK, 2); g.beginPath(); g.ellipse(1, 11, 4.5, 3.5, 0, 0, 7); ink('#5a2018', 1.8); }
+  else if (face === 'rap'){ line(-7.5, 0, -2.5, 1, INK, 2); line(2.5, 1, 7.5, 0, INK, 2); line(-8, -4, -2.5, -3, INK, 1.5); line(2.5, -3, 8, -4, INK, 1.5); g.beginPath(); g.ellipse(0, 11, 4, 3, 0, 0, 7); ink('#5a2018', 1.8); }
+  else if (face === 'out'){ line(-7.5, 1, -2.5, 1, INK, 2); line(2.5, 1, 7.5, 1, INK, 2); g.beginPath(); g.moveTo(-4, 11); g.quadraticCurveTo(0, 14, 4, 10); g.lineWidth = 1.8; g.strokeStyle = INK; g.stroke(); }
+  else { disc(-5, 0, 3, '#fff', 1.5); disc(5, 0, 3, '#fff', 1.5); disc(-4.5, .5, 1.1, INK, 0); disc(5.5, .5, 1.1, INK, 0); g.beginPath(); g.ellipse(0, 12, 3.5, 4.5, 0, 0, 7); ink('#5a2018', 1.8); }
+  if (hat){ g.beginPath(); g.arc(0, -2, 17.5, Math.PI * 1.05, Math.PI * 1.95); g.lineTo(16, -6); ink(C.beanie, L); rr(-18, -9, 36, 7, 3); ink('#555a52', L * .9); disc(3, -21, 3, C.beanie, L * .8); } }); }
+
+// before the grab: a drawn, bouncing rapper, fist up, mic at the mouth
+function drawRapper(x, y, t){ const beat = Math.sin(t * 2 * Math.PI * 1.45), dip = Math.abs(beat) * 6; const yy = y + dip;
+  const lim = (ax, ay, a1, a2, l1, l2, col, w, end) => { const r1 = a1 * Math.PI / 180, r2 = (a1 + a2) * Math.PI / 180; const ex = ax + Math.sin(r1) * l1, ey = ay + Math.cos(r1) * l1, hx = ex + Math.sin(r2) * l2, hy = ey + Math.cos(r2) * l2;
+    line(ax, ay, ex, ey, INK, w + LW * 1.6); line(ex, ey, hx, hy, INK, w + LW * 1.6); line(ax, ay, ex, ey, col, w); line(ex, ey, hx, hy, col, w); if (end) end(hx, hy, r2); return [hx, hy]; };
+  const k = dip / 6;
+  lim(x - 4, yy, -18 - k * 14, 26 + k * 34, 15, 15, C.jeansD, 8.5, (hx, hy) => shoe(hx, Math.min(hy, y + 29), 0));
+  at(x, yy - 17, Math.sin(t * 2 * Math.PI * .72) * .05, () => { rr(-12, -17, 24, 34, 9); ink(C.hood); g.beginPath(); g.ellipse(0, -16, 10, 4, 0, 0, Math.PI); ink(C.hood2, 2); rr(-6, 4, 12, 6, 2.5); ink(C.hood2, 1.8);
+    [[-7.5, 3], [-4.5, 6], [-1.5, 10], [1.5, 6], [4.5, 3]].forEach(([bx, hh]) => { g.fillStyle = C.cream; g.fillRect(bx, -5 - hh / 2, 2, hh); }); });
+  lim(x + 4, yy, 18 + k * 14, -26 - k * 34, 15, 15, C.jeans, 8.5, (hx, hy) => shoe(hx, Math.min(hy, y + 29), 0));
+  head(x + Math.sin(t * 2 * Math.PI * .72) * 1.5, yy - 49 + Math.abs(beat) * 1.5, Math.sin(t * 2 * Math.PI * .72) * .08, 'rap', true);
+  // mic hand at the mouth
+  lim(x - 5, yy - 28, -50, 215, 13, 12, C.hood2, 7, (hx, hy) => { line(hx, hy, hx + 7, hy - 2, INK, 4); disc(hx + 9, hy - 3, 4.2, '#8d8a82', 2); disc(hx, hy, 4, C.skin, 2); });
+  // fist pumping on the beat
+  const up = 140 + beat * 18; lim(x + 6, yy - 28, up, 20 - beat * 10, 14, 13, C.hood2, 7, (hx, hy, r) => at(hx, hy, r, () => { rr(-5, -2, 10, 10, 3); ink(C.skin, 2); }));
+  if (state === 'stage'){ const hx = x + 25, hy = yy - 70; g.beginPath(); g.arc(hx, hy, 26 + Math.sin(t * 5) * 3, 0, 7); g.strokeStyle = 'rgba(236,228,204,.55)'; g.lineWidth = 2.5; g.setLineDash([6, 8]); g.stroke(); g.setLineDash([]); } }
+
+function drawParts(){ for (const p of parts){ const k = 1 - p.t / p.life;
+  if (p.k === 'smoke'){ g.globalAlpha = .55 * k; disc(p.x, p.y, p.s * (1.4 - k * .4), p.c, 2); g.globalAlpha = 1; }
+  else if (p.k === 'flame'){ g.globalAlpha = k; disc(p.x, p.y, p.s * k, k > .5 ? '#ffb347' : '#e8572a', 0); g.globalAlpha = 1; }
+  else if (p.k === 'spark'){ g.globalAlpha = k; line(p.x, p.y, p.x - p.vx * 1.5, p.y - p.vy * 1.5, p.c, p.s); g.globalAlpha = 1; }
+  else if (p.k === 'shard'){ at(p.x, p.y, p.r, () => { g.globalAlpha = Math.min(1, k * 2); path([[0, 0], [p.s, p.s * .3], [p.s * .2, p.s]]); ink(C.glass, 1.5); g.globalAlpha = 1; }); }
+  else { at(p.x, p.y, p.r, () => { g.globalAlpha = Math.min(1, k * 2); if (p.k === 'rubble') disc(0, 0, p.s * .6, C.stone, 1.6); else { rr(-p.s, -1.5, p.s * 2, 3, 1); ink(p.c, 1.4); } g.globalAlpha = 1; }); } } }
+function drawBooms(){ for (const b of booms){ const k = b.t / .7, r = b.r * (.35 + k * .75); seed = Math.floor(b.x * 13 + b.y);
+  const sp = 14, out = [], mid = [], core = []; for (let i = 0; i < sp * 2; i++){ const t = i / (sp * 2) * 6.283, f = i % 2 ? .62 : 1, j = .85 + R() * .3; out.push([b.x + Math.cos(t) * r * f * j, b.y + Math.sin(t) * r * f * j]); mid.push([b.x + Math.cos(t) * r * f * j * .7, b.y + Math.sin(t) * r * f * j * .7]); core.push([b.x + Math.cos(t) * r * f * .38, b.y + Math.sin(t) * r * f * .38]); }
+  g.globalAlpha = 1 - k * k; path(out); ink('#e8572a', LW * 1.2); path(mid); g.fillStyle = '#ffb347'; g.fill(); if (k < .5){ path(core); g.fillStyle = '#fff2c4'; g.fill(); } g.globalAlpha = 1; } }
+function drawArcs(){ for (const a of arcs){ g.beginPath(); g.moveTo(a.x1, a.y1); for (let i = 1; i < 8; i++){ const u = i / 8; g.lineTo(a.x1 + (a.x2 - a.x1) * u + (rnd() - .5) * 26, a.y1 + (a.y2 - a.y1) * u + (rnd() - .5) * 26); } g.lineTo(a.x2, a.y2); g.strokeStyle = '#cfe9ff'; g.lineWidth = 3; g.stroke(); g.strokeStyle = 'rgba(122,176,208,.5)'; g.lineWidth = 8; g.stroke(); } }
+function drawPops(){ const z = baseZ() * cam.z; for (const p of pops){ const k = p.t / 1.6, y = p.y - k * 60; g.globalAlpha = k > .7 ? (1 - k) / .3 : 1; const fs = 24 / Math.max(.6, z);
+  g.font = fs + 'px VT323'; g.textAlign = 'center'; const w = g.measureText(p.s).width + 16 / z; rr(p.x - w / 2, y - fs * .85, w, fs * 1.15, 5 / z); g.fillStyle = 'rgba(27,23,20,.85)'; g.fill(); g.fillStyle = p.col; g.fillText(p.s, p.x, y); g.globalAlpha = 1; } }
+
+// ---------- main loop ----------
+let last = 0, acc = 0, shownScore = -1;
+function frame(ts){ requestAnimationFrame(frame); const t = ts / 1000, dt = Math.min(.05, last ? t - last : .016); last = t;
+  if (engine && state !== 'start'){ if (state === 'stage' || state === 'grab' || state === 'fly' || state === 'over') simulate(dt); spawnAhead(); }
+  camStep(dt); mixUpdate();
+  draw(t);
+  if (score !== shownScore){ shownScore = score; $('score').textContent = score.toLocaleString('fi-FI'); }
+  if (rag && state === 'fly') $('dist').textContent = Math.max(0, Math.round(maxDist)) + ' M'; }
+resize(); makeBg(); buildCurve(); planCourse();
+engine = null; document.fonts && document.fonts.load('30px VT323');
+newGame(); state = 'start'; $('hint').classList.remove('on');
+requestAnimationFrame(frame);
+
+// for testing
+window.__heita = { get state(){ return state; }, get score(){ return score; }, get dist(){ return maxDist; }, get bodies(){ return bodies.length; }, get rag(){ return rag; }, tally:() => tally, combo:() => maxCombo,
+  start(){ $('bgo').click(); },
+  throwNow(vx, vy){ if (state !== 'stage') return; doGrab({x:STAGE.x + 30, y:STAGE.y - 150}); rag.all.forEach(b => Body.setVelocity(b, {x:vx, y:vy})); release(); rag.all.forEach(b => Body.setVelocity(b, {x:vx, y:vy})); },
+  cam, dbg:() => ({mv: rag ? Math.max(...rag.all.filter(b => b !== rag.mic).map(b => Math.hypot(b.velocity.x, b.velocity.y))) : 0, timers: timers.length, rockets: rockets.length, restT, flyT, tv: rag && rag.throwV, parts: rag ? rag.all.map(b => Math.hypot(b.velocity.x, b.velocity.y).toFixed(2)) : []}) };
+})();
+</script>
+</body></html>
