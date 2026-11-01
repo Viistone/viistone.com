@@ -455,7 +455,7 @@ export default {
 
 // CH 09 Kirilii online. One room per table, the whole state lives in D1 (binding KDB).
 // The server runs the same engine as the browser, deals, checks every move and plays the bots.
-// Players can only send a card number, or one of four fixed shouts; each shout once per lap. Anyone may join a running table to watch.
+// Players can only send a card number, one of four fixed shouts (each once per lap), or bang the table (a rhythm of knocks, no limit). Anyone may join a running table to watch.
 // There is no chat and no free text: names are three letters.
 // A player never receives anyone else's hidden cards or the shuffle seed.
 
@@ -544,6 +544,7 @@ function koView(room, seat) {
   const lk = koLapKey(room.st), used = (room.shouts || []).filter(x => x.seat === seat && x.lap === lk).map(x => x.k);
   base.canShout = seat >= 0 ? [0, 1, 2, 3].map(k => used.indexOf(k) < 0) : [false, false, false, false];
   base.watchers = (room.watch || []).length;
+  base.bangs = (room.bangs || []).filter(x => now - x.at < 6000).map(x => ({ id: x.id, seat: x.seat, p: x.p }));
   base.st = {
     v: 1, players, round: st.round, starter: st.starter, turn: st.turn, last: st.last, lastBy: st.lastBy, lastId: st.lastId,
     lapN: st.lapN, lapPos: st.lapPos, lap: st.lap, phase: st.phase, headsUp: st.headsUp, winner: st.winner, settings: st.settings,
@@ -658,6 +659,18 @@ async function kiriliiOnline(req, env, url) {
       room.shoutN = (room.shoutN || 0) + 1;
       room.shouts.push({ id: room.shoutN, seat, k, lap: key, at: now });
       if (await koUpdate(db, room, got.v)) return json(req, koView(room, seat));
+      continue;
+    }
+
+    if (op === 'bang') {
+      const pat = b.p;
+      if (!Array.isArray(pat) || pat.length < 1 || pat.length > 16 || pat.some((x, i) => !Number.isInteger(x) || x < 0 || x > 2500 || (i && x < pat[i - 1]))) return json(req, { error: 'bang' }, 400);
+      if (room.phase !== 'game') return json(req, { error: 'bang' }, 409);
+      room.bangs = (room.bangs || []).filter(x => now - x.at < 8000);
+      if (room.bangs.some(x => x.seat === seat && now - x.at < 400)) return json(req, { error: 'slow' }, 429);
+      room.bangN = (room.bangN || 0) + 1;
+      room.bangs.push({ id: room.bangN, seat, at: now, p: pat });
+      if (await koUpdate(db, room, got.v)) return json(req, { ok: true, id: room.bangN });
       continue;
     }
 

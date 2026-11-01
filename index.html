@@ -2539,6 +2539,14 @@ body.kiropen{overflow:hidden}
 .kir .plate .tag{position:absolute;right:-6px;top:-11px;font-family:var(--f-mono);font-size:9px;letter-spacing:.14em;font-style:normal;padding:1px 4px;background:#1c1f1c;color:#9fe0a8;border:1px solid #3a4a3a;transform:rotate(3deg)}
 .kir .plate .tag:empty{display:none}
 .kir .plate .tag.away{color:#ffb35c;border-color:#6a4a2a}
+.kir .kbangb{position:absolute;right:max(10px, env(safe-area-inset-right,0px));bottom:calc(var(--hand) + 10px);z-index:8;font-family:var(--f-osd);font-size:21px;letter-spacing:.06em;color:#fff3df;background:#8c2a1c;border:0;padding:8px 14px;cursor:pointer;box-shadow:3px 4px 0 rgba(0,0,0,.6);transform:rotate(2deg);touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.kir .kbangb:active,.kir .kbangb.hit{transform:rotate(2deg) translateY(3px) scale(.96);box-shadow:1px 1px 0 rgba(0,0,0,.6)}
+.kir.idle .kbangb,.kir.watch .kbangb{display:none}
+@media (min-aspect-ratio: 1/1){ .kir .kbangb{right:calc(7% + 14px);bottom:calc(var(--hand) + 30px)} }
+.kir .kstage.bang{animation:kbang .26s cubic-bezier(.2,.8,.3,1)}
+@keyframes kbang{18%{transform:translateY(5px) scale(1.008)}45%{transform:translateY(-2px)}70%{transform:translateY(1px)}}
+.kir .kbam{position:absolute;z-index:9;width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;pointer-events:none;border:3px solid rgba(255,214,150,.75);animation:kbam .45s ease-out forwards}
+@keyframes kbam{from{transform:scale(.2);opacity:1}to{transform:scale(1.5);opacity:0}}
 .kir .kshout{position:absolute;left:max(10px, env(safe-area-inset-left,0px));bottom:calc(var(--hand) + 10px);z-index:8;display:none;flex-direction:column;gap:6px;align-items:flex-start}
 .kir .kshout button{font-family:var(--f-osd);font-size:19px;letter-spacing:.05em;color:#14130f;background:#ffb35c;border:0;padding:3px 10px;cursor:pointer;box-shadow:2px 3px 0 rgba(0,0,0,.55);transform:rotate(-2deg)}
 .kir .kshout button + button{background:#ffd23a;transform:rotate(1.5deg)}
@@ -2580,6 +2588,7 @@ body.kiropen{overflow:hidden}
   </div>
   <button class="knext" id="knext" type="button">SEURAAVA JAKO ▶</button>
   <div class="kshout" id="kshout"><button type="button" data-k="0">HÖYLÄ!</button><button type="button" data-k="1">McBUENO!!!</button><button type="button" data-k="2">TÄÄ ON MUN PIENIN!</button><button type="button" data-k="3">EIIIIHHH!!!</button></div>
+  <button class="kbangb" id="kbang" type="button" aria-label="Paukuta pöytää">PAUKUTA</button>
   <div class="kvig" aria-hidden="true"></div>
   <div class="kscan" aria-hidden="true"></div>
   <div class="ktrack" aria-hidden="true"></div>
@@ -3221,7 +3230,7 @@ body.kiropen{overflow:hidden}
     online = {room:d.room, token:d.token, seat:d.seat, name:name, view:null, away:{}, watch:!!d.watch}; lsSet(OSAVE, {room:d.room, token:d.token, seat:d.seat, name:name, watch:!!d.watch});
     root.classList.toggle('watch', !!d.watch);
     try { localStorage.setItem('viistone-2048-name', name); } catch(e){}
-    root.classList.add('online'); seenShouts = {}; (d.shouts || []).forEach(function(x){ seenShouts[x.id] = 1; });
+    root.classList.add('online'); seenShouts = {}; (d.shouts || []).forEach(function(x){ seenShouts[x.id] = 1; }); seenBangs = {}; (d.bangs || []).forEach(function(x){ seenBangs[x.id] = 1; });
     history.replaceState(null, '', '#kirilii-' + d.room); applyView(d); poll();
   }
   $('konline').addEventListener('click', function(){ ac(); showLobby(''); });
@@ -3267,7 +3276,7 @@ body.kiropen{overflow:hidden}
     online.view = v; online.away = {};
     if (v.phase === 'lobby'){ renderLobby(v); return; }
     v.seats.forEach(function(s0, i){ if (s0.away) online.away[(i - Math.max(0, v.me) + 6) % 6] = 1; });
-    showShouts(v);
+    showShouts(v); showBangs(v);
     var ns = fromView(v);
     if (revealing){ pending = ns; return; }
     applyState(ns);
@@ -3309,6 +3318,40 @@ body.kiropen{overflow:hidden}
     b.addEventListener('click', function(){ if (!online) return; ac(); if (b.disabled) return; b.disabled = true;
       opost('shout', {room:online.room, t:online.token, k:+b.dataset.k}).then(function(d){ if (d.st) applyView(d); }).catch(function(){}); });
   });
+  // table banging: anyone at the table, as much as they like; others see and hear the same rhythm
+  var seenBangs = {}, bangQ = null;
+  function knock(f){
+    if (!settings.fx || !AC) return; var t = AC.currentTime;
+    if (bufs.bang){ playS('bang', .5 + f * .4, .92 + Math.random() * .16); return; }
+    var o = AC.createOscillator(), g = AC.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(95 + Math.random() * 20, t); o.frequency.exponentialRampToValueAtTime(42, t + .16);
+    g.gain.setValueAtTime(.55 * f + .2, t); g.gain.exponentialRampToValueAtTime(.0001, t + .22); o.connect(g).connect(AC.destination); o.start(t); o.stop(t + .25);
+    var n = Math.floor(AC.sampleRate * .09), b = AC.createBuffer(1, n, AC.sampleRate), a = b.getChannelData(0); for (var i = 0; i < n; i++) a[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 4);
+    var s = AC.createBufferSource(), lp = AC.createBiquadFilter(), g2 = AC.createGain(); lp.type = 'lowpass'; lp.frequency.value = 700 + f * 500; g2.gain.value = .5 + f * .3; s.buffer = b; s.connect(lp).connect(g2).connect(AC.destination); s.start(t);
+    if (Math.random() < .35) setTimeout(function(){ tone(2500 + Math.random() * 900, .14, 'sine', .02); }, 40);
+  }
+  function bangFx(pid){
+    knock(.85);
+    if (reduce) return;
+    var stg = $('kstage'); stg.classList.remove('bang', 'jolt'); void stg.offsetWidth; stg.classList.add('bang');
+    var l = root.querySelectorAll('.played .kc, .myplayed .kc, .kphone'); for (var i = 0; i < l.length; i++){ if (Math.random() < .7) l[i].animate([{marginTop:'0px'}, {marginTop:-(3 + Math.random() * 6) + 'px'}, {marginTop:'0px'}], {duration:160 + Math.random() * 120, easing:'ease-out'}); }
+    var pl = pid === 0 ? $('kmyplate') : $('kplate' + pid); if (!pl) return;
+    pl.animate([{transform:'translateY(0)'}, {transform:'translateY(4px) rotate(-1deg)'}, {transform:'translateY(0)'}], {duration:180});
+    var r = pl.getBoundingClientRect(), sr = root.getBoundingClientRect(), d = document.createElement('div'); d.className = 'kbam';
+    d.style.left = (r.left - sr.left + r.width / 2) + 'px'; d.style.top = (pid === 0 ? r.top - sr.top - 30 : r.bottom - sr.top + 30) + 'px'; root.appendChild(d); setTimeout(function(){ d.remove(); }, 500);
+  }
+  $('kbang').addEventListener('pointerdown', function(e){
+    e.preventDefault(); ac(); if (!st || root.classList.contains('idle') || (online && online.watch)) return;
+    var b = this; b.classList.remove('hit'); void b.offsetWidth; b.classList.add('hit'); setTimeout(function(){ b.classList.remove('hit'); }, 120);
+    bangFx(0); if (navigator.vibrate) try { navigator.vibrate(22); } catch(_){}
+    if (!online) return;
+    var now = performance.now();
+    if (!bangQ){ bangQ = {t0:now, p:[]}; setTimeout(function(){ var q = bangQ; bangQ = null; if (q && online) opost('bang', {room:online.room, t:online.token, p:q.p}).catch(function(){}); }, 700); }
+    if (bangQ.p.length < 16) bangQ.p.push(Math.min(2500, Math.round(now - bangQ.t0)));
+  });
+  function showBangs(v){
+    (v.bangs || []).forEach(function(x){ if (seenBangs[x.id]) return; seenBangs[x.id] = 1; if (x.seat === v.me) return;
+      var pid = (x.seat - Math.max(0, v.me) + 6) % 6; x.p.forEach(function(ms){ setTimeout(function(){ bangFx(pid); }, ms); }); });
+  }
   function showShouts(v){
     (v.shouts || []).forEach(function(x){ if (seenShouts[x.id]) return; seenShouts[x.id] = 1;
       var pid = (x.seat - Math.max(0, v.me) + 6) % 6, name = v.seats[x.seat] ? v.seats[x.seat].name : '';
