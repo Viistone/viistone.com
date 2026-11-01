@@ -2831,15 +2831,14 @@ body.kiropen{overflow:hidden}
     headsup: function(){ tone(110, 1.2, 'sawtooth', .06, 220); setTimeout(function(){ tone(220, .9, 'square', .04); }, 400); setTimeout(SFX.thud, 900); }
   };
 
-  // ---------- music: same as the other games; the menu loops the start of one song, a game draws songs at random ----------
+  // ---------- music: same as the other games; the menu and lobby play one whole song on repeat, a game draws songs at random ----------
   var SONGS = [['01','PROLOGI','prologi'],['02','KYMMENEN TIKKUU','kymmenentikkuu'],['03','PITKÄSILTA','pitkasilta'],['04','SYMMETRISII UNII','symmetrisiiunii'],['05','VÄLII VUODELLA','valiivuodella'],
     ['06','POSTINKANTAJA','postinkantaja'],['07','HYMYTYTTÖ','hymytytto'],['08','KOTIINPALUU KAI JOTENKI JÄRJESTYY','kotiinpaluu'],['09','VIKA SELKÄ','vikaselka'],['10','EPILOGI','epilogi']];
   var audio = $('kaudio'), song = 7, mode = 'menu', INTRO_END = 26, musicOn = true;
   try { musicOn = localStorage.getItem('kirilii_mus') !== '0'; } catch(e){}
   function setSong(i){ song = (i + SONGS.length) % SONGS.length; audio.src = 'assets/' + SONGS[song][2] + '.m4a'; $('ksong').textContent = '▶ ' + SONGS[song][0] + ' ' + SONGS[song][1]; }
   function drawSong(){ var i; do { i = Math.floor(Math.random() * SONGS.length); } while (i === song && SONGS.length > 1); setSong(i); }
-  audio.addEventListener('ended', function(){ if (mode === 'game'){ drawSong(); syncMusic(); } });
-  audio.addEventListener('timeupdate', function(){ if (mode === 'menu' && audio.currentTime > INTRO_END) audio.currentTime = 0; });
+  audio.addEventListener('ended', function(){ if (mode === 'game') drawSong(); else try { audio.currentTime = 0; } catch(e){} syncMusic(); });
   function syncMusic(){
     $('kmus').classList.toggle('off', !musicOn); $('kmus').setAttribute('aria-pressed', musicOn);
     if (!audio.src) setSong(7);
