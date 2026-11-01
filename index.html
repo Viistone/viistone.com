@@ -2329,7 +2329,7 @@ body.postiopen{overflow:hidden}
 <style>
 /* CH 09: KIRILII. A card game on a worn Finnish bar table. Six at the table, the last one left wins. */
 .kir{position:fixed;inset:0;z-index:74;display:none;overflow:hidden;background:#120d09;color:#e8e0c8;user-select:none;-webkit-user-select:none;
-  --cw:56px;--ch:80px;--sw:26px;--sh:37px;--hand:142px;font-family:var(--f-mono)}
+  --cw:60px;--ch:88px;--sw:34px;--sh:49px;--hand:158px;font-family:var(--f-mono)}
 .kir.on{display:block}
 body.kiropen{overflow:hidden}
 .kir .kwood{position:absolute;inset:-4%;background:#2f1f14 center/512px 512px repeat;filter:saturate(.85) contrast(1.05);transform-origin:50% 45%;transition:transform .6s}
@@ -2355,7 +2355,7 @@ body.kiropen{overflow:hidden}
 .kir .kbtn:hover{border-color:#e8e0c8}
 .kir .kbtn.off{opacity:.45;text-decoration:line-through}
 /* seats */
-.kir .seat{position:absolute;z-index:3;display:flex;flex-direction:column;align-items:center;gap:4px;width:104px;transition:opacity .8s, filter .8s}
+.kir .seat{position:absolute;z-index:3;display:flex;flex-direction:column;align-items:center;gap:4px;width:120px;transition:opacity .8s, filter .8s}
 .kir .seat.out{opacity:.38;filter:grayscale(1)}
 .kir .plate{position:relative;display:flex;align-items:baseline;justify-content:center;gap:6px;min-width:84px;padding:2px 8px 3px;background:#d9cfb4;color:#1a140e;
   font-family:var(--f-osd);font-size:21px;line-height:1;letter-spacing:.05em;box-shadow:2px 3px 0 rgba(0,0,0,.45);transform:rotate(-1.5deg);border:1px solid #6d5d43}
@@ -2394,18 +2394,21 @@ body.kiropen{overflow:hidden}
 .kc.back::before{content:"";position:absolute;inset:8%;border:1px solid rgba(232,224,200,.25);background:repeating-linear-gradient(45deg, rgba(232,224,200,.05) 0 2px, transparent 2px 6px)}
 .kc.back b{position:absolute;inset:0;background:url(assets/peli/mark.png) center/58% no-repeat;opacity:.85}
 .kc.back i{position:absolute;left:12%;right:12%;bottom:12%;height:9%;background:url(assets/logo.png) center/contain no-repeat;opacity:.7}
-.kc.last{outline:2px solid #ffb35c;outline-offset:1px;z-index:2;transform:translateY(-4px)}
+.kc.old{filter:brightness(.55) saturate(.5)}
+.kc.lap{z-index:1}
+.kc.ref{outline:3px solid #ffb35c;outline-offset:1px;z-index:3;transform:translateY(-6px) scale(1.14);box-shadow:0 0 0 1px #000, 0 0 22px 4px rgba(255,170,70,.75);animation:kref 1s steps(2) infinite}
+@keyframes kref{50%{outline-color:#fff2c8;box-shadow:0 0 0 1px #000, 0 0 30px 8px rgba(255,170,70,.9)}}
 .kc.lose{outline:3px solid #ff3a22;outline-offset:1px;animation:klose .6s steps(2) 3}
 @keyframes klose{50%{outline-color:#ffd28a}}
 /* my area */
 .kir .mine{position:absolute;left:0;right:0;bottom:0;height:var(--hand);z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
   background:linear-gradient(to top, rgba(10,7,5,.85), rgba(10,7,5,.35) 70%, transparent)}
 .kir .myplayed{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:3;display:flex}
-.kir .myplayed .kc{--sw:30px;--sh:43px;margin-left:-12px}
+.kir .myplayed .kc{--sw:40px;--sh:57px;margin-left:-14px}
 .kir .myplayed .kc:first-child{margin-left:0}
 .kir .myrow{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .kir .myrow .plate{transform:rotate(-1deg)}
-.kir .hint{font-family:var(--f-osd);font-size:18px;letter-spacing:.05em;color:#ffd28a;text-shadow:0 1px 0 #000;min-height:20px}
+.kir .hint{max-width:96vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--f-osd);font-size:18px;letter-spacing:.05em;color:#ffd28a;text-shadow:0 1px 0 #000;min-height:20px}
 .kir .myhand{display:flex;gap:6px;justify-content:center;align-items:flex-end;height:calc(var(--ch) + 14px)}
 .kir .myhand .kc{--sw:var(--cw);--sh:var(--ch);cursor:pointer;transition:transform .15s, filter .2s, opacity .2s;touch-action:none}
 .kir .myhand .kc.no{filter:brightness(.45) saturate(.4);cursor:not-allowed}
@@ -2494,9 +2497,9 @@ body.kiropen{overflow:hidden}
 .kir .kfly{position:fixed;z-index:15;pointer-events:none}
 .kir.idle .seat,.kir.idle .kphone,.kir.idle .mine,.kir.idle .myplayed{visibility:hidden}
 /* landscape and desktop: roomier */
-@media (min-aspect-ratio: 1/1){ .kir{--cw:70px;--ch:100px;--sw:34px;--sh:48px;--hand:170px} .kir .seat{width:150px} .kir .kphone{width:136px;height:230px} .kir .scr table{font-size:17px} .kir .myplayed .kc{--sw:38px;--sh:54px} .kir .bub{font-size:12px;max-width:190px} }
-@media (min-width: 1000px) and (min-aspect-ratio: 1/1){ .kir{--cw:82px;--ch:116px;--sw:40px;--sh:57px;--hand:190px} .kir .myplayed .kc{--sw:46px;--sh:65px} }
-@media (max-height: 640px) and (max-aspect-ratio: 1/1){ .kir{--cw:48px;--ch:68px;--sw:22px;--sh:32px;--hand:124px} .kir .kphone{width:104px;height:176px} .kir .scr table{font-size:13px} }
+@media (min-aspect-ratio: 1/1){ .kir{--cw:84px;--ch:120px;--sw:46px;--sh:66px;--hand:198px} .kir .seat{width:196px} .kir .kphone{width:136px;height:230px} .kir .scr table{font-size:17px} .kir .myplayed .kc{--sw:52px;--sh:74px;margin-left:-18px} .kir .bub{font-size:12px;max-width:190px} }
+@media (min-width: 1000px) and (min-aspect-ratio: 1/1){ .kir{--cw:96px;--ch:136px;--sw:54px;--sh:77px;--hand:218px} .kir .seat{width:230px} .kir .myplayed .kc{--sw:60px;--sh:86px;margin-left:-20px} }
+@media (max-height: 640px) and (max-aspect-ratio: 1/1){ .kir{--cw:54px;--ch:78px;--sw:28px;--sh:40px;--hand:138px} .kir .kphone{width:104px;height:176px} .kir .scr table{font-size:13px} }
 @media (prefers-reduced-motion: reduce){ .kir .kstage.shake,.kir .kstage.quake,.kir .kvhs.on{animation:none} }
 </style>
 <div class="kir idle" id="kir" role="dialog" aria-label="Peli: Kirilii">
@@ -2541,7 +2544,7 @@ body.kiropen{overflow:hidden}
     <div class="rules">
       <p><b>Kortit.</b> 55 korttia: tavalliset 2–A, kaksi jokeria (15) ja yksi Ekstrajokka (16). Maat eivät merkitse mitään.</p>
       <p><b>Jako.</b> Jokainen saa kuusi korttia. Kortteja ei nosteta.</p>
-      <p><b>Vuoro.</b> Pelaa kortti omaan eteesi. Sen pitää olla vähintään yhtä suuri kuin viimeksi pelattu kortti, kenen tahansa edessä se on. Käden pienimmän saa aina pelata. Vuoroa ei voi ohittaa.</p>
+      <p><b>Vuoro.</b> Pelaa kortti omaan eteesi. Kierroksella jokainen pelaa yhden kortin. Kierroksen ensimmäinen kortti on vapaa, sen jälkeen kortin pitää olla vähintään yhtä suuri kuin kierroksen isoin kortti, kuka sen sitten pelasikin. Isoin on korostettu. Käden pienimmän saa aina pelata. Vuoroa ei voi ohittaa. Jakoon kuuluu viisi kierrosta.</p>
       <p><b>Loppu.</b> Kun jokaisella on yksi kortti, kortit paljastetaan. Suurimman kortin jättänyt saa sen arvon pisteinä, tasatilanteessa kaikki suurimmat. 21 pistettä ja olet ulkona.</p>
       <p><b>Höylääminen.</b> Säästä iso kortti loppuun ja pelaa se juuri ennen vastustajaa. Hänen on pakko pelata pienin korttinsa ja iso jää käteen. Ekstrajokalla tehtynä se on <b>Höylä McBueno</b>.</p>
       <p><b>Heads Up.</b> Kun kaksi on jäljellä, alkaa finaali. Viimeinen pöydässä voittaa.</p>
@@ -2679,8 +2682,12 @@ body.kiropen{overflow:hidden}
   };
 
   // ---------- rendering ----------
+  // which played cards belong to this lap, and which one is being asked for
+  var lapIds = {};
+  function cls(c){ if (st.phase !== 'play') return ''; if (c.id === st.lastId) return 'ref'; return lapIds[c.id] ? 'lap' : 'old'; }
   function render(){
     if (!st) return;
+    lapIds = {}; var lp = st.lapPos || 0; st.roundLog.slice(st.roundLog.length - lp).forEach(function(e){ if (lp) lapIds[e.card.id] = 1; });
     var me = st.players[0], land = innerWidth > innerHeight;
     for (var i = 1; i <= 5; i++){
       var p = st.players[i], seat = $('kseat' + i), plate = $('kplate' + i);
@@ -2692,10 +2699,10 @@ body.kiropen{overflow:hidden}
       var reveal = st.phase !== 'play' && st.result && !p.out || (st.phase !== 'play' && st.result && st.result.out.indexOf(i) >= 0);
       $('kbacks' + i).innerHTML = reveal ? '' : new Array(p.hand.length + 1).join('<i></i>');
       $('kfinal' + i).innerHTML = reveal && p.hand[0] ? cardHTML(p.hand[0], (st.result.losers.indexOf(i) >= 0 ? 'lose' : '')) : '';
-      $('kplayed' + i).innerHTML = p.played.map(function(c){ return cardHTML(c, st.lastBy === i && st.last === c.v && p.played[p.played.length - 1] === c ? 'last' : ''); }).join('');
+      $('kplayed' + i).innerHTML = p.played.map(function(c){ return cardHTML(c, cls(c)); }).join('');
     }
     $('kmypts').textContent = me.pts; $('kmyplate').classList.toggle('turn', st.phase === 'play' && st.turn === 0);
-    $('kmyplayed').innerHTML = me.played.map(function(c, j){ return cardHTML(c, st.lastBy === 0 && j === me.played.length - 1 ? 'last' : ''); }).join('');
+    $('kmyplayed').innerHTML = me.played.map(function(c){ return cardHTML(c, cls(c)); }).join('');
     renderHand(); renderPhone(); hint();
   }
   function renderHand(){
@@ -2707,10 +2714,9 @@ body.kiropen{overflow:hidden}
   function hint(){
     var h = '', me = st.players[0];
     if (st.phase === 'play' && st.turn === 0 && !busy){
-      if (me.hand.length === 6 && st.last == null) h = 'Aloitat. Pelaa mikä tahansa.';
-      else if (st.last == null) h = 'Pelaa mikä tahansa.';
-      else { var m = K.minV(me.hand), any = me.hand.some(function(c){ return c.v >= st.last; });
-        h = any ? 'Vähintään ' + nm(st.last) + ' tai pienin (' + nm(m) + ')' : 'Pakko pelata pienin (' + nm(m) + ')'; }
+      if (st.last == null) h = 'Kierros ' + st.lap + '/5 · pelaa mikä tahansa';
+      else { var m = K.minV(me.hand), any = me.hand.some(function(c){ return c.v >= st.last; }), who = st.players[st.lastBy].name;
+        h = any ? 'Kysytty ' + nm(st.last) + ' · ' + who + ' · tai pienin ' + nm(m) : 'Kysytty ' + nm(st.last) + ' · pakko pelata pienin ' + nm(m); }
       if (selected != null) h = 'Napauta uudestaan: pelaa';
       if (me.hand.length === 2 && selected == null) h += ' · toinen jää';
     } else if (st.phase === 'play' && me.out) h = 'Olet ulkona. Katsot loppuun.';
@@ -2732,7 +2738,7 @@ body.kiropen{overflow:hidden}
     var el = wrap.firstChild; el.style.setProperty('--sw', to.width + 'px'); el.style.setProperty('--sh', to.height + 'px');
     wrap.style.left = to.left + 'px'; wrap.style.top = to.top + 'px'; root.appendChild(wrap); toEl.style.visibility = 'hidden';
     var dx = fromRect.left + fromRect.width / 2 - (to.left + to.width / 2), dy = fromRect.top + fromRect.height / 2 - (to.top + to.height / 2), sc = fromRect.width / to.width;
-    var a = wrap.animate([{transform:'translate(' + dx + 'px,' + dy + 'px) scale(' + sc + ') rotate(' + ((Math.random() - .5) * 30) + 'deg)'}, {transform:'translate(0,0) scale(1) rotate(0)'}], {duration:260, easing:'cubic-bezier(.2,.7,.3,1)'});
+    var a = wrap.animate([{transform:'translate(' + dx + 'px,' + dy + 'px) scale(' + sc + ') rotate(' + ((Math.random() - .5) * 30) + 'deg)'}, {transform:'translate(0,0) scale(1) rotate(0)'}], {duration:430, easing:'cubic-bezier(.2,.7,.3,1)'});
     a.onfinish = function(){ wrap.remove(); toEl.style.visibility = ''; done && done(); };
   }
   function lastPlayedEl(pid){ var box = pid === 0 ? $('kmyplayed') : $('kplayed' + pid); return box.lastElementChild; }
@@ -2744,7 +2750,7 @@ body.kiropen{overflow:hidden}
     var ev = K.play(st, pid, cardId); selected = null; persist();
     render(); SFX.slap(); if (Math.random() < .25) wobble(false);
     fly(fromRect, card, lastPlayedEl(pid));
-    if (st.phase !== 'play') setTimeout(function(){ roundEnd(gen); }, 650);
+    if (st.phase !== 'play') setTimeout(function(){ roundEnd(gen); }, 1300);
     else schedule();
     return ev;
   }
@@ -2753,7 +2759,7 @@ body.kiropen{overflow:hidden}
     if (st.phase !== 'play') return;
     if (st.turn === 0){ busy = false; render(); return; }
     busy = true; render(); showThinking(st.turn, true);
-    var fast = st.players[0].out ? .35 : 1, delay = (520 + Math.random() * 520) * fast;
+    var fast = st.players[0].out ? .45 : 1, delay = (1300 + Math.random() * 900 + (st.lapPos === 0 && st.roundLog.length ? 900 : 0)) * fast;
     setTimeout(function(){
       if (my !== gen || !st || st.phase !== 'play') return;
       var pid = st.turn; showThinking(pid, false);
@@ -2817,7 +2823,7 @@ body.kiropen{overflow:hidden}
     if (my !== gen) return; var R = st.result, T = 0, me = st.players[0];
     busy = true; render(); persist(); noise(.25, .2, 900);
     var seq = [];
-    function at(ms, fn){ seq.push(setTimeout(function(){ if (my === gen) fn(); }, ms)); }
+    function at(ms, fn){ seq.push(setTimeout(function(){ if (my === gen) fn(); }, ms * 1.4)); }
     // the cards are already face up; mark the losers
     at(450, function(){ R.losers.forEach(function(id){ var pl = id === 0 ? $('kmyplate') : $('kplate' + id); if (pl){ pl.classList.add('lose', 'hit'); } }); if (R.losers.length) SFX.thud(); });
     // the phone wakes up with the new points
@@ -2868,7 +2874,7 @@ body.kiropen{overflow:hidden}
       if (st.phase === 'over'){ gameOver(); return; }
       busy = false;
       var nb = $('knext'); nb.textContent = me.out ? 'JATKA (ULKONA) ▶' : 'SEURAAVA JAKO ▶'; nb.classList.add('on');
-      autoNext = setTimeout(function(){ if (my === gen && $('knext').classList.contains('on') && me.out) next(); }, 1500);
+      autoNext = setTimeout(function(){ if (my === gen && $('knext').classList.contains('on') && me.out) next(); }, 2600);
     });
   }
   var autoNext = 0;

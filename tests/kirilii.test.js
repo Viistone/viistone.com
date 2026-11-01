@@ -6,7 +6,7 @@ const c = (id, v, s) => ({ id, v, s: s || 'S' });
 function playOut(st, rnd) { let guard = 0; while (st.phase === 'play' && guard++ < 200) K.botMove(st, rnd); }
 function setHands(st, hands, starter) {
   st.players.forEach((p, i) => { p.hand = hands[i] ? hands[i].slice() : []; p.played = []; p.out = !hands[i]; });
-  st.turn = starter || 0; st.starter = starter || 0; st.last = null; st.lastBy = null; st.phase = 'play'; st.roundLog = [];
+  st.turn = starter || 0; st.starter = starter || 0; st.last = null; st.lastBy = null; st.phase = 'play'; st.roundLog = []; st.lapN = hands.filter(Boolean).length; st.lapPos = 0; st.lap = 1;
 }
 
 test('1. pakassa on 55 korttia', () => { assert.strictEqual(K.makeDeck().length, 55); });
@@ -44,12 +44,14 @@ test('9. laitonta korttia ei voi pelata', () => {
   assert.throws(() => K.play(st, 0, 2)); // 6 is not >= 8 and not the lowest (2 is)
   assert.throws(() => K.play(st, 1, 12), /not your turn/);
 });
-test('10. viimeksi pelattu kortti ohjaa seuraavaa', () => {
+test('10. kierroksen isoin kortti ohjaa ja uusi kierros alkaa vapaana', () => {
   const st = K.newGame({ seed: 4 });
-  setHands(st, [[c(1, 5), c(2, 6), c(3, 7)], [c(11, 14), c(12, 3), c(13, 4)], [c(21, 2), c(22, 9), c(23, 10)]], 0);
+  setHands(st, [[c(1, 5), c(2, 6), c(3, 7)], [c(11, 14), c(12, 3), c(13, 4)], [c(21, 2), c(22, 5, 'H'), c(23, 9)]], 0);
   K.play(st, 0, 3); assert.strictEqual(st.last, 7);
-  K.play(st, 1, 12); assert.strictEqual(st.last, 3, 'lower card becomes the new reference');
-  assert.deepStrictEqual(K.legal(st.players[2].hand, st.last).map(x => x.v).sort((a, b) => a - b), [2, 9, 10]);
+  K.play(st, 1, 12); assert.strictEqual(st.last, 7, 'a lower card does not lower the lap reference');
+  assert.deepStrictEqual(K.legal(st.players[2].hand, st.last).map(x => x.v).sort((a, b) => a - b), [2, 9]);
+  K.play(st, 2, 23); assert.strictEqual(st.last, null, 'new lap is free');
+  assert.deepStrictEqual(K.legal(st.players[0].hand, st.last).length, 2);
 });
 test('11. kortit sijoitetaan pelaajakohtaisesti', () => {
   const st = K.newGame({ seed: 5 });

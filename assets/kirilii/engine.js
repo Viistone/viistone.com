@@ -40,6 +40,8 @@
   function minV(hand) { var m = 99; for (var i = 0; i < hand.length; i++) if (hand[i].v < m) m = hand[i].v; return m; }
 
   // ---------- rules ----------
+  // A lap is one card from every player still in. The first card of a lap is free; after that every card is compared
+  // to the biggest card played in this lap, whoever played it. The lowest card of your hand is always allowed.
   function legal(hand, last) {
     if (last == null) return hand.slice();
     var m = minV(hand);
@@ -83,7 +85,7 @@
     for (var r = 0; r < HAND; r++) act.forEach(function (p) { p.hand.push(deck.pop()); });
     act.forEach(function (p) { sortHand(p.hand); });
     if (st.players[st.starter].out) st.starter = nextActive(st, st.starter);
-    st.turn = st.starter; st.last = null; st.lastBy = null; st.phase = 'play'; st.roundLog = []; st.result = null;
+    st.turn = st.starter; st.last = null; st.lastBy = null; st.lastId = null; st.lapN = act.length; st.lapPos = 0; st.lap = 1; st.phase = 'play'; st.roundLog = []; st.result = null;
     return st;
   }
 
@@ -91,6 +93,7 @@
   function play(st, pid, cardId) {
     if (st.phase !== 'play') throw new Error('not playing');
     if (st.turn !== pid) throw new Error('not your turn');
+    if (st.lapN == null){ st.lapN = active(st).length; st.lapPos = st.roundLog.length % st.lapN; st.lap = Math.floor(st.roundLog.length / st.lapN) + 1; }
     var p = st.players[pid], idx = -1;
     for (var i = 0; i < p.hand.length; i++) if (p.hand[i].id === cardId) idx = i;
     if (idx < 0) throw new Error('card not in hand');
@@ -104,7 +107,10 @@
     };
     p.hand.splice(idx, 1);
     p.played.push(card);
-    st.last = card.v; st.lastBy = pid;
+    // the biggest card of the current lap is what the next player has to beat; a new lap starts free
+    if (st.last == null || card.v >= st.last){ st.last = card.v; st.lastBy = pid; st.lastId = card.id; }
+    st.lapPos++;
+    if (st.lapPos >= st.lapN){ st.lapPos = 0; st.lap++; st.last = null; st.lastBy = null; st.lastId = null; }
     st.roundLog.push(ev);
     if (active(st).every(function (q) { return q.hand.length === 1; })) { ev.endsRound = true; endRound(st); }
     else st.turn = nextActive(st, pid);
@@ -173,7 +179,7 @@
   // ---------- what a bot is allowed to know ----------
   function view(st, pid) {
     return {
-      me: pid, hand: st.players[pid].hand.map(function (c) { return { id: c.id, v: c.v, s: c.s }; }), last: st.last, lastBy: st.lastBy,
+      me: pid, hand: st.players[pid].hand.map(function (c) { return { id: c.id, v: c.v, s: c.s }; }), last: st.last, lastBy: st.lastBy, lapPos: st.lapPos, lapN: st.lapN,
       settings: { difficulty: st.settings.difficulty },
       players: st.players.map(function (p) {
         return { id: p.id, pts: p.pts, out: p.out, persona: p.persona, handSize: p.hand.length, played: p.played.map(function (c) { return { id: c.id, v: c.v, s: c.s }; }) };
@@ -210,14 +216,15 @@
     var hands = {}, order = [], me = v.me;
     v.players.forEach(function (p) { if (!p.out) { order.push(p.id); hands[p.id] = deal[p.id].slice(); } });
     hands[me] = hands[me].filter(function (c) { return c.id !== firstCard.id; });
-    var last = firstCard.v, turn = me, n = order.length;
+    var n = order.length, pos = (v.lapPos || 0) + 1, last = v.last == null ? firstCard.v : Math.max(v.last, firstCard.v), turn = me;
+    if (pos >= n){ pos = 0; last = null; }
     function nextOf(id) { var i = order.indexOf(id); return order[(i + 1) % n]; }
     var guard = 0;
     while (!order.every(function (id) { return hands[id].length === 1; }) && guard++ < 200) {
       turn = nextOf(turn);
       var h = hands[turn], c = rolloutPick(h, last, rnd);
       hands[turn] = h.filter(function (x) { return x.id !== c.id; });
-      last = c.v;
+      last = last == null ? c.v : Math.max(last, c.v); pos++; if (pos >= n){ pos = 0; last = null; }
     }
     var max = 0; order.forEach(function (id) { if (hands[id][0].v > max) max = hands[id][0].v; });
     var pen = {}; order.forEach(function (id) { pen[id] = hands[id][0].v === max ? max : 0; });
