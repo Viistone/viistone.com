@@ -2347,6 +2347,8 @@ body.kiropen{overflow:hidden}
 .kir .kscan{position:absolute;inset:0;pointer-events:none;z-index:7;opacity:.22;background:repeating-linear-gradient(to bottom, rgba(0,0,0,.25) 0 1px, transparent 1px 3px)}
 .kir .kstage{position:absolute;left:0;right:0;top:0;bottom:var(--hand);transform-origin:50% 50%}
 .kir .kstage.shake{animation:kshake .45s steps(6)}
+.kir .kstage.jolt{animation:kjolt .22s ease-out}
+@keyframes kjolt{30%{transform:translateY(2px) scale(1.004)}65%{transform:translateY(-1px)}}
 .kir .kstage.quake{animation:kquake .9s steps(10)}
 @keyframes kshake{20%{transform:translate(4px,-2px) rotate(.4deg)}40%{transform:translate(-5px,2px)}60%{transform:translate(3px,1px) scale(1.02)}80%{transform:translate(-2px,-1px)}}
 @keyframes kquake{10%{transform:translate(9px,-4px) rotate(1deg) scale(1.05)}25%{transform:translate(-10px,5px) rotate(-1.2deg) scale(1.06)}40%{transform:translate(7px,3px) scale(1.05)}55%{transform:translate(-6px,-4px) rotate(.6deg) scale(1.04)}70%{transform:translate(4px,2px) scale(1.02)}85%{transform:translate(-2px,1px)}}
@@ -2532,7 +2534,7 @@ body.kiropen{overflow:hidden}
 @media (min-aspect-ratio: 1/1){ .kir .kshout{left:calc(7% + 14px) !important;bottom:calc(var(--hand) + 30px)} }
 .kir.watch .myhand,.kir.online.watch .kshout,.kir.online.idle .kshout{display:none}
 .kir .kshout button{font-size:16px !important;padding:3px 8px !important;width:auto;white-space:nowrap}
-.kir .myhand .kc.drag{transition:none;z-index:5;box-shadow:0 14px 26px rgba(0,0,0,.6), 0 0 0 2px rgba(255,179,92,.8)}
+.kir .myhand .kc.drag{transition:none;z-index:5;box-shadow:0 calc(10px + var(--lift,0) * 26px) calc(18px + var(--lift,0) * 30px) rgba(0,0,0,.55), 0 0 0 2px rgba(255,179,92,.8)}
 @media (prefers-reduced-motion: reduce){ .kir .ktrack,.kir .kscan,.kir .ktbl{animation:none} }
 .kir .plate .tag{position:absolute;right:-6px;top:-11px;font-family:var(--f-mono);font-size:9px;letter-spacing:.14em;font-style:normal;padding:1px 4px;background:#1c1f1c;color:#9fe0a8;border:1px solid #3a4a3a;transform:rotate(3deg)}
 .kir .plate .tag:empty{display:none}
@@ -2780,7 +2782,8 @@ body.kiropen{overflow:hidden}
     if (c.v >= 11 && c.v <= 13) body = court(c);
     else if (c.v === 14) body = '<div class="pips"><span class="ace" style="left:50%;top:50%">' + su + '</span></div>';
     else body = '<div class="pips">' + PIPS[c.v].map(function(p){ return '<span class="' + (p[1] > 50 ? 'd' : '') + '" style="left:' + p[0] + '%;top:' + p[1] + '%">' + su + '</span>'; }).join('') + '</div>';
-    return '<div class="kc ' + (red ? 'red ' : '') + (c.v === 14 && c.s === 'S' ? 'ace-s ' : '') + (extra || '') + '" data-id="' + c.id + '"><span class="cr' + (c.v === 10 ? ' t10' : '') + '">' + lab + '<i>' + su + '</i></span>' + body + '<span class="cr b' + (c.v === 10 ? ' t10' : '') + '">' + lab + '<i>' + su + '</i></span></div>';
+    var ly = st && lie && lie[st.round + ':' + c.id], lst = ly ? ' style="rotate:' + ly.r + 'deg;translate:' + ly.x + 'px ' + ly.y + 'px"' : '';
+    return '<div class="kc ' + (red ? 'red ' : '') + (c.v === 14 && c.s === 'S' ? 'ace-s ' : '') + (extra || '') + '" data-id="' + c.id + '"' + lst + '><span class="cr' + (c.v === 10 ? ' t10' : '') + '">' + lab + '<i>' + su + '</i></span>' + body + '<span class="cr b' + (c.v === 10 ? ' t10' : '') + '">' + lab + '<i>' + su + '</i></span></div>';
   }
 
   // ---------- sound ----------
@@ -2799,7 +2802,9 @@ body.kiropen{overflow:hidden}
   var voxT = 0;
   function vox(list, vol, force){ var t = Date.now(); if (!force && t - voxT < 2600) return; voxT = t; playS(list[Math.floor(Math.random() * list.length)], vol == null ? .5 : vol, .96 + Math.random() * .08); }
   var SFX = {
-    slap: function(){ var k = 'put' + (1 + Math.floor(Math.random() * 4)); if (bufs[k]) playS(k, .75, .92 + Math.random() * .16); else { noise(.07, .45, 1800); tone(120, .06, 'sine', .12, 70); } },
+    slap: function(f){ f = f == null ? .5 : f; var k = f < .25 ? (Math.random() < .5 ? 'put2' : 'put3') : 'put' + (1 + Math.floor(Math.random() * 4));
+      if (bufs[k]) playS(k, .3 + f * .65, 1.04 - f * .12 + Math.random() * .08); else { noise(.07, .2 + f * .3, 1800); tone(120, .06, 'sine', .12, 70); }
+      if (f > .68){ tone(82, .18, 'sine', .1 + (f - .68) * .5, 46); if (bufs.cards && f > .85) playS('cards', .18, 1.3); } },
     shuffle: function(){ if (bufs.deal) { playS('deal', .55); return; } for (var i = 0; i < 9; i++) setTimeout(function(){ noise(.03, .18, 3200); }, i * 45 + Math.random() * 20); },
     flip: function(){ playS('flip', .45, .95 + Math.random() * .1); },
     cards: function(){ if (bufs.cards) playS('cards', .5); else noise(.25, .2, 900); },
@@ -2919,14 +2924,49 @@ body.kiropen{overflow:hidden}
   }
 
   // ---------- flying card animation ----------
-  function fly(fromRect, card, toEl, done){
-    if (reduce || !fromRect || !toEl){ done && done(); return; }
+  var lie = {}, nextThrow = null;
+  var STYLE = {varovainen:[.08, .22], hoylaaja:[.72, .98], riski:[.45, .9], taktikko:[.2, .38], kaaos:[0, 1]};
+  function botThrow(p){ var r = STYLE[p.persona] || [.35, .7], f = r[0] + Math.random() * (r[1] - r[0]); return {force:f, vx:(Math.random() - .5) * f * 2, vy:0, rot:0, spin:p.persona === 'kaaos' || p.persona === 'riski'}; }
+  function clamp(v, a, b){ return v < a ? a : v > b ? b : v; }
+  function landed(f, pid){
+    SFX.slap(f);
+    if (f > .68 && !reduce){ var stg = $('kstage'); stg.classList.remove('jolt'); void stg.offsetWidth; stg.classList.add('jolt');
+      var others = root.querySelectorAll('.played .kc, .myplayed .kc'); for (var i = 0; i < others.length; i++){ if (Math.random() < .55) others[i].animate([{marginTop:'0px'}, {marginTop:-(2 + f * 4) + 'px'}, {marginTop:'0px'}], {duration:170 + Math.random() * 90, easing:'ease-out'}); }
+      if (f > .85 && Math.random() < .5) wobble(false); }
+    if (pid === 0 && navigator.vibrate) try { navigator.vibrate(f > .68 ? [18, 30, 12] : 10); } catch(e){}
+  }
+  function fly(fromRect, card, toEl, done, th, pid){
+    th = th || {force:.5, vx:0, vy:0, rot:0};
+    var f = clamp(th.force, 0, 1), key = st.round + ':' + card.id;
+    var ly = lie[key] = lie[key] || {r:Math.round((Math.random() - .5) * (4 + f * 9) * 10) / 10, x:Math.round((Math.random() - .5) * (2 + f * 6)), y:Math.round((Math.random() - .5) * (2 + f * 5))};
+    if (reduce || !fromRect || !toEl){ if (toEl){ toEl.style.rotate = ly.r + 'deg'; toEl.style.translate = ly.x + 'px ' + ly.y + 'px'; } landed(f, pid); done && done(); return; }
     var to = toEl.getBoundingClientRect(), wrap = document.createElement('div'); wrap.className = 'kfly'; wrap.innerHTML = cardHTML(card);
-    var el = wrap.firstChild; el.style.setProperty('--sw', to.width + 'px'); el.style.setProperty('--sh', to.height + 'px');
+    var el = wrap.firstChild; el.style.setProperty('--sw', to.width + 'px'); el.style.setProperty('--sh', to.height + 'px'); el.style.rotate = ''; el.style.translate = '';
     wrap.style.left = to.left + 'px'; wrap.style.top = to.top + 'px'; root.appendChild(wrap); toEl.style.visibility = 'hidden';
     var dx = fromRect.left + fromRect.width / 2 - (to.left + to.width / 2), dy = fromRect.top + fromRect.height / 2 - (to.top + to.height / 2), sc = fromRect.width / to.width;
-    var a = wrap.animate([{transform:'translate(' + dx + 'px,' + dy + 'px) scale(' + sc + ') rotate(' + ((Math.random() - .5) * 30) + 'deg)'}, {transform:'translate(0,0) scale(1) rotate(0)'}], {duration:430, easing:'cubic-bezier(.2,.7,.3,1)'});
-    a.onfinish = function(){ wrap.remove(); toEl.style.visibility = ''; done && done(); };
+    var dist = Math.hypot(dx, dy), carry = clamp(dist * .35, 30, 160);
+    // the flick carries the card off its straight line before it curves to the slot
+    var mx = dx * .42 + clamp(th.vx, -3, 3) * carry * .5, my = dy * .42 + clamp(th.vy, -3, 3) * carry * .2 - (10 + f * 26);
+    var spin = (th.spin || f > .6 ? (th.vx >= 0 ? 1 : -1) * (40 + f * 220) * (Math.random() < .5 ? 1 : .6) : (th.vx || (Math.random() - .5)) * 25);
+    var r0 = th.rot || 0, lift = 1 + .1 + f * .16, dur = 620 - f * 300;
+    var sh = function(h){ return 'drop-shadow(0 ' + h + 'px ' + (h * 1.4) + 'px rgba(0,0,0,.5))'; };
+    var T = function(x, y, s1, s2, r){ return 'translate(' + x + 'px,' + y + 'px) scale(' + s1 + ',' + s2 + ') rotate(' + r + 'deg)'; };
+    var land = T(ly.x, ly.y, 1, 1, ly.r), frames;
+    if (f > .55) frames = [
+      {offset:0, transform:T(dx, dy, sc, sc, r0), filter:sh(14)},
+      {offset:.5, transform:T(mx, my, lift * (sc * .4 + .6), lift * (sc * .4 + .6), r0 + spin * .7), filter:sh(26)},
+      {offset:.82, transform:T(ly.x, ly.y, 1.08 + f * .06, .9 - f * .05, ly.r + spin * .03), filter:sh(2), easing:'ease-out'},
+      {offset:.92, transform:T(ly.x, ly.y - 2, .98, 1.03, ly.r), filter:sh(4)},
+      {offset:1, transform:land, filter:sh(3)}];
+    else frames = [
+      {offset:0, transform:T(dx, dy, sc, sc, r0), filter:sh(14)},
+      {offset:.55, transform:T(mx * .9, my * .9, lift * (sc * .4 + .6), lift * (sc * .4 + .6), r0 + spin * .6), filter:sh(18)},
+      {offset:.86, transform:T(ly.x + (th.vx || 0) * 6, ly.y + 3, 1.01, 1.01, ly.r + spin * .08), filter:sh(5), easing:'ease-in-out'},
+      {offset:1, transform:land, filter:sh(3)}];
+    var landAt = dur * (f > .55 ? .82 : .9), fired = false;
+    var lt = setTimeout(function(){ fired = true; landed(f, pid); }, landAt);
+    var a = wrap.animate(frames, {duration:dur, easing:f > .55 ? 'cubic-bezier(.3,.2,.6,1)' : 'cubic-bezier(.25,.6,.35,1)'});
+    a.onfinish = function(){ wrap.remove(); toEl.style.visibility = ''; toEl.style.rotate = ly.r + 'deg'; toEl.style.translate = ly.x + 'px ' + ly.y + 'px'; if (!fired){ clearTimeout(lt); landed(f, pid); } done && done(); };
   }
   function lastPlayedEl(pid){ var box = pid === 0 ? $('kmyplayed') : $('kplayed' + pid); return box.lastElementChild; }
 
@@ -2935,8 +2975,8 @@ body.kiropen{overflow:hidden}
   function doPlay(pid, cardId, fromRect){
     var p = st.players[pid], card = null; p.hand.forEach(function(c){ if (c.id === cardId) card = c; });
     var ev = K.play(st, pid, cardId); selected = null; persist();
-    render(); SFX.slap(); if (Math.random() < .25) wobble(false);
-    fly(fromRect, card, lastPlayedEl(pid));
+    var th = pid === 0 ? (nextThrow || {force:.45, vx:0, vy:0, rot:0}) : botThrow(p); if (pid === 0) nextThrow = null;
+    render(); fly(fromRect, card, lastPlayedEl(pid), null, th, pid);
     if (st.phase !== 'play') setTimeout(function(){ roundEnd(gen); }, 1300);
     else schedule();
     return ev;
@@ -2962,20 +3002,26 @@ body.kiropen{overflow:hidden}
   $('kmyhand').addEventListener('pointerdown', function(e){
     ac(); var el = e.target.closest('.kc'); if (!el || !st || st.phase !== 'play' || st.turn !== 0 || busy) return;
     if (!el.classList.contains('ok')) { tone(160, .08, 'square', .03); el.animate([{transform:'translateX(-4px)'}, {transform:'translateX(4px)'}, {transform:'none'}], {duration:180}); return; }
-    drag = {id:+el.dataset.id, x:e.clientX, y:e.clientY, t:performance.now(), el:el, moved:false}; try { el.setPointerCapture(e.pointerId); } catch(_){}
+    drag = {id:+el.dataset.id, x:e.clientX, y:e.clientY, t:performance.now(), el:el, moved:false, pts:[[e.clientX, e.clientY, performance.now()]], rot:0}; try { el.setPointerCapture(e.pointerId); } catch(_){}
   });
   $('kmyhand').addEventListener('pointermove', function(e){ if (!drag) return; var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    var now = performance.now(); drag.pts.push([e.clientX, e.clientY, now]); while (drag.pts.length > 2 && now - drag.pts[0][2] > 90) drag.pts.shift();
     if (!drag.moved && Math.hypot(dx, dy) < 8) return; drag.moved = true; drag.el.classList.add('drag');
-    drag.el.style.transform = 'translate(' + dx * .6 + 'px,' + Math.min(20, dy) + 'px) rotate(' + dx * .05 + 'deg) scale(' + (1 + Math.min(.12, Math.max(0, -dy) / 600)) + ')';
+    var v = velo(drag), up = Math.max(0, -dy), lift = Math.min(1, up / 160);
+    drag.rot = drag.rot * .7 + clamp(v.vx * 9 + dx * .04, -22, 22) * .3;
+    drag.el.style.setProperty('--lift', lift);
+    drag.el.style.transform = 'translate(' + dx + 'px,' + Math.min(24, dy) + 'px) rotate(' + drag.rot + 'deg) scale(' + (1 + lift * .16) + ')';
     $('khint').textContent = dy < -55 ? 'Päästä irti: pelaa' : 'Pyyhkäise ylös'; });
+  function velo(d){ var a = d.pts[0], b = d.pts[d.pts.length - 1], t = Math.max(16, b[2] - a[2]); return {vx:(b[0] - a[0]) / t, vy:(b[1] - a[1]) / t}; }
   function endDrag(e, cancel){
     if (!drag) return; var d = drag; drag = null; var dy = e.clientY - d.y, dt = performance.now() - d.t, fast = dy < -30 && dt < 260;
     d.el.classList.remove('drag');
     if (cancel){ d.el.style.transform = ''; return; }
-    if (dy < -55 || fast){ play(d.id, d.el); return; }
-    if (d.moved){ d.el.animate([{transform:d.el.style.transform}, {transform:'none'}], {duration:180, easing:'ease-out'}); d.el.style.transform = ''; hint(); return; }
+    if (dy < -55 || fast){ d.pts.push([e.clientX, e.clientY, performance.now()]); var v = velo(d), sp = Math.hypot(v.vx, v.vy);
+      nextThrow = {force:clamp((sp - .25) / 2.1, 0, 1), vx:v.vx, vy:v.vy, rot:d.rot}; play(d.id, d.el); return; }
+    if (d.moved){ d.el.animate([{transform:d.el.style.transform}, {transform:'translateY(-6px) rotate(' + (-d.rot * .2) + 'deg)', offset:.6}, {transform:'none'}], {duration:300, easing:'ease-out'}); d.el.style.transform = ''; d.el.style.removeProperty('--lift'); hint(); return; }
     d.el.style.transform = '';
-    if (selected === d.id) play(d.id, d.el); else { selected = d.id; SFX.flip(); renderHand(); hint(); }
+    if (selected === d.id){ nextThrow = {force:.42, vx:0, vy:-.6, rot:0}; play(d.id, d.el); } else { selected = d.id; SFX.flip(); renderHand(); hint(); }
   }
   $('kmyhand').addEventListener('pointerup', function(e){ endDrag(e); });
   $('kmyhand').addEventListener('pointercancel', function(e){ endDrag(e, true); });
@@ -3248,8 +3294,8 @@ body.kiropen{overflow:hidden}
       busy = false; render();
       newEvs.forEach(function(e, k){ var box = e.pid === 0 ? $('kmyplayed') : $('kplayed' + e.pid), el = null;
         for (var j = 0; j < box.children.length; j++) if (+box.children[j].dataset.id === e.card.id) el = box.children[j];
-        setTimeout(function(){ SFX.slap(); fly(from[e.pid], e.card, el); }, k * 260); });
-      if (Math.random() < .25) wobble(false);
+        var th = e.pid === 0 ? (nextThrow || {force:.45, vx:0, vy:0, rot:0}) : botThrow(st.players[e.pid]); if (e.pid === 0) nextThrow = null;
+        setTimeout(function(){ fly(from[e.pid], e.card, el, null, th, e.pid); }, k * 260); });
     } else { busy = false; render(); }
     if (wasPlay && st.phase !== 'play') setTimeout(function(){ roundEnd(gen); }, 1300);
   }
