@@ -61,6 +61,20 @@ body.menu .hud{opacity:0}
 .panel .pts{font-size:clamp(40px,7vw,64px);color:#ff6a33;margin:4px 0 8px}
 .panel .rows{font-size:clamp(18px,2.6vw,24px);color:#b3b0aa;line-height:1.35;margin-bottom:16px}
 .panel .rec{color:#e7c25a}
+.plab{font-size:16px;letter-spacing:.2em;color:#b3b0aa;margin:0 0 4px}
+.pinit{display:none;flex-direction:column;align-items:center;gap:6px;margin:4px 0 10px}
+.pinit.on{display:flex}
+.pname{font:inherit;font-size:52px;line-height:1;letter-spacing:.25em;text-transform:uppercase;text-align:center;width:5.2ch;padding:2px 0 4px .25em;box-sizing:border-box;background:transparent;color:#ece4cc;border:0;border-bottom:2px solid #ff6a33;border-radius:0;outline:none;caret-color:#ff6a33;-webkit-appearance:none;appearance:none}
+.pname::placeholder{color:rgba(236,228,204,.3)}
+.panel .sm{font-size:22px;padding:3px 16px}
+.boards{display:grid;grid-template-columns:1fr 1fr;gap:4px 28px;width:min(520px,100%);text-align:left;margin:0 0 14px}
+.boards ol{list-style:none;margin:0;padding:0;font-size:19px;color:rgba(236,228,204,.75)}
+.boards li{display:grid;grid-template-columns:22px 42px 1fr;gap:6px}
+.boards li b{font-weight:400;color:#fff}
+.boards li em{font-style:normal;text-align:right;color:#ffb48a}
+.boards li.me{color:#fff;background:rgba(255,106,51,.25)}
+.boards li.empty{opacity:.35}
+@media (max-width:520px){ .boards{gap:4px 12px} .boards ol{font-size:16px} .boards li{grid-template-columns:18px 34px 1fr} .panel h1{font-size:40px} }
 .panel .act{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
 .panel button,.panel a{font:inherit;font-size:clamp(24px,3.4vw,32px);padding:8px 26px;border-radius:4px;cursor:pointer;text-decoration:none}
 .panel .go{background:#ffb35c;color:#14130f;border:2px solid #ffb35c}
@@ -76,11 +90,13 @@ body.menu .hud{opacity:0}
 <div class="hud" id="mid"><div id="combo"></div></div>
 <div id="viisi">VIISI<small style="display:block;font-size:.22em;color:#ece4cc">VIISI OSUMAA PUTKEEN</small></div>
 <div id="hint">TARTU VIISTOSEEN<br>PYÖRITÄ MONTA KIERROSTA<br>JA PÄÄSTÄ IRTI</div>
-<div id="btns"><button id="breset" aria-label="Uusi heitto">↺</button><button id="bmus" aria-label="Musiikki">♪</button><button id="bfx" aria-label="Äänet">FX</button><a href="/" aria-label="Kotisivulle">⏏</a></div>
-<div class="panel on" id="start"><h1>HEITÄ VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Mitä useampi kierros, sitä pidempi lento.</p><p>Mäki on pitkä. Kukaan ei ole nähnyt sen loppua.</p><div class="act" style="margin-top:6px"><button class="go" id="bgo">ALOITA</button></div><button id="bclear" class="reset">NOLLAA ENNÄTYKSET</button><div class="note">testiversio</div></div>
+<div id="btns"><button id="breset" aria-label="Uusi heitto">↺</button><button id="bmus" aria-label="Musiikki">♪</button><button id="bfx" aria-label="Äänet">FX</button><a href="/#pelit" aria-label="Kotisivulle">⏏</a></div>
+<div class="panel on" id="start"><h1>HEITÄ VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Mitä useampi kierros, sitä pidempi lento.</p><p>Mäki on pitkä. Kukaan ei ole nähnyt sen loppua.</p><div class="act" style="margin-top:6px"><button class="go" id="bgo">ALOITA</button></div><button id="bclear" class="reset">NOLLAA ENNÄTYKSET</button></div>
 <div id="next"><div id="nres"></div><button id="bnext">SEURAAVA HEITTO</button></div>
 <div id="zone"></div>
-<div class="panel" id="over"><h1 id="oh">VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div id="omiss"></div><div class="act"><button class="go" id="bagain">UUDESTAAN</button><a class="alt" href="/">KOTISIVULLE</a></div></div>
+<div class="panel" id="over"><h1 id="oh">VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div id="omiss"></div>
+<div class="pinit" id="pinit"><p class="plab">PÄÄSIT LISTALLE. NIMIKIRJAIMET:</p><input class="pname" id="pname" type="text" maxlength="3" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done" aria-label="Kolme nimikirjainta" placeholder="___"><button class="alt sm" id="psave" type="button">TALLENNA</button></div>
+<div class="boards"><div><p class="plab">TÄNÄÄN</p><ol id="btoday"></ol></div><div><p class="plab">KAIKKIEN AIKOJEN</p><ol id="ball"></ol></div></div><div class="act"><button class="go" id="bagain">UUDESTAAN</button><a class="alt" href="/#pelit">KOTISIVULLE</a></div></div>
 <script src="assets/lib/matter.min.js"></script>
 <script>
 (function(){
@@ -664,9 +680,31 @@ function finish(){ if (ended) return; ended = true; state = 'over'; $('oh').text
   tally.env = Math.max(0, score - tally.self - tally.boom);
   $('opts').textContent = tot.toLocaleString('fi-FI') + ' PTS';
   $('orows').innerHTML = d + ' M · COMBO x' + Math.max(1, maxCombo) + '<br>MATKA ' + (Math.max(0, d) * 100).toLocaleString('fi-FI') + ' · VIISTONE ITSE ' + tally.self.toLocaleString('fi-FI') + ' · YMPÄRISTÖ ' + tally.env.toLocaleString('fi-FI') + ' · RÄJÄHDYKSET ' + tally.boom.toLocaleString('fi-FI') + '<br>' + (rec && tot > 0 ? '<span class="rec">UUSI ENNÄTYS</span>' : 'ENNÄTYS ' + best.toLocaleString('fi-FI')) + '<br>' + (recD ? '<span class="rec">PISIN MATKA TÄHÄN ASTI</span>' : missD > 0 && missD <= 40 ? '<span class="rec">' + missD + ' M PUUTTUI MATKAENNÄTYKSESTÄ</span>' : '');
-  $('omiss').innerHTML = '';
+  $('omiss').innerHTML = ''; lastScore = tot; lastDist = Math.max(0, d); showBoards();
   setTimeout(() => { if (state === 'over') $('over').classList.add('on'); }, 1000); }
-addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && state === 'over'){ e.preventDefault(); newGame(); } });
+addEventListener('keydown', e => { if (e.target && e.target.tagName === 'INPUT') return; if ((e.key === 'Enter' || e.key === ' ') && state === 'over'){ e.preventDefault(); newGame(); } });
+// ---------- leaderboard: same server and same initials as the other games, its own lists ----------
+const API = 'https://api.viistone.com/api/scores?g=heita'; let lastScore = 0, lastDist = 0, myT = 0;
+function fill(id, rows, failed){ let h = ''; if (failed) h = '<li class="empty"><span></span><b>EI</b><em>YHTEYTTÄ</em></li>';
+  else { (rows || []).forEach((r, i) => { h += '<li class="' + (r.t === myT ? 'me' : '') + '"><span>' + (i + 1) + '</span><b>' + r.n + '</b><em>' + r.s.toLocaleString('fi-FI') + '</em></li>'; }); for (let i = (rows || []).length; i < 10; i++) h += '<li class="empty"><span>' + (i + 1) + '</span><b>---</b><em>0</em></li>'; }
+  $(id).innerHTML = h; }
+function renderBoards(d, failed){ fill('btoday', d && d.today, failed); fill('ball', d && d.all, failed); }
+function qualifies(rows){ return lastScore > 0 && (rows.length < 10 || lastScore > rows[rows.length - 1].s); }
+function savedName(){ try { return localStorage.getItem('viistone-2048-name') || ''; } catch(e){ return ''; } }
+function showBoards(){ $('pinit').classList.remove('on'); renderBoards(null); myT = 0;
+  fetch(API, {cache:'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null).then(d => { if (!d || d.game !== 'heita'){ renderBoards(null, true); return; } renderBoards(d);
+    if (qualifies(d.today || []) || qualifies(d.all || [])){ $('pname').value = savedName().slice(0, 3); $('pinit').classList.add('on'); if (!matchMedia('(pointer: coarse)').matches) setTimeout(() => { $('pname').focus(); $('pname').select(); }, 1100); } }); }
+$('pname').addEventListener('input', () => { const v = $('pname').value.toUpperCase().replace(/[^A-ZÅÄÖ]/g, '').slice(0, 3); if (v !== $('pname').value) $('pname').value = v; });
+$('pname').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter'){ e.preventDefault(); saveScore(); } }, true);
+function saveScore(){ const n = $('pname').value.toUpperCase(), btn = $('psave');
+  if (!/^[A-ZÅÄÖ]{3}$/.test(n)){ btn.textContent = 'KOLME KIRJAINTA'; $('pname').focus(); setTimeout(() => { btn.textContent = 'TALLENNA'; }, 1600); return; }
+  $('pname').blur(); btn.disabled = true; btn.textContent = 'TALLENNETAAN'; try { localStorage.setItem('viistone-2048-name', n); } catch(e){}
+  fetch(API, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({n, s:lastScore, l:Math.min(99999, lastDist), g:'heita'})})
+    .then(r => r.json().then(d => ({ok:r.ok, d}))).then(x => { btn.disabled = false; btn.textContent = 'TALLENNA';
+      if (!x.ok){ btn.textContent = x.d && x.d.error === 'name' ? 'VALITSE TOISET KIRJAIMET' : x.d && x.d.error === 'slow down' ? 'ODOTA HETKI' : 'EI ONNISTUNUT'; setTimeout(() => { btn.textContent = 'TALLENNA'; }, 1800); return; }
+      myT = x.d.t; renderBoards(x.d); $('pinit').classList.remove('on'); })
+    .catch(() => { btn.disabled = false; btn.textContent = 'EI YHTEYTTÄ'; setTimeout(() => { btn.textContent = 'TALLENNA'; }, 1800); }); }
+$('psave').addEventListener('click', saveScore);
 $('bgo').onclick = () => { audioInit(); document.body.classList.remove('menu'); $('start').classList.remove('on'); startSong(); newGame(); };
 $('bagain').onclick = () => { audioInit(); newGame(); };
 // start this throw over at any point

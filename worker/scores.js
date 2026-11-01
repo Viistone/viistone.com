@@ -1,5 +1,5 @@
 // viistone.com CH 03 leaderboard: today (Helsinki time) and all time, three-letter names.
-// Storage: one KV namespace bound as SCORES. Two games: CH 03 (default keys) and CH 06 Postinkantaja (keys prefixed with posti:).
+// Storage: one KV namespace bound as SCORES. CH 03 (default keys), CH 06 Postinkantaja (posti:) and CH 02 Heitä Viistone (heita:).
 
 const ORIGINS = ['https://viistone.com', 'https://www.viistone.com', 'http://localhost:8080', 'http://localhost:8811'];
 const KEEP = 10;
@@ -66,8 +66,8 @@ export default {
     const day = today();
     const qg = url.searchParams.get('g') || '';
     if (qg === 'kirilii' && req.method === 'GET') return kirilii(req, env, day);
-    const game = qg === 'posti' ? 'posti' : '2048';
-    const pre = game === 'posti' ? 'posti:' : '';
+    const game = qg === 'posti' ? 'posti' : qg === 'heita' ? 'heita' : '2048';
+    const pre = game === '2048' ? '' : game + ':';
     let dayKey = pre + 'day:' + day, allKey = pre + 'all';
 
     if (req.method === 'GET') {
@@ -79,14 +79,14 @@ export default {
       let body;
       try { body = await req.json(); } catch (e) { return json(req, { error: 'bad json' }, 400); }
       if (body.g === 'kirilii') return kirilii(req, env, day, body);
-      const bg = body.g === 'posti' ? 'posti' : game, bpre = bg === 'posti' ? 'posti:' : '';
+      const bg = body.g === 'posti' ? 'posti' : body.g === 'heita' ? 'heita' : game, bpre = bg === '2048' ? '' : bg + ':';
       dayKey = bpre + 'day:' + day; allKey = bpre + 'all';
       const n = String(body.n || '').toUpperCase();
       const s = Math.floor(Number(body.s));
       const l = Math.floor(Number(body.l));
       if (!/^[A-ZÅÄÖ]{3}$/.test(n) || BLOCK.has(n)) return json(req, { error: 'name' }, 400);
-      if (!Number.isFinite(s) || s <= 0 || s > 5000000) return json(req, { error: 'score' }, 400);
-      if (!Number.isFinite(l) || l < 0 || l > 9) return json(req, { error: 'level' }, 400);
+      if (!Number.isFinite(s) || s <= 0 || s > (bg === 'heita' ? 50000000 : 5000000)) return json(req, { error: 'score' }, 400);
+      if (!Number.isFinite(l) || l < 0 || l > (bg === 'heita' ? 99999 : 9)) return json(req, { error: 'level' }, 400);
 
       // one submission per connection every 15 s
       const ip = req.headers.get('CF-Connecting-IP') || 'x';
