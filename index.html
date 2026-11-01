@@ -2905,14 +2905,17 @@ body.kiropen{overflow:hidden}
     $('kmyplayed').innerHTML = me.played.map(function(c){ return cardHTML(c, cls(c)); }).join('');
     renderHand(); renderPhone(); hint();
   }
+  var handDirty = false;
   function renderHand(){
+    // never rebuild the hand under a finger: a poll or a timer would drop the card being dragged
+    if (drag){ handDirty = true; return; } handDirty = false;
     if (online && online.watch){ $('kmyhand').innerHTML = ''; return; }
     var me = st.players[0], myTurn = st.phase === 'play' && st.turn === 0 && !busy, lg = myTurn ? K.legal(me.hand, st.last).map(function(c){ return c.id; }) : [];
     var lose = st.phase !== 'play' && st.result && st.result.losers.indexOf(0) >= 0;
     $('kmyhand').innerHTML = me.hand.map(function(c){ var cls = myTurn ? (lg.indexOf(c.id) >= 0 ? 'ok' : 'no') : ''; if (selected === c.id && myTurn) cls += ' sel'; if (lose) cls += ' lose'; return cardHTML(c, cls); }).join('');
     $('kmyhand').classList.toggle('wait', !myTurn);
   }
-  function hint(){
+  function hint(){ if (drag) return;
     var h = '', me = st.players[0];
     if (online && online.watch){ $('khint').textContent = st.phase === 'play' ? 'Katsot pöytää · ' + st.players[st.turn].name + ' miettii…' : 'Katsot pöytää'; return; }
     if (st.phase === 'play' && st.turn === 0 && !busy){
@@ -3025,7 +3028,7 @@ body.kiropen{overflow:hidden}
     $('khint').textContent = dy < -55 ? 'Päästä irti: pelaa' : 'Pyyhkäise ylös'; });
   function velo(d){ var a = d.pts[0], b = d.pts[d.pts.length - 1], t = Math.max(16, b[2] - a[2]); return {vx:(b[0] - a[0]) / t, vy:(b[1] - a[1]) / t}; }
   function endDrag(e, cancel){
-    if (!drag) return; var d = drag; drag = null; var dy = e.clientY - d.y, dt = performance.now() - d.t, fast = dy < -30 && dt < 260;
+    if (!drag) return; var d = drag; drag = null; if (handDirty && !d.el.isConnected) handDirty = false; var dy = e.clientY - d.y, dt = performance.now() - d.t, fast = dy < -30 && dt < 260;
     d.el.classList.remove('drag');
     if (cancel){ d.el.style.transform = ''; return; }
     if (dy < -55 || fast){ d.pts.push([e.clientX, e.clientY, performance.now()]); var v = velo(d), sp = Math.hypot(v.vx, v.vy);
@@ -3034,8 +3037,10 @@ body.kiropen{overflow:hidden}
     d.el.style.transform = '';
     if (selected === d.id){ nextThrow = {force:.42, vx:0, vy:-.6, rot:0}; play(d.id, d.el); } else { selected = d.id; SFX.flip(); renderHand(); hint(); }
   }
-  $('kmyhand').addEventListener('pointerup', function(e){ endDrag(e); });
-  $('kmyhand').addEventListener('pointercancel', function(e){ endDrag(e, true); });
+  function afterDrag(){ if (handDirty && !drag && !busy) renderHand(); }
+  $('kmyhand').addEventListener('pointerup', function(e){ endDrag(e); afterDrag(); });
+  $('kmyhand').addEventListener('pointercancel', function(e){ endDrag(e, true); afterDrag(); });
+  $('kmyhand').addEventListener('lostpointercapture', function(e){ if (drag && e.target === drag.el) { endDrag(e); afterDrag(); } });
   function play(id, el){ if (st.turn !== 0 || busy) return; var r = el.getBoundingClientRect(); busy = true; if (online){ onPlay(id, r); return; } try { doPlay(0, id, r); } catch(err){ busy = false; render(); } }
   addEventListener('keydown', function(e){
     if (!root.classList.contains('on')) return;
