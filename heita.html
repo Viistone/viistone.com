@@ -43,6 +43,7 @@ body.menu .hud{opacity:0}
 #tr{right:max(16px,env(safe-area-inset-right));top:calc(max(12px,env(safe-area-inset-top)) + 50px);text-align:right}
 #score{font-size:clamp(30px,5vw,54px);line-height:1;color:#ff6a33}
 #dist{font-size:clamp(18px,2.6vw,28px);text-shadow:none}
+#dives{font-size:clamp(16px,2.2vw,24px);color:#ff8a5c;text-shadow:none;letter-spacing:.08em}
 #mid{left:0;right:0;top:16%;text-align:center}
 #combo{font-size:clamp(40px,8vw,84px);line-height:1;color:#ffb35c;opacity:0;transition:opacity .25s}
 #combo.on{opacity:1}
@@ -71,7 +72,7 @@ body.menu .hud{opacity:0}
 </style></head><body>
 <canvas id="cv"></canvas>
 <div class="hud" id="tl"><b>HEITÄ VIISTONE</b><span id="song">CH 02</span></div>
-<div class="hud" id="tr"><div id="score">0</div><div id="dist">0 M</div></div>
+<div class="hud" id="tr"><div id="score">0</div><div id="dist">0 M</div><div id="dives"></div></div>
 <div class="hud" id="mid"><div id="combo"></div></div>
 <div id="viisi">VIISI<small style="display:block;font-size:.22em;color:#ece4cc">VIISI OSUMAA PUTKEEN</small></div>
 <div id="hint">TARTU VIISTOSEEN<br>PYÖRITÄ MONTA KIERROSTA<br>JA PÄÄSTÄ IRTI</div>
@@ -106,7 +107,7 @@ function disc(x, y, r, fill, lw){ g.beginPath(); g.arc(x, y, r, 0, 7); if (lw ==
 
 // ---------- sound ----------
 const SFX_LIST = ['boom_bright','boom_rocky','boom_tan','crowd_aww','crowd_cheer','crowd_murmur','crowd_shout','dumpster','electric','fireball','fireball_glitch','fireworks','fireworks_crackle','fireworks_red','flame_burst','fuse','gas_hiss','gas_release','glass_break','glass_debris','glass_heavy','grab','groan1','groan2','groan3','groan4','groan5','groan6','groan7','metal_slam','metal_strike','metal_table1','metal_table2','plywood_crumble','thud_heavy','thud_soft','victory1','victory2','wind_loop','wood_creak','wood_explode','wood_metal_smash','wood_pile','yell_strained'];
-const EXTRA = {laughe:'assets/kirilii/sfx/laughe.mp3', cry:'assets/posti/sfx/cry.mp3', burp:'assets/kirilii/sfx/burp1.mp3', yes:'assets/kirilii/sfx/yes.mp3', gull1:'assets/posti/sfx/gull1.mp3', gull2:'assets/posti/sfx/gull2.mp3', jet:'assets/posti/sfx/jet.mp3', rat:'assets/posti/sfx/rat.mp3', crow1:'assets/posti/sfx/crow1.mp3', crow2:'assets/posti/sfx/crow2.mp3', crow3:'assets/posti/sfx/crow3.mp3', static:'assets/posti/sfx/static.mp3', ouch1:'assets/kirilii/sfx/ouch.mp3', ouch2:'assets/kirilii/sfx/ouch2.mp3', ouch3:'assets/kirilii/sfx/ouch3.mp3', ouch4:'assets/kirilii/sfx/ouch4.mp3', ouch5:'assets/kirilii/sfx/ouch5.mp3', ouch6:'assets/kirilii/sfx/ouch6.mp3', slow:'assets/posti/sfx/slow.mp3', sonofa:'assets/kirilii/sfx/sonofa.mp3', alarm:'assets/posti/sfx/alarm1.mp3'};
+const EXTRA = {aboard:'assets/kirilii/sfx/aboard.mp3', laughe:'assets/kirilii/sfx/laughe.mp3', cry:'assets/posti/sfx/cry.mp3', burp:'assets/kirilii/sfx/burp1.mp3', yes:'assets/kirilii/sfx/yes.mp3', gull1:'assets/posti/sfx/gull1.mp3', gull2:'assets/posti/sfx/gull2.mp3', jet:'assets/posti/sfx/jet.mp3', rat:'assets/posti/sfx/rat.mp3', crow1:'assets/posti/sfx/crow1.mp3', crow2:'assets/posti/sfx/crow2.mp3', crow3:'assets/posti/sfx/crow3.mp3', static:'assets/posti/sfx/static.mp3', ouch1:'assets/kirilii/sfx/ouch.mp3', ouch2:'assets/kirilii/sfx/ouch2.mp3', ouch3:'assets/kirilii/sfx/ouch3.mp3', ouch4:'assets/kirilii/sfx/ouch4.mp3', ouch5:'assets/kirilii/sfx/ouch5.mp3', ouch6:'assets/kirilii/sfx/ouch6.mp3', slow:'assets/posti/sfx/slow.mp3', sonofa:'assets/kirilii/sfx/sonofa.mp3', alarm:'assets/posti/sfx/alarm1.mp3'};
 const SONGS = [['02','KYMMENEN TIKKUU','kymmenentikkuu'],['03','PITKÄSILTA','pitkasilta'],['04','SYMMETRISII UNII','symmetrisiiunii'],['05','VÄLII VUODELLA','valiivuodella'],['06','POSTINKANTAJA','postinkantaja'],['07','HYMYTYTTÖ','hymytytto'],['08','KOTIINPALUU KAI JOTENKI JÄRJESTYY','kotiinpaluu'],['09','VIKA SELKÄ','vikaselka']];
 let AC = null, master, fxBus, musBus, buf = {}, voices = 0, lastPlay = {};
 let musOn = true, fxOn = true;
@@ -209,15 +210,36 @@ function makeExtras(){ seed = 4242; TREES = []; ICE = []; CROWS = []; LAVA = [];
   RATS.forEach(x => { const y = gy(x + 80), b = Bodies.rectangle(x + 80, y - 33, 180, 66, {isStatic:true, restitution:.9, friction:.2, chamfer:{radius:26}}); b.plugin = {kind:'rat', w:180, h:66, t:-9}; Composite.add(world, b); bodies.push(b); });
   if (rnd() < .3){ const g2 = pick(); if (g2){ const x = (g2[0] + g2[1]) / 2 + 40; if (!TREES.some(t => Math.abs(t.x - x) < 120)){ const y = gy(x), b = Bodies.rectangle(x, y - 46, 28, 92, {isStatic:true, friction:.4}); b.plugin = {kind:'hymy', w:28, h:92}; Composite.add(world, b); bodies.push(b); } } }
   bigRockets(G);
+  SKY = []; let planes = 0; for (let x = 1600 + rnd() * 500; x < EDGE - 1500; x += 520 + rnd() * 600){ const r = rnd(), zz = zoneAt(x); if (zz && ZDEF[zz.k].hell) continue;
+    if (r < .26) SKY.push({k:'crows', x, h:380 + rnd() * 500, ph:rnd() * 6}); else if (r < .48) SKY.push({k:'line', x, h:210 + rnd() * 50}); else if (r < .66) SKY.push({k:'kite', x, h:430 + rnd() * 300, ph:rnd() * 6}); else if (r < .86) SKY.push({k:'drone', x, h:260 + rnd() * 380, ph:rnd() * 6}); else if (planes < 3 && x > 4000){ planes++; SKY.push({k:'plane', x, h:950 + rnd() * 500, ph:0}); } }
   BALLOONS = []; ZL.filter(z => z.k === 'tivoli').forEach(z => { for (let i = 0; i < 4; i++) BALLOONS.push({x:z.a + 400 + i * 700 + rnd() * 200, h:260 + rnd() * 400, ph:rnd() * 6, gas:rnd() < .4, popped:false, col:['#c23b3b', '#3d6f96', '#e7c25a', '#5f8a4a'][i % 4]}); });
   for (let x = 1500 + rnd() * 400; x < EDGE - 600; x += 650 + rnd() * 700){ BALLOONS.push({x, h:300 + rnd() * 520, ph:rnd() * 6, gas:rnd() < .4, popped:false, col:['#c23b3b', '#3d6f96', '#e7c25a', '#5f8a4a'][Math.floor(rnd() * 4)]}); }
   CARSPOTS = []; ZL.filter(z => ['lahio', 'tori', 'romu', 'satama'].includes(z.k)).forEach(z => { for (let x = z.a + 500 + rnd() * 400; x < z.b - 300; x += 1100 + rnd() * 900) CARSPOTS.push({x, done:false}); });
   LOOSE = []; G.forEach(([a, b], i) => { if (b > EDGE - 200) return; if (RIDX.includes(i) || i < 1) return; if (TREES.some(t => t.x > a - 20 && t.x < b + 20)) return; if (rnd() < .55){ const x = a + 20 + rnd() * Math.max(10, b - a - 40), k = rnd(); LOOSE.push([x, k < .45 ? 'oil' : k < .8 ? 'gas' : 'fw']); } });
   for (let i = 0; i < 5; i++){ const g2 = G[1 + Math.floor(rnd() * (G.length - 1))]; if (!g2) continue; const x = g2[0] + rnd() * (g2[1] - g2[0]); const n = 3 + Math.floor(rnd() * 4); CROWS.push({x, birds:Array.from({length:n}, (_, k) => ({x:x + (k - n / 2) * 16 + (rnd() - .5) * 8, y:0, vx:0, vy:0, fly:false, ph:rnd() * 6}))}); } }
-let BIGR = [], LOOSE = [], BALLOONS = [], CARSPOTS = [];
+let BIGR = [], LOOSE = [], BALLOONS = [], CARSPOTS = [], SKY = [];
 function bigRockets(G){ BIGR = []; const idx = [3, 11, 21, 33]; idx.forEach(i => { const g2 = G[i]; if (!g2 || g2[1] > EDGE - 3000) return; const x = (g2[0] + g2[1]) / 2; if (TREES.some(t => Math.abs(t.x - x) < 140)) TREES = TREES.filter(t => Math.abs(t.x - x) >= 140); BIGR.push({x, y:gy(x), st:'idle', t:0, px:x, py:gy(x) - 80, ang:-Math.PI / 2}); }); }
+function skyPos(o){ const base = gy(o.x); if (o.k === 'plane') return {x:o.x - (o.mv || 0), y:base - o.h}; return {x:o.x, y:base - o.h + Math.sin(simT * 1.6 + (o.ph || 0)) * (o.k === 'drone' ? 14 : 8)}; }
+function skyStep(dt){ for (const o of SKY){ if (o.k === 'plane' && !o.hit){ const p0 = rag ? rag.torso.position : cam; if (Math.abs(o.x - p0.x) < 3500) o.mv = (o.mv || 0) + dt * 260; }
+    if (o.down){ o.vy = (o.vy || 0) + .35; o.dx = (o.dx || 0) + (o.k === 'plane' ? -4 : .8); o.dy = (o.dy || 0) + o.vy; o.rot = (o.rot || 0) + (o.k === 'plane' ? .01 : .08); if (rnd() < .5){ const q = skyPos(o); parts.push({x:q.x + o.dx, y:q.y + o.dy, vx:0, vy:-.5, life:1.4, t:0, k:'smoke', s:14 + rnd() * 10, c:'#4a4740'}); } if (gy(o.x) - o.h + o.dy > gy(o.x + o.dx - (o.mv || 0)) && !o.crashed){ o.crashed = true; const q = skyPos(o); if (o.k !== 'kite') explode(q.x + o.dx, q.y + o.dy, o.k === 'plane' ? 320 : 120, o.k === 'plane' ? 30 : 6, o.k === 'plane' ? 'boom_bright' : 'boom_tan'); } }
+    if (o.hit || !rag || state !== 'fly') continue; const q = skyPos(o), p = rag.torso.position;
+    if (o.k === 'line'){ const x2 = o.x + 380; if (p.x > o.x && p.x < x2){ const u = (p.x - o.x) / 380, wy = gy(o.x) - o.h + (gy(x2) - gy(o.x)) * u + Math.sin(u * Math.PI) * 40; if (Math.abs(p.y - wy) < 22 && rag.torso.velocity.y > 0){ o.hit = true; o.twang = simT; rag.all.forEach(b => Body.setVelocity(b, {x:b.velocity.x + 4, y:-Math.abs(b.velocity.y) * .7 - 8}));
+          sfx('electric', .9, {x:p.x, y:p.y, force:true}); arcs.push({x1:p.x - 60, y1:wy, x2:p.x + 60, y2:wy, t:0}); award(700, p.x, p.y - 80, 'SÄHKÖLINJA', '#7ab0d0'); ouch(); } } continue; }
+    const R2 = {crows:110, kite:60, drone:46, plane:140}[o.k]; if (Math.hypot(p.x - q.x, p.y - q.y) > R2) continue; o.hit = true;
+    if (o.k === 'crows'){ rag.all.forEach(b => Body.setVelocity(b, {x:b.velocity.x * .85, y:Math.max(b.velocity.y, 0) + 14})); sfx('crow' + (1 + Math.floor(rnd() * 3)), .9, {x:p.x, y:p.y, force:true}); for (let i = 0; i < 30; i++){ const a = rnd() * 6.28, v = 2 + rnd() * 6; parts.push({x:q.x, y:q.y, vx:Math.cos(a) * v, vy:Math.sin(a) * v, life:2 + rnd(), t:0, k:'leaf', s:4 + rnd() * 3, r:rnd() * 6, vr:(rnd() - .5) * .3, c:'#1a1a1a'}); } award(600, q.x, q.y - 80, 'VARIKSET NOKKII', '#ece4cc'); bleed(p.x, p.y, 10, 4); }
+    else if (o.k === 'kite'){ o.down = true; sfx('wood_pile', .6, {x:q.x, y:q.y, force:true}); award(700, q.x, q.y - 80, 'LEIJA', '#ffd28a'); }
+    else if (o.k === 'drone'){ o.down = true; sfx('metal_slam', .8, {x:q.x, y:q.y, force:true}); sfx('electric', .5, {x:q.x, y:q.y}); rag.all.forEach(b => Body.setVelocity(b, {x:b.velocity.x + 6, y:b.velocity.y - 4})); award(900, q.x, q.y - 80, 'DROONI', '#cfe0e8'); }
+    else if (o.k === 'plane'){ o.down = true; explode(q.x, q.y, 260, 26, 'boom_rocky'); award(8000, q.x, q.y - 160, 'LENTOKONE', '#ff6a33'); splatScreen(); } } }
+function drawSky(x0, x1, t){ for (const o of SKY){ const q = skyPos(o), X = q.x + (o.dx || 0), Y = q.y + (o.dy || 0); if (X < x0 - 500 || X > x1 + 500) continue;
+    if (o.k === 'line'){ const x2 = o.x + 380, b1 = gy(o.x), b2 = gy(x2); for (const [px2, by] of [[o.x, b1], [x2, b2]]){ line(px2, by, px2, by - o.h - 14, INK, 7); line(px2, by, px2, by - o.h - 14, '#6b5038', 4); line(px2 - 18, by - o.h - 10, px2 + 18, by - o.h - 10, INK, 4); }
+      const tw = o.twang ? Math.sin((t - o.twang) * 30) * 22 * Math.max(0, 1 - (simT - o.twang)) : 0; for (const off of [-8, 8]){ g.beginPath(); g.moveTo(o.x + off, b1 - o.h - 10); g.quadraticCurveTo((o.x + x2) / 2, (b1 + b2) / 2 - o.h + 70 + tw, x2 + off, b2 - o.h - 10); g.strokeStyle = '#141414'; g.lineWidth = 2.2; g.stroke(); } continue; }
+    if (o.k === 'crows' && !o.hit){ for (let i = 0; i < 7; i++){ const bx = X + Math.cos(i * 2.1 + t * .8) * 60, by = Y + Math.sin(i * 1.7 + t * 1.1) * 30, f = Math.sin(t * 12 + i) * 7; g.beginPath(); g.moveTo(bx - 12, by - f); g.quadraticCurveTo(bx - 5, by - 3, bx, by); g.quadraticCurveTo(bx + 5, by - 3, bx + 12, by - f); g.strokeStyle = '#141414'; g.lineWidth = 3.5; g.stroke(); } continue; }
+    if (o.k === 'kite'){ if (!o.down){ g.beginPath(); g.moveTo(X, Y + 30); g.quadraticCurveTo(X - 80, gy(o.x) - o.h / 2, X - 160, gy(o.x - 160)); g.strokeStyle = 'rgba(236,228,204,.5)'; g.lineWidth = 1.5; g.stroke(); }
+      at(X, Y, (o.rot || 0) + Math.sin(t * 2 + o.ph) * .15, () => { path([[0, -34], [24, 0], [0, 34], [-24, 0]]); ink('#c23b3b', 3); line(0, -34, 0, 34, INK, 1.5); line(-24, 0, 24, 0, INK, 1.5); for (let i = 0; i < 4; i++) line(0, 34 + i * 12, (i % 2 ? 6 : -6), 40 + i * 12, '#e7c25a', 3); }); continue; }
+    if (o.k === 'drone'){ at(X, Y, o.rot || 0, () => { rr(-16, -6, 32, 12, 4); ink('#2a2b30', 3); line(-26, -8, 26, -8, INK, 3); for (const sx of [-26, 26]){ g.globalAlpha = .6; g.beginPath(); g.ellipse(sx, -10, 14, 3, 0, 0, 7); g.fillStyle = '#8d8a82'; g.fill(); g.globalAlpha = 1; } disc(0, 8, 4, Math.sin(t * 8) > 0 ? '#ff2e2e' : '#3a1210', 1.5); }); continue; }
+    if (o.k === 'plane'){ at(X, Y, o.rot || 0, () => { rr(-130, -18, 260, 36, 18); ink('#d8d4ca', 4); path([[-150, -10], [-130, -54], [-104, -54], [-110, -12]]); ink('#c23b3b', 3); path([[-20, 4], [40, 4], [-40, 60], [-70, 60]]); ink('#b8b4a8', 3); for (let i = 0; i < 9; i++) disc(-80 + i * 22, -6, 4, '#3d6f96', 1.5); path([[130, -10], [150, 0], [130, 12]]); ink('#d8d4ca', 3); g.fillStyle = INK; g.font = '18px VT323'; g.textAlign = 'center'; g.fillText('VIISTONE AIR', -20, 14); }); } } }
 function balloonStep(){ if (!rag || state !== 'fly') return; const p = rag.torso.position; for (const b of BALLOONS){ if (b.popped) continue; const by = gy(b.x) - b.h + Math.sin(simT * 1.3 + b.ph) * 10; if (Math.hypot(p.x - b.x, p.y - (by - 20)) < 62){ b.popped = true; b.py = by;
-      rag.all.forEach(q => Body.setVelocity(q, {x:q.velocity.x * .8 + 8, y:Math.min(q.velocity.y, 0) - 24})); explode(b.x, by, b.gas ? 240 : 110, b.gas ? 22 : 5, b.gas ? 'boom_bright' : 'boom_tan'); sfx('fireball', .5, {x:b.x, y:by, force:true});
+      rag.all.forEach(q => Body.setVelocity(q, {x:q.velocity.x * .8 + 10, y:Math.min(q.velocity.y, 0) - (b.gas ? 24 : 10)})); explode(b.x, by, b.gas ? 240 : 110, b.gas ? 22 : 5, b.gas ? 'boom_bright' : 'boom_tan'); sfx('fireball', .5, {x:b.x, y:by, force:true});
       for (let i = 0; i < 18; i++){ const a = rnd() * 6.28, v = 2 + rnd() * 6; parts.push({x:b.x, y:by - 30, vx:Math.cos(a) * v, vy:Math.sin(a) * v, life:2 + rnd(), t:0, k:'leaf', s:5 + rnd() * 4, r:rnd() * 6, vr:(rnd() - .5) * .3, c:b.col}); }
       const k2 = block('crate', b.x, by + 40, 30, 22); Body.setVelocity(k2, {x:(rnd() - .5) * 4, y:2}); k2.sleepThreshold = Infinity; if (b.gas){ const g2 = explosive('gas', b.x + 8, by + 20); g2.sleepThreshold = Infinity; arm(g2); }
       award(1500, b.x, by - 90, 'ILMAPALLO', '#ffd28a'); mEv('balloon'); } } }
@@ -252,18 +274,18 @@ function showZone(n, sub){ const el = $('zone'); el.innerHTML = n + (sub ? '<sma
 function zoneTick(){ if (!rag || state !== 'fly') return; const z = zoneAt(rag.torso.position.x); if (z && !z.seen){ z.seen = true; showZone(ZDEF[z.k].n, ZDEF[z.k].s); } }
 function fling(vx, vy){ rag.all.forEach(q => Body.setVelocity(q, {x:vx + (rnd() - .5) * 3, y:vy + (rnd() - .5) * 3})); }
 const NPCTXT = {piru:'PIRU HEITTÄÄ', skater:'SKEITTARI HEITTÄÄ', spuge:'SPUGE POTKAISEE', loyly:'LÖYLYMIES HEITTÄÄ', pallo:'PURKUPALLO', tykki:'IHMISTYKKI', kauppias:'KAUPPIAS HEITTÄÄ', kiekko:'LÄMÄRI!', magneetti:'MAGNEETTI', hirvi:'HIRVI PUSKEE', lokki:'LOKKI NAPPAA'};
-function npcGo(n){ n.used = true; n.ph = 'act'; n.at = 0; const x = n.x, y = n.y; pops.push({x, y:y - 260, t:0, s:NPCTXT[n.kind], col:'#ffd28a'}); award(1500, x, y - 200); shake = Math.max(shake, 10); mEv(n.kind);
+function npcGo(n){ n.used = true; if (rag){ rag.dives = Math.min(2, (rag.dives || 0) + 1); diveHud(); } n.ph = 'act'; n.at = 0; const x = n.x, y = n.y; pops.push({x, y:y - 260, t:0, s:NPCTXT[n.kind], col:'#ffd28a'}); award(1500, x, y - 200); shake = Math.max(shake, 10); mEv(n.kind);
   const hold = (k) => { n.ph = 'hold'; n.ht = 0; n.c = Constraint.create({pointA:{x:rag.torso.position.x, y:rag.torso.position.y}, bodyB:rag.torso, pointB:{x:0, y:0}, stiffness:.4, damping:.1, length:0}); Composite.add(world, n.c); };
   switch (n.kind){
-    case 'skater': fling(27, -26); sfx('wood_pile', .8, {x, y, force:true}); sfx('fireball', .5, {force:true, rate:1.3}); break;
-    case 'spuge': fling(23, -20); sfx('thud_heavy', .9, {x, y, force:true}); sfx('burp', .8, {force:true, delay:.6}); break;
-    case 'loyly': fling(29, -28); sfx('gas_release', .8, {x, y, force:true}); for (let i = 0; i < 20; i++) parts.push({x:x + (rnd() - .5) * 60, y:y - 60, vx:(rnd() - .5) * 3, vy:-2 - rnd() * 3, life:1.6, t:0, k:'smoke', s:16 + rnd() * 16, c:'#e8e4da'}); break;
-    case 'pallo': fling(36, -14); sfx('metal_strike', 1, {x, y, force:true}); sfx('thud_heavy', 1, {x, y, force:true}); shake = 22; bleed(rag.torso.position.x, rag.torso.position.y, 20, 8); break;
+    case 'skater': fling(31, -13); sfx('wood_pile', .8, {x, y, force:true}); sfx('fireball', .5, {force:true, rate:1.3}); break;
+    case 'spuge': fling(29, -8); sfx('thud_heavy', .9, {x, y, force:true}); sfx('burp', .8, {force:true, delay:.6}); break;
+    case 'loyly': fling(33, -12); sfx('gas_release', .8, {x, y, force:true}); for (let i = 0; i < 20; i++) parts.push({x:x + (rnd() - .5) * 60, y:y - 60, vx:(rnd() - .5) * 3, vy:-2 - rnd() * 3, life:1.6, t:0, k:'smoke', s:16 + rnd() * 16, c:'#e8e4da'}); break;
+    case 'pallo': fling(39, -7); sfx('metal_strike', 1, {x, y, force:true}); sfx('thud_heavy', 1, {x, y, force:true}); shake = 22; bleed(rag.torso.position.x, rag.torso.position.y, 20, 8); break;
     case 'tykki': hold(); sfx('fuse', .7, {x, y, force:true}); break;
-    case 'kauppias': fling(25, -25); sfx('yes', .8, {x, y, force:true}); break;
+    case 'kauppias': fling(29, -10); sfx('yes', .8, {x, y, force:true}); break;
     case 'kiekko': fling(42, -9); sfx('metal_slam', 1, {x, y, force:true}); sfx('crowd_cheer', .4, {force:true}); break;
     case 'magneetti': hold(); sfx('electric', .8, {x, y, force:true}); break;
-    case 'hirvi': fling(30, -22); sfx('thud_heavy', 1, {x, y, force:true}); sfx('wood_creak', .6, {x, y}); break;
+    case 'hirvi': fling(33, -9); sfx('thud_heavy', 1, {x, y, force:true}); sfx('wood_creak', .6, {x, y}); break;
     case 'piru': fling(36, -32); sfx('laughe', 1, {x, y, force:true}); sfx('fireball', .8, {x, y, force:true}); for (let i = 0; i < 20; i++) parts.push({x:x + 40, y:y - 60, vx:4 + rnd() * 4, vy:-2 - rnd() * 4, life:.9, t:0, k:'flame', s:10 + rnd() * 8}); break;
     case 'lokki': hold(); sfx('gull' + (1 + Math.floor(rnd() * 2)), .9, {x, y, force:true}); break; } }
 function npcStep(dt){ for (const n of NPCS){ n.t += dt; if (n.ph === 'act'){ n.at += dt; if (n.at > 1.2) n.ph = 'done'; }
@@ -320,7 +342,7 @@ function onIce(x){ return ICE.some(r => x > r[0] && x < r[1]); }
 function treeTop(t, u){ const y = gy(t.x); return {x:t.x + Math.sin(t.b) * t.h * u, y:y - Math.cos(t.b) * t.h * u}; }
 function treesStep(dt){ for (const t of TREES){
     if (t.ph === 'load'){ t.t += dt; const k = Math.min(1, t.t / .32); t.b = t.dir * 1.15 * Math.pow(k, .7); const pt = treeTop(t, t.u); if (t.c){ t.c.pointA.x = pt.x; t.c.pointA.y = pt.y; }
-      if (k >= 1){ if (t.c) Composite.remove(world, t.c); t.c = null; t.ph = 'whip'; t.t = 0; rag.all.forEach(q => Body.setVelocity(q, {x:t.dir * (16 + rnd() * 6) + q.velocity.x * .2, y:-30 - rnd() * 6}));
+      if (k >= 1){ if (t.c) Composite.remove(world, t.c); t.c = null; t.ph = 'whip'; t.t = 0; rag.all.forEach(q => Body.setVelocity(q, {x:t.dir * (16 + rnd() * 6) + q.velocity.x * .2, y:-15 - rnd() * 4}));
         sfx('fireball', .45, {x:t.x, y:gy(t.x), force:true}); sfx('wood_pile', .5, {x:t.x, y:gy(t.x)}); award(900, pt.x, pt.y - 80, 'KOIVU LINKOAA', '#cfe8a8'); shake = 10; mInc('tree');
         for (let i = 0; i < 26; i++){ const a = rnd() * 6.28, v = 2 + rnd() * 6; parts.push({x:pt.x, y:pt.y, vx:Math.cos(a) * v, vy:Math.sin(a) * v - 2, life:2 + rnd() * 1.5, t:0, k:'leaf', s:3 + rnd() * 2.5, r:rnd() * 6, vr:(rnd() - .5) * .3, c:rnd() < .5 ? '#c9a243' : '#8a9a48'}); } } }
     else if (t.ph === 'whip'){ t.t += dt; t.b = t.dir * 1.15 * Math.cos(t.t * 13) * Math.exp(-t.t * 3.2); if (t.t > 2){ t.ph = 'done'; t.b = 0; } }
@@ -527,7 +549,7 @@ function explode(x, y, r, power, snd){ booms.push({x, y, r, t:0}); shake = Math.
     const k = 1 - d / r, nx = dx / (d || 1), ny = dy / (d || 1) - .35, dv = power * k / Math.sqrt(Math.max(.4, b.mass));
     Sleeping.set(b, false); Body.setVelocity(b, {x:b.velocity.x + nx * dv, y:b.velocity.y + ny * dv}); Body.setAngularVelocity(b, b.angularVelocity + (rnd() - .5) * .3 * k);
     const p = b.plugin; if (!p) continue;
-    if (p.kind === 'rag'){ if (power >= 24 && k > .55 && rnd() < .1) detach(['ua1', 'ua2', 'th1', 'th2', 'fa1', 'sh2', 'head'][Math.floor(rnd() * 7)]); Body.setVelocity(b, {x:b.velocity.x + 7 * k, y:b.velocity.y - 5 * k}); if (b === rag.torso){ tally.self += award(power * k * 40, x, y - 60, 'POKS'); ouch(true); bleed(b.position.x, b.position.y, 26, 9); rag.bleedT = 2.5; } }
+    if (p.kind === 'rag'){ if (power >= 24 && k > .55 && rnd() < .1) detach(['ua1', 'ua2', 'th1', 'th2', 'fa1', 'sh2', 'head'][Math.floor(rnd() * 7)]); Body.setVelocity(b, {x:b.velocity.x + 9 * k, y:Math.max(b.velocity.y - 3 * k, -13)}); if (b === rag.torso){ tally.self += award(power * k * 40, x, y - 60, 'POKS'); ouch(true); bleed(b.position.x, b.position.y, 26, 9); rag.bleedT = 2.5; } }
     else if (EXPL[p.kind]){ const bb = b; if (!p.armed) later(.25 + d / r * .35, () => arm(bb)); }
     else hurt(b, power * k * 2.4, b.position.x, b.position.y); } }
 function fireworks(b){ if (b.plugin.boomed) return; b.plugin.boomed = true; const x = b.position.x, y = b.position.y; removeBody(b);
@@ -563,16 +585,16 @@ function onCollide(e){ for (const pr of e.pairs){ let a = pr.bodyA, b = pr.bodyB
     if (!a.isStatic) hurt(a, imp * .9, x, y); if (!b.isStatic) hurt(b, imp * .9, x, y);
     if (imp > 6 && rnd() < .5){ const m = (pa.mat || pb.mat); if (m === 'metal') sfx('metal_table' + (1 + Math.floor(rnd() * 2)), clamp(imp / 40, .1, .5), {x, y, gap:.15}); else if (m === 'wood') sfx('wood_pile', clamp(imp / 50, .08, .4), {x, y, gap:.12}); else if (m === 'stone') sfx('thud_heavy', clamp(imp / 60, .08, .5), {x, y, gap:.12}); } } }
 function bleed(x, y, n, sp){ for (let i = 0; i < n; i++){ const a = rnd() * 6.28, v = 1 + rnd() * sp; parts.push({x, y, vx:Math.cos(a) * v, vy:Math.sin(a) * v - 2, life:2.5, t:0, k:'blood', s:2 + rnd() * 3.5}); } }
-function ragHit(part, other, imp, rv, x, y){ if (state !== 'fly' || (rag.torso.position.x < STAGE.x + 190 && rag.torso.position.y < STAGE.y + 40)) return; const big = imp > 7;
+function ragHit(part, other, imp, rv, x, y){ if (state !== 'fly' || (rag.torso.position.x < STAGE.x + 190 && rag.torso.position.y < STAGE.y + 40)) return; if (rag.dive && !rag.diveHit && simT - rag.dive < 2.6 && imp > 6) diveBoom(x, y); const big = imp > 7;
   if (big){ const pts = Math.min(1500, imp * 9); tally.self += award(pts, x, y - 40, imp > 22 ? 'AUTS' : null);
     sfx(rv > 14 ? 'thud_heavy' : 'thud_soft', clamp(imp / 30, .2, .9), {x, y, gap:.07}); shake = Math.max(shake, Math.min(10, imp * .25));
     maybeDetach(part, imp); if (imp > 24) ouch(); if (rag.hat && (part === rag.head) && imp > 12) loseHat();
     if (imp > 11){ bleed(x, y, Math.min(34, imp * .9), 2 + imp * .12); rag.bleedT = Math.max(rag.bleedT || 0, 1.6); } if (imp > 30 && simT - (rag.splatT || -9) > 4){ rag.splatT = simT; splatScreen(); } }
-  if (other.plugin && other.plugin.kind === 'tramp' && simT - other.plugin.t > .4){ other.plugin.t = simT; rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 6) + 5, y:Math.min(q.velocity.y, 0) - 26})); sfx('thud_soft', .9, {x, y, force:true}); sfx('wood_creak', .5, {x, y}); pops.push({x, y:y - 60, t:0, s:'BOING', col:'#ece4cc'}); award(300, x, y - 40); shake = 12; mInc('tramp'); }
+  if (other.plugin && other.plugin.kind === 'tramp' && simT - other.plugin.t > .4){ other.plugin.t = simT; rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 6) + 10, y:Math.min(q.velocity.y, 0) - 15})); sfx('thud_soft', .9, {x, y, force:true}); sfx('wood_creak', .5, {x, y}); pops.push({x, y:y - 60, t:0, s:'BOING', col:'#ece4cc'}); award(300, x, y - 40); shake = 12; mInc('tramp'); }
   const op = other.plugin || {}; if (imp > 8 && !other.isStatic && op.kind && op.kind !== 'rag'){ if (simT - (rag.stT || -9) < 1.6) rag.streak = (rag.streak || 0) + 1; else rag.streak = 1; rag.stT = simT;
     if (rag.streak >= 2 && rag.streak < 5) pops.push({x, y:y - 90, t:.3, s:rag.streak + ' / 5', col:'#ff8a5c'}); if (rag.streak === 5) viisi(); }
   if (op.kind === 'car' && imp > 6) mEv('car');
-  if (op.kind === 'rat' && simT - op.t > .5){ op.t = simT; rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 8) + 8, y:Math.min(q.velocity.y, 0) - 34})); sfx('rat', .9, {x, y, force:true}); sfx('thud_soft', .8, {x, y, force:true}); award(1000, x, y - 80, 'JÄTTIROTTA', '#ece4cc'); shake = 16; mEv('rat'); }
+  if (op.kind === 'rat' && simT - op.t > .5){ op.t = simT; rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 8) + 8, y:Math.min(q.velocity.y, 0) - 17})); sfx('rat', .9, {x, y, force:true}); sfx('thud_soft', .8, {x, y, force:true}); award(1000, x, y - 80, 'JÄTTIROTTA', '#ece4cc'); shake = 16; mEv('rat'); }
   if (op.kind === 'hymy' && !op.seen){ op.seen = true; sfx('static', .5, {force:true}); hymySeen('c02'); award(1500, x, y - 120, 'HYMYTYTTÖ', '#cfe0e8'); mEv('hymy'); }
   if (rag.micC && imp > 18 && rnd() < .5) loseMic(); }
 function hymySeen(k){ try { const h = JSON.parse(localStorage.getItem('viistone-hymy') || '{}'); if (!h[k]){ h[k] = Date.now(); localStorage.setItem('viistone-hymy', JSON.stringify(h)); } } catch(e){} }
@@ -587,7 +609,7 @@ function toWorld(cx, cy){ const z = baseZ() * cam.z; return {x:(cx - W / 2) / z 
 let ptr = null, ptrHist = [];
 const GRAB_C = {x:STAGE.x + 120, y:STAGE.y - 230}, GRAB_R = 280;
 function clampGrab(p){ const cx = GRAB_C.x, cy = GRAB_C.y, dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy), R0 = GRAB_R; return d > R0 ? {x:cx + dx / d * R0, y:cy + dy / d * R0} : p; }
-cv.addEventListener('pointerdown', e => { if (state !== 'stage') return; audioInit(); const w = toWorld(e.clientX, e.clientY);
+cv.addEventListener('pointerdown', e => { if (state === 'fly'){ dive(); return; } if (state !== 'stage') return; audioInit(); const w = toWorld(e.clientX, e.clientY);
   if (Math.hypot(w.x - (STAGE.x + 10), w.y - (STAGE.y - 110)) > 160) return;
   e.preventDefault(); cv.setPointerCapture(e.pointerId); ptr = e.pointerId; doGrab(w); });
 cv.addEventListener('pointermove', e => { if (e.pointerId !== ptr || !grab) return; const w = clampGrab(toWorld(e.clientX, e.clientY)); grab.pointA.x = w.x; grab.pointA.y = w.y; spinTrack(w); ptrHist.push({t:performance.now(), x:w.x, y:w.y}); if (ptrHist.length > 8) ptrHist.shift(); });
@@ -603,6 +625,15 @@ function doGrab(w){ document.body.classList.add('grab'); spin = 0; spinA = null;
   const f = rag.fa1, hp = handPos(f); grab = Constraint.create({pointA:{x:hp.x, y:hp.y}, bodyB:f, pointB:{x:hp.x - f.position.x, y:hp.y - f.position.y}, stiffness:.32, damping:.08, length:0}); Composite.add(world, grab);
   const t = clampGrab(w); grab.pointA.x = t.x; grab.pointA.y = t.y; ptrHist = [];
   sfx('grab', .9, {force:true}); sfx('crowd_cheer', .55, {force:true, x:STAGE.x, y:STAGE.y}); }
+function dive(){ if (!rag || rag.dives <= 0 || (rag.dive && !rag.diveHit && simT - rag.dive < 1.8) || flyT < .4) return; rag.dives--; rag.dive = simT; rag.diveHit = false; diveHud();
+  rag.all.forEach(q => Body.setVelocity(q, {x:clamp(Math.max(q.velocity.x, 14), 14, 30), y:Math.max(q.velocity.y, 0) + 30})); rag.face = 'shock';
+  sfx('fireball', .7, {force:true, rate:.75, vary:false}); sfx('aboard', .8, {force:true}); pops.push({x:rag.torso.position.x, y:rag.torso.position.y - 90, t:0, s:'SYÖKSY!', col:'#ff8a5c'}); }
+function diveBoom(x, y){ rag.diveHit = true; shake = 30; flashT = .1; sfx('thud_heavy', 1, {x, y, force:true}); sfx('wood_explode', .8, {x, y, force:true});
+  booms.push({x, y, r:190, t:0, dust:true}); for (let i = 0; i < 26; i++){ const a = Math.PI + rnd() * Math.PI, v = 4 + rnd() * 9; parts.push({x, y, vx:Math.cos(a) * v, vy:Math.sin(a) * v, life:1.4 + rnd(), t:0, k:'smoke', s:12 + rnd() * 16, c:rnd() < .5 ? '#8d8a82' : '#6e6860'}); }
+  for (const b of bodies){ if (b.isStatic || !b.plugin || b.plugin.gone) continue; const dx = b.position.x - x, dy = b.position.y - y, d = Math.hypot(dx, dy); if (d > 200) continue; const k = 1 - d / 200;
+    Sleeping.set(b, false); Body.setVelocity(b, {x:b.velocity.x + dx / (d || 1) * 14 * k, y:b.velocity.y - 10 * k}); if (EXPL[b.plugin.kind]){ const bb = b; later(.2, () => arm(bb)); } else hurt(b, 30 * k, b.position.x, b.position.y); }
+  bleed(x, y, 24, 7); award(2500, x, y - 120, 'SYÖKSYPOMMI', '#ff8a5c'); mInc('dive'); }
+function diveHud(){ $('dives').textContent = rag ? 'SYÖKSY ' + '●'.repeat(Math.max(0, rag.dives)) + '○'.repeat(Math.max(0, 2 - rag.dives)) : ''; }
 function release(){ document.body.classList.remove('grab'); Composite.remove(world, grab); grab = null; state = 'fly'; flyT = 0; restT = 0;
   // a good swing gets a little extra, as if he helped
   let pvx = 0, pvy = 0; const now = performance.now(), h = ptrHist.filter(q => now - q.t < 90); if (h.length > 1){ const a = h[0], b = h[h.length - 1], dt = Math.max(8, b.t - a.t); pvx = (b.x - a.x) / dt * 16.67; pvy = (b.y - a.y) / dt * 16.67; }
@@ -610,15 +641,16 @@ function release(){ document.body.classList.remove('grab'); Composite.remove(wor
   const pa = Math.atan2(pvy, pvx) * 180 / Math.PI, perfect = spinTurns >= 1 && pa > -72 && pa < -22 && Math.hypot(pvx, pvy) > 8;
   const pw = (1 + spinTurns * .32) * (perfect ? 1.15 : 1), cap = (44 + spinTurns * 4.5) * (perfect ? 1.1 : 1); rag.power = spinTurns;
   if (perfect){ pops.push({x:GRAB_C.x, y:GRAB_C.y - 40, t:0, s:'TÄYDELLINEN HEITTO', col:'#cfe8a8'}); sfx('fireball', .7, {force:true, rate:1.4, vary:false}); award(1500, GRAB_C.x, GRAB_C.y - 200); mEv('perfect'); }
-  rag.all.forEach(b => { let vx = (b.velocity.x * .35 + pvx * .95) * pw, vy = (b.velocity.y * .35 + pvy * .95) * pw; const s = Math.hypot(vx, vy); if (s > cap){ vx *= cap / s; vy *= cap / s; } Body.setVelocity(b, {x:vx + spinTurns * 1.5, y:vy - spinTurns * 3.5}); });
+  rag.all.forEach(b => { let vx = (b.velocity.x * .35 + pvx * .95) * pw, vy = (b.velocity.y * .35 + pvy * .95) * pw; const s = Math.hypot(vx, vy); if (s > cap){ vx *= cap / s; vy *= cap / s; } Body.setVelocity(b, {x:vx + spinTurns * 1.5, y:vy - spinTurns * 2}); });
   rag.throwV = Math.hypot(pvx, pvy);
-  rag.face = 'ouch'; sfx('yell_strained', .85, {force:true}); sfx('crowd_shout', .6, {force:true, x:STAGE.x, y:STAGE.y}); }
+  rag.face = 'ouch'; sfx('yell_strained', .85, {force:true}); sfx('crowd_shout', .6, {force:true, x:STAGE.x, y:STAGE.y});
+  rag.dives = 2; diveHud(); let n2 = 0; try { n2 = +localStorage.getItem('viistone-heita-tips') || 0; localStorage.setItem('viistone-heita-tips', n2 + 1); } catch(e){} if (n2 < 4) setTimeout(() => { if (state === 'fly') showZone('NAPAUTA', 'SYÖKSY ALAS'); }, 900); }
 
 // ---------- game flow ----------
 function newGame(){ if (engine){ Composite.clear(engine.world, false); Engine.clear(engine); }
   engine = Engine.create({enableSleeping:true}); engine.gravity.scale = .00085; engine.positionIterations = 10; engine.velocityIterations = 8; engine.constraintIterations = 4; world = engine.world;
   bodies = []; parts = []; rockets = []; timers = []; pops = []; booms = []; arcs = []; fires = []; stains = []; splats = []; flashT = 0; rag = null; grab = null;
-  RUN = {ev:{}, cnt:{}}; mTickT = 0; NPCS = []; $('zone').classList.remove('on');
+  RUN = {ev:{}, cnt:{}}; mTickT = 0; NPCS = []; $('dives').textContent = ''; $('zone').classList.remove('on');
   score = 0; combo = 0; maxCombo = 0; comboShown = 0; viisiCount = 0; lastHit = -9; tally = {self:0, env:0, boom:0}; simT = 0; flyT = 0; restT = 0; slowT = 0; shake = 0; maxDist = 0; ended = false;
   buildCurve(); planCourse(); makeFlats(); makeExtras(); terrain(); stage(); RAMPS.forEach(x => { if (!FLATS.some(f => x > f.a - 260 && x < f.b + 240)) ramp(x); });
   Events.on(engine, 'collisionStart', onCollide);
@@ -663,11 +695,12 @@ function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= d
   fires = fires.filter(f => f.t < f.life);
   // the mic lets go if it gets yanked
   if (rag && rag.micC){ const c = rag.micC, A = c.bodyA, B = c.bodyB; const ax = A.position.x + c.pointA.x, ay = A.position.y + c.pointA.y, bx = B.position.x + c.pointB.x, by = B.position.y + c.pointB.y; if (Math.hypot(ax - bx, ay - by) > 14) loseMic(); }
+  if (state === 'fly' && rag && !NPCS.some(n2 => n2.ph === 'hold') && !BIGR.some(r2 => r2.st === 'fly') && !TREES.some(tr => tr.ph === 'load') && rag.torso.position.x < EDGE){ const ab = gy(rag.torso.position.x) - rag.torso.position.y; if (ab > 450){ const f = clamp((ab - 450) / 1300, 0, 1) * .0009; rag.all.forEach(q => Body.applyForce(q, q.position, {x:0, y:q.mass * f})); } }
   if (state === 'fly' && rag){ const t0 = rag.torso, gx = t0.position.x, sl = (gy(gx + 30) - gy(gx - 30)) / 60; if (t0.position.y > gy(gx) - 50 && sl > .04){ const f = .00045 * Math.min(sl, 1.2), nrm = Math.hypot(1, sl); rag.all.forEach(q => { if (q !== rag.mic) Body.applyForce(q, q.position, {x:q.mass * f / nrm, y:q.mass * f * sl / nrm}); }); } }
   if (rag && state === 'fly' && onLava(rag.torso.position.x) && rag.torso.position.y > gy(rag.torso.position.x) - 45 && simT - (rag.lavaT || -9) > .7){ rag.lavaT = simT; const p2 = rag.torso.position;
-    rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 4) + 6, y:-20 - rnd() * 6})); sfx('flame_burst', .7, {x:p2.x, y:p2.y, force:true}); pops.push({x:p2.x, y:p2.y - 90, t:0, s:'KUUMAA!', col:'#ff8a2a'}); award(400, p2.x, p2.y - 50); ouch(true);
+    rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 4) + 6, y:-11 - rnd() * 4})); sfx('flame_burst', .7, {x:p2.x, y:p2.y, force:true}); pops.push({x:p2.x, y:p2.y - 90, t:0, s:'KUUMAA!', col:'#ff8a2a'}); award(400, p2.x, p2.y - 50); ouch(true);
     for (let i = 0; i < 14; i++) parts.push({x:p2.x + (rnd() - .5) * 40, y:p2.y + 20, vx:(rnd() - .5) * 4, vy:-3 - rnd() * 4, life:.8, t:0, k:'flame', s:8 + rnd() * 8}); }
-  treesStep(sdt); crowsStep(dt); bigStep(sdt); balloonStep(); carsStep(); npcStep(sdt); mTick();
+  treesStep(sdt); crowsStep(dt); skyStep(sdt); bigStep(sdt); balloonStep(); carsStep(); npcStep(sdt); mTick();
   if (rag && state === 'fly' && onIce(rag.torso.position.x) && !rag.iceSaid && rag.torso.position.y > gy(rag.torso.position.x) - 50){ rag.iceSaid = true; pops.push({x:rag.torso.position.x, y:rag.torso.position.y - 90, t:0, s:'JÄÄTÄ', col:'#cfe9ff'}); mEv('ice'); }
   if (state === 'fly' && rag && rag.torso.position.x > EDGE){ if (!rag.overEdge){ rag.overEdge = true; rag.face = 'shock'; sfx('yell_strained', 1, {force:true, rate:.8, vary:false}); sfx('cry', .8, {force:true, delay:.6}); sfx('crowd_aww', .5, {force:true});
       award(50000, EDGE, EDGEY - 160, 'MAAILMAN REUNA', '#cfe9ff'); showZone('MAAILMAN REUNA', 'TÄSTÄ EI OLE PALUUTA'); }
@@ -687,6 +720,7 @@ function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= d
   const left = cam.x - viewW() * .5 - 2500; for (let i = bodies.length - 1; i >= 0; i--){ const b = bodies[i]; if (!b.isStatic && b.position.x < left && b.plugin && b.plugin.kind !== 'speaker'){ removeBody(b); } }
   for (const b of bodies){ if (!b.isStatic && b.position.y > gy(b.position.x) + 600) removeBody(b); }
   if (rag) for (const st of rag.stumps){ if (st.t <= 0) continue; st.t -= sdt; const c = Math.cos(st.b.angle - st.a0), s2 = Math.sin(st.b.angle - st.a0), px2 = st.b.position.x + st.ox * c - st.oy * s2, py2 = st.b.position.y + st.ox * s2 + st.oy * c; if (rnd() < .7) bleed(px2, py2, 1, 3.5); }
+  if (rag && rag.dive && !rag.diveHit && simT - rag.dive < 2.6 && state === 'fly'){ const tp = rag.torso.position; for (let i = 0; i < 2; i++) parts.push({x:tp.x + (rnd() - .5) * 20, y:tp.y + (rnd() - .5) * 20, vx:-rag.torso.velocity.x * .15, vy:-rag.torso.velocity.y * .15, life:.45, t:0, k:'spark', c:i ? '#ece4cc' : '#ff8a5c', s:5}); }
   if (rag && rag.bleedT > 0 && state === 'fly'){ rag.bleedT -= sdt; if (rnd() < .5) bleed(rag.head.position.x, rag.head.position.y, 1, 1.5); }
   parts.forEach(p => { if (p.k === 'blood' && !p.dead){ const gyb = gy(p.x); if (p.y >= gyb - 1){ stains.push({x:p.x, y:gyb + 1, s:p.s * (1.4 + rnd()), r:rnd()}); if (stains.length > 260) stains.shift(); p.dead = true; p.t = p.life; } }
     p.t += sdt; p.x += p.vx * ts; p.y += p.vy * ts; if (p.k === 'smoke' || p.k === 'flame'){ p.vx *= .98; p.vy *= .98; } else if (p.k === 'leaf'){ p.vx *= .97; p.vy = p.vy * .96 + .06 * ts; p.vx += Math.sin(p.t * 5 + p.r) * .05; } else { p.vy += .35 * ts; const gyx = gy(p.x); if (p.y > gyx){ p.y = gyx; p.vy *= -.3; p.vx *= .6; } } if (p.r != null) p.r += (p.vr || 0) * ts; });
@@ -704,7 +738,7 @@ function backOnStage(msg){ // a weak or backwards throw: he gets back up and you
 
 // ---------- camera ----------
 function camStep(dt){ if (rag && state !== 'stage'){ const t = rag.torso, v = t.velocity, sp = Math.hypot(v.x, v.y);
-    cam.tx = t.position.x + clamp(v.x * 14, -260, 520); cam.ty = t.position.y + clamp(v.y * 8, -200, 260) - 40; const above = Math.max(0, gy(t.position.x) - t.position.y); cam.tz = Math.min(clamp(1.1 - sp / 70, .5, 1.1), clamp(H * .42 / baseZ() / (above + 160), H > W ? .72 : .62, 1.1)); if (above > 900) cam.tz = Math.min(cam.tz, H > W ? .66 : .58);
+    cam.tx = t.position.x + clamp(v.x * 14, -260, 520); cam.ty = t.position.y + clamp(v.y * 8, -200, 260) - 40; const above = Math.max(0, gy(t.position.x) - t.position.y); cam.tz = Math.min(clamp(1.1 - sp / 70, .5, 1.1), clamp(H * .42 / baseZ() / (above + 160), H > W ? .72 : .62, 1.1)); if (above > 900) cam.tz = Math.max(Math.min(cam.tz, H > W ? .78 : .7), H > W ? .7 : .62);
     if (above < 900) cam.ty = Math.max(cam.ty, gy(t.position.x) - H * .36 / (baseZ() * cam.z));
     if (state === 'grab'){ cam.tx = GRAB_C.x; cam.ty = GRAB_C.y + 30; cam.tz = Math.min(H > W ? 1 : .95, Math.min(H, W * 1.1) / (780 * baseZ())); } }
   else { cam.tx = STAGE.x + 60; cam.ty = STAGE.y - 150; cam.tz = H > W ? 1.25 : 1.1; }
@@ -776,6 +810,7 @@ function draw(t){ g.setTransform(DPR, 0, 0, DPR, 0, 0);
     g.beginPath(); g.moveTo(t.x, y); g.quadraticCurveTo(cx, cy, top.x, top.y); g.strokeStyle = INK; g.lineWidth = 13; g.lineCap = 'round'; g.stroke(); g.strokeStyle = '#e8e4da'; g.lineWidth = 8; g.stroke();
     for (let i = 1; i < 6; i++){ const u = i / 6.5, px2 = (1 - u) * (1 - u) * t.x + 2 * (1 - u) * u * cx + u * u * top.x, py2 = (1 - u) * (1 - u) * y + 2 * (1 - u) * u * cy + u * u * top.y; line(px2 - 3, py2, px2 + 2, py2 + 1, INK, 2.2); }
     [[0, 0, 34], [-26, 14, 24], [24, 12, 26], [-8, -24, 24], [14, -20, 20]].forEach(([dx, dy, r]) => disc(top.x + dx, top.y + dy, r, t.used ? '#7d8a40' : '#6b7a3a', 3)); }
+  drawSky(x0, x1, t);
   drawStains();
   for (const n of NPCS) if (n.x > x0 - 500 && n.x < x1 + 800 || n.ph === 'hold') drawNpc(n, t);
   drawBigRockets();
@@ -797,6 +832,11 @@ function draw(t){ g.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (slowT > 0){ g.fillStyle = 'rgba(120,0,0,.18)'; g.fillRect(0, 0, W, H); }
   if (flashT > 0){ g.fillStyle = 'rgba(255,220,160,' + (flashT * 1.2).toFixed(2) + ')'; g.fillRect(0, 0, W, H); flashT -= .016; }
   drawSplats(.016);
+  if (rag && state === 'fly' && rag.torso.position.x < EDGE){ const tp = rag.torso.position, above = gy(tp.x) - tp.y; if (above > 650){ let px2 = tp.x, py2 = tp.y, vx = rag.torso.velocity.x, vy = rag.torso.velocity.y; const gs = .236; let hit = null;
+      for (let i = 0; i < 900; i++){ const ab2 = gy(px2) - py2; vy += gs * (1 + clamp((ab2 - 450) / 1300, 0, 1) * 1.06); px2 += vx; py2 += vy; if (py2 >= gy(px2)){ hit = px2; break; } }
+      if (hit != null){ const z2 = baseZ() * cam.z, sx = clamp((hit - cam.x) * z2 + W / 2, 40, W - 40), m = Math.round((hit - STAGE.x) / PXM), off = (hit - cam.x) * z2 + W / 2 > W - 40;
+        g.globalAlpha = .85; g.fillStyle = '#ff8a5c'; g.beginPath(); if (off){ g.moveTo(W - 14, H - 70); g.lineTo(W - 44, H - 88); g.lineTo(W - 44, H - 52); } else { g.moveTo(sx, H - 40); g.lineTo(sx - 18, H - 70); g.lineTo(sx + 18, H - 70); } g.closePath(); g.fill(); g.lineWidth = 3; g.strokeStyle = INK; g.stroke();
+        g.font = '24px VT323'; g.textAlign = off ? 'right' : 'center'; g.fillStyle = '#ece4cc'; const zz = zoneAt(hit); g.fillText(m + ' M' + (zz ? ' · ' + ZDEF[zz.k].n : ''), off ? W - 52 : sx, H - 80); g.globalAlpha = 1; } } }
   cv.style.filter = slowT > 0 ? 'grayscale(.85) contrast(1.1)' : ''; }
 
 function drawStage(){ const x = STAGE.x, y = STAGE.y;
@@ -902,7 +942,7 @@ function drawParts(){ for (const p of parts){ const k = 1 - p.t / p.life;
   else if (p.k === 'spark'){ g.globalAlpha = k; line(p.x, p.y, p.x - p.vx * 1.5, p.y - p.vy * 1.5, p.c, p.s); g.globalAlpha = 1; }
   else if (p.k === 'shard'){ at(p.x, p.y, p.r, () => { g.globalAlpha = Math.min(1, k * 2); path([[0, 0], [p.s, p.s * .3], [p.s * .2, p.s]]); ink(C.glass, 1.5); g.globalAlpha = 1; }); }
   else { at(p.x, p.y, p.r, () => { g.globalAlpha = Math.min(1, k * 2); if (p.k === 'rubble') disc(0, 0, p.s * .6, C.stone, 1.6); else { rr(-p.s, -1.5, p.s * 2, 3, 1); ink(p.c, 1.4); } g.globalAlpha = 1; }); } } }
-function drawBooms(){ for (const b of booms){ const k = b.t / .7, r = b.r * (.35 + k * .75); seed = Math.floor(b.x * 13 + b.y);
+function drawBooms(){ for (const b of booms){ if (b.dust){ const k = b.t / .7; g.globalAlpha = 1 - k; g.beginPath(); g.ellipse(b.x, b.y, b.r * (.3 + k), b.r * (.12 + k * .3), 0, 0, 7); g.strokeStyle = '#d8d4ca'; g.lineWidth = 8 * (1 - k) + 2; g.stroke(); g.globalAlpha = 1; continue; } const k = b.t / .7, r = b.r * (.35 + k * .75); seed = Math.floor(b.x * 13 + b.y);
   const sp = 14, out = [], mid = [], core = []; for (let i = 0; i < sp * 2; i++){ const t = i / (sp * 2) * 6.283, f = i % 2 ? .62 : 1, j = .85 + R() * .3; out.push([b.x + Math.cos(t) * r * f * j, b.y + Math.sin(t) * r * f * j]); mid.push([b.x + Math.cos(t) * r * f * j * .7, b.y + Math.sin(t) * r * f * j * .7]); core.push([b.x + Math.cos(t) * r * f * .38, b.y + Math.sin(t) * r * f * .38]); }
   g.globalAlpha = 1 - k * k; path(out); ink('#e8572a', LW * 1.2); path(mid); g.fillStyle = '#ffb347'; g.fill(); if (k < .5){ path(core); g.fillStyle = '#fff2c4'; g.fill(); } g.globalAlpha = 1; } }
 function drawArcs(){ for (const a of arcs){ g.beginPath(); g.moveTo(a.x1, a.y1); for (let i = 1; i < 8; i++){ const u = i / 8; g.lineTo(a.x1 + (a.x2 - a.x1) * u + (rnd() - .5) * 26, a.y1 + (a.y2 - a.y1) * u + (rnd() - .5) * 26); } g.lineTo(a.x2, a.y2); g.strokeStyle = '#cfe9ff'; g.lineWidth = 3; g.stroke(); g.strokeStyle = 'rgba(122,176,208,.5)'; g.lineWidth = 8; g.stroke(); } }
