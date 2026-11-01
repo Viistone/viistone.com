@@ -2328,7 +2328,7 @@ body.postiopen{overflow:hidden}
 <!--KIRILII-->
 <style>
 /* CH 09: KIRILII. A card game on a worn Finnish bar table. Six at the table, the last one left wins. */
-.kir{position:fixed;inset:0;z-index:74;display:none;overflow:hidden;background:#120d09;color:#e8e0c8;user-select:none;-webkit-user-select:none;
+.kir{position:fixed;inset:0;z-index:74;display:none;overflow:hidden;background:#120d09;color:#e8e0c8;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
   --cw:57px;--ch:84px;--sw:34px;--sh:49px;--hand:158px;font-family:var(--f-mono)}
 .kir.on{display:block}
 body.kiropen{overflow:hidden}
@@ -2519,11 +2519,25 @@ body.kiropen{overflow:hidden}
 .kir .knext{white-space:nowrap;position:absolute;z-index:9;left:50%;bottom:calc(var(--hand) + 60px);transform:translateX(-50%) rotate(-1deg);display:none;font-family:var(--f-osd);font-size:26px;letter-spacing:.06em;color:#14130f;background:#ffb35c;border:0;padding:4px 18px;cursor:pointer;box-shadow:3px 4px 0 rgba(0,0,0,.5)}
 .kir .knext.on{display:block;animation:kturn .9s steps(2) infinite}
 .kir .kfly{position:fixed;z-index:15;pointer-events:none}
+.kir .ktrack{position:absolute;left:0;right:0;height:12%;top:-20%;pointer-events:none;z-index:7;mix-blend-mode:screen;
+  background:linear-gradient(transparent, rgba(255,255,255,.035) 35%, rgba(255,255,255,.08) 50%, rgba(220,230,255,.03) 62%, transparent);animation:ktrack 13s linear infinite}
+@keyframes ktrack{0%,70%{top:-20%}100%{top:112%}}
+.kir .kscan{animation:kflick 7s steps(1) infinite}
+@keyframes kflick{0%,100%{opacity:.22}48%{opacity:.3}49%{opacity:.18}50%{opacity:.26}}
+.kir .ktbl{animation:kjit 9s steps(1) infinite}
+@keyframes kjit{0%,100%{transform:none}61%{transform:translateX(2px)}62%{transform:translateX(-1px)}63%{transform:none}}
+.kir .scr tr.now{background:rgba(255,179,92,.28);color:#ffd8a0}
+.kir .scr tr.now td:first-child::after{content:" ◂";color:#ffb35c}
+.kir.watch .kshout,.kir.watch .myhand{display:none}
+.kir .kshout{display:none;grid-template-columns:auto auto;gap:6px}
+.kir.online .kshout{display:grid}
+.kir .kshout button{font-size:16px !important;padding:3px 8px !important}
+.kir .myhand .kc.drag{transition:none;z-index:5;box-shadow:0 14px 26px rgba(0,0,0,.6), 0 0 0 2px rgba(255,179,92,.8)}
+@media (prefers-reduced-motion: reduce){ .kir .ktrack,.kir .kscan,.kir .ktbl{animation:none} }
 .kir .plate .tag{position:absolute;right:-6px;top:-11px;font-family:var(--f-mono);font-size:9px;letter-spacing:.14em;font-style:normal;padding:1px 4px;background:#1c1f1c;color:#9fe0a8;border:1px solid #3a4a3a;transform:rotate(3deg)}
 .kir .plate .tag:empty{display:none}
 .kir .plate .tag.away{color:#ffb35c;border-color:#6a4a2a}
 .kir .kshout{position:absolute;right:max(10px, env(safe-area-inset-right,0px));bottom:calc(var(--hand) + 10px);z-index:8;display:none;flex-direction:column;gap:6px;align-items:flex-end}
-.kir.online .kshout{display:flex}
 .kir.idle .kshout{display:none}
 .kir .kshout button{font-family:var(--f-osd);font-size:19px;letter-spacing:.05em;color:#14130f;background:#ffb35c;border:0;padding:3px 10px;cursor:pointer;box-shadow:2px 3px 0 rgba(0,0,0,.55);transform:rotate(-2deg)}
 .kir .kshout button + button{background:#ffd23a;transform:rotate(1.5deg)}
@@ -2560,13 +2574,14 @@ body.kiropen{overflow:hidden}
   </div>
   <div class="mine" id="kmine">
     <div class="hint" id="khint" aria-live="polite"></div>
-    <div class="myrow"><div class="plate" id="kmyplate"><b>SINÄ</b><small id="kmypts">0</small></div></div>
+    <div class="myrow"><div class="plate" id="kmyplate"><b>SINÄ</b><small id="kmypts">0</small><em class="tag"></em></div></div>
     <div class="myhand" id="kmyhand" role="group" aria-label="Kätesi"></div>
   </div>
   <button class="knext" id="knext" type="button">SEURAAVA JAKO ▶</button>
-  <div class="kshout" id="kshout"><button type="button" data-k="0">HÖYLÄ!</button><button type="button" data-k="1">HÖYLÄ McBUENO!!!</button></div>
+  <div class="kshout" id="kshout"><button type="button" data-k="0">HÖYLÄ!</button><button type="button" data-k="1">McBUENO!!!</button><button type="button" data-k="2">TÄÄ ON MUN PIENIN!</button><button type="button" data-k="3">EIIIIHHH!!!</button></div>
   <div class="kvig" aria-hidden="true"></div>
   <div class="kscan" aria-hidden="true"></div>
+  <div class="ktrack" aria-hidden="true"></div>
   <div class="kvhs" id="kvhs" aria-hidden="true"></div>
   <div class="kbig" id="kbig" aria-live="assertive"></div>
   <div class="kosd">CH 09</div>
@@ -2611,7 +2626,7 @@ body.kiropen{overflow:hidden}
   <div class="kpanel" id="klobby">
     <h2 style="font-size:52px">PÖYTÄ</h2>
     <div id="kentry" style="display:flex;flex-direction:column;align-items:center;gap:14px">
-      <p>Nimikirjaimet, kolme kirjainta. Muut eivät voi lähettää viestejä, vain pelata kortteja ja huutaa kerran kierroksessa.</p>
+      <p>Nimikirjaimet, kolme kirjainta. Pöydässä ei voi lähettää viestejä, vain pelata kortteja ja huutaa kerran kierroksessa. Jos peli on jo käynnissä, pääset katsomaan.</p>
       <input class="kin" id="koname" type="text" maxlength="3" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" aria-label="Nimikirjaimet" placeholder="___">
       <button class="go" id="kocreate" type="button">LUO PÖYTÄ ▶</button>
       <div class="krow"><input class="kin code" id="kocode" type="text" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" aria-label="Pöydän koodi" placeholder="____"><button class="ln" id="kojoin" type="button">LIITY</button></div>
@@ -2706,7 +2721,7 @@ body.kiropen{overflow:hidden}
   function buildProps(){
     var land = innerWidth > innerHeight, P = $('kprops'), html = '<svg width="0" height="0" style="position:absolute"><filter id="kblur"><feGaussianBlur stdDeviation="4"/></filter></svg>';
     // [kind, x%, y%, rotation, key, extra]
-    PROPS = land ? [
+    PROPS = []; if (false) PROPS = land ? [
       ['tray', 70, 46, 0], ['shot', 67, 42, 0], ['shot', 73, 44, 0], ['shot', 69, 51, 0], ['stout', 38, 72, 0, 'p1'], ['stout', 62, 28, 0, 'p3'], ['lager', 24, 62, 0, '', 1], ['stout', 80, 66, 0, 'p5'],
       ['shot', 38, 64, 0], ['shot', 58, 66, 0], ['coins', 44, 70, 0], ['receipt', 84, 38, 18], ['caps', 18, 44, 0]
     ] : [
@@ -2770,7 +2785,11 @@ body.kiropen{overflow:hidden}
   }
 
   // ---------- sound ----------
-  var AC = null, bufs = {}, FILES = {smash:'posti/sfx/smash.mp3', boom:'posti/sfx/boom4.mp3', laugh:'posti/sfx/laugh2.mp3', burp:'posti/sfx/burp1.mp3', bell:'posti/sfx/bell1.mp3', open:'posti/sfx/open.mp3', fart:'posti/sfx/fart3.mp3'};
+  var AC = null, bufs = {}, FILES = {smash:'posti/sfx/smash.mp3', boom:'posti/sfx/boom4.mp3', laugh:'posti/sfx/laugh2.mp3', burp:'kirilii/sfx/burp1.mp3', burp2:'kirilii/sfx/burp2.mp3', bell:'posti/sfx/bell1.mp3', open:'posti/sfx/open.mp3', fart:'posti/sfx/fart3.mp3',
+    bar1:'kirilii/sfx/bar1.mp3', bar2:'kirilii/sfx/bar2.mp3', deal:'kirilii/sfx/deal.mp3', flip:'kirilii/sfx/flip.mp3', cards:'kirilii/sfx/cards.mp3', over:'kirilii/sfx/over.mp3',
+    impossible:'kirilii/sfx/impossible.mp3', laughr:'kirilii/sfx/laughr.mp3', laughe:'kirilii/sfx/laughe.mp3', aboard:'kirilii/sfx/aboard.mp3',
+    nouhh:'kirilii/sfx/nouhh.mp3', no1:'kirilii/sfx/no1.mp3', no2:'kirilii/sfx/no2.mp3', yes:'kirilii/sfx/yes.mp3', idiots:'kirilii/sfx/idiots.mp3', sonofa:'kirilii/sfx/sonofa.mp3',
+    put1:'kirilii/sfx/put1.mp3', put2:'kirilii/sfx/put2.mp3', put3:'kirilii/sfx/put3.mp3', put4:'kirilii/sfx/put4.mp3'};
   function ac(){ if (!AC){ try { AC = new (window.AudioContext || window.webkitAudioContext)(); Object.keys(FILES).forEach(function(k){ fetch('assets/' + FILES[k]).then(function(r){ return r.arrayBuffer(); }).then(function(a){ return new Promise(function(ok, no){ AC.decodeAudioData(a, ok, no); }); }).then(function(b){ bufs[k] = b; }).catch(function(){}); }); } catch(e){} }
     if (AC && AC.state === 'suspended') AC.resume(); }
   function playS(k, vol, rate){ if (!settings.fx || !AC || !bufs[k]) return; var s = AC.createBufferSource(), g = AC.createGain(); s.buffer = bufs[k]; s.playbackRate.value = rate || 1; g.gain.value = vol == null ? .5 : vol; s.connect(g).connect(AC.destination); s.start(); }
@@ -2778,16 +2797,20 @@ body.kiropen{overflow:hidden}
     var s = AC.createBufferSource(), g = AC.createGain(), fl = AC.createBiquadFilter(); fl.type = 'bandpass'; fl.frequency.value = f || 2200; fl.Q.value = .8; s.buffer = b; g.gain.value = vol || .3; s.connect(fl).connect(g).connect(AC.destination); s.start(); }
   function tone(f, d, type, vol, f2){ if (!settings.fx || !AC) return; var o = AC.createOscillator(), g = AC.createGain(), n = AC.currentTime; o.type = type || 'square'; o.frequency.setValueAtTime(f, n); if (f2) o.frequency.exponentialRampToValueAtTime(f2, n + d);
     g.gain.setValueAtTime(vol || .05, n); g.gain.exponentialRampToValueAtTime(.0001, n + d); o.connect(g).connect(AC.destination); o.start(n); o.stop(n + d + .02); }
+  var voxT = 0;
+  function vox(list, vol, force){ var t = Date.now(); if (!force && t - voxT < 2600) return; voxT = t; playS(list[Math.floor(Math.random() * list.length)], vol == null ? .5 : vol, .96 + Math.random() * .08); }
   var SFX = {
-    slap: function(){ noise(.07, .45, 1800); tone(120, .06, 'sine', .12, 70); },
-    shuffle: function(){ for (var i = 0; i < 9; i++) setTimeout(function(){ noise(.03, .18, 3200); }, i * 45 + Math.random() * 20); },
+    slap: function(){ var k = 'put' + (1 + Math.floor(Math.random() * 4)); if (bufs[k]) playS(k, .75, .92 + Math.random() * .16); else { noise(.07, .45, 1800); tone(120, .06, 'sine', .12, 70); } },
+    shuffle: function(){ if (bufs.deal) { playS('deal', .55); return; } for (var i = 0; i < 9; i++) setTimeout(function(){ noise(.03, .18, 3200); }, i * 45 + Math.random() * 20); },
+    flip: function(){ playS('flip', .45, .95 + Math.random() * .1); },
+    cards: function(){ if (bufs.cards) playS('cards', .5); else noise(.25, .2, 900); },
     phone: function(){ tone(1320, .09, 'sine', .07); setTimeout(function(){ tone(1760, .12, 'sine', .07); }, 110); },
     clink: function(){ tone(2400, .18, 'sine', .05); tone(3300, .12, 'sine', .03); },
     thud: function(){ tone(70, .25, 'sine', .35, 40); noise(.12, .25, 400); },
     hoyla: function(){ if (!settings.fx || !AC) return; var n = Math.floor(AC.sampleRate * .55), b = AC.createBuffer(1, n, AC.sampleRate), a = b.getChannelData(0); for (var i = 0; i < n; i++) a[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n);
       var s = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain(), t = AC.currentTime; fl.type = 'bandpass'; fl.Q.value = 2; fl.frequency.setValueAtTime(600, t); fl.frequency.exponentialRampToValueAtTime(4200, t + .45); g.gain.value = .5; s.buffer = b; s.connect(fl).connect(g).connect(AC.destination); s.start();
       setTimeout(SFX.thud, 420); },
-    mcbueno: function(){ playS('boom', .7, .8); [523, 659, 784, 1047].forEach(function(f, i){ setTimeout(function(){ tone(f, .22, 'square', .05); }, 300 + i * 120); }); setTimeout(function(){ tone(196, .9, 'sawtooth', .07, 98); }, 860); setTimeout(function(){ playS('laugh', .6, .9); }, 1200); },
+    mcbueno: function(){ playS('boom', .7, .8); [523, 659, 784, 1047].forEach(function(f, i){ setTimeout(function(){ tone(f, .22, 'square', .05); }, 300 + i * 120); }); setTimeout(function(){ tone(196, .9, 'sawtooth', .07, 98); }, 860); setTimeout(function(){ playS('laugh', .6, .9); }, 1200); setTimeout(function(){ vox(['idiots'], .5, true); }, 2500); },
     out: function(){ tone(300, .5, 'triangle', .06, 120); setTimeout(function(){ playS('open', .4, .8); }, 200); },
     headsup: function(){ tone(110, 1.2, 'sawtooth', .06, 220); setTimeout(function(){ tone(220, .9, 'square', .04); }, 400); setTimeout(SFX.thud, 900); }
   };
@@ -2812,6 +2835,35 @@ body.kiropen{overflow:hidden}
   $('knextsong').addEventListener('click', function(){ ac(); mode = 'game'; drawSong(); if (!musicOn){ musicOn = true; try { localStorage.setItem('kirilii_mus', '1'); } catch(_){} } syncMusic(); this.blur(); });
   document.addEventListener('visibilitychange', function(){ if (root.classList.contains('on')) syncMusic(); });
 
+  // ---------- bar ambience (placeholder until real recordings) ----------
+  var amb = null, ambT = 0;
+  function ambOn(){
+    if (amb || !settings.fx || !AC || !root.classList.contains('on')) return;
+    if (!bufs.bar1 || !bufs.bar2){ clearTimeout(ambT); ambT = setTimeout(ambOn, 400); return; }
+    var bus = AC.createGain(); bus.gain.value = .0001; bus.connect(AC.destination); bus.gain.setTargetAtTime(.5, AC.currentTime, 1.2);
+    amb = {g:bus, srcs:[], k:Math.random() < .5 ? 1 : 2, t:0, lt:0};
+    ambLayer(AC.currentTime, true); ambTick();
+  }
+  var XF = 3;
+  function ambLayer(t0, first){
+    if (!amb) return;
+    var b = bufs['bar' + amb.k], s = AC.createBufferSource(), g = AC.createGain(), d = b.duration;
+    s.buffer = b; s.connect(g).connect(amb.g);
+    g.gain.setValueAtTime(first ? 1 : 0, t0); if (!first) g.gain.linearRampToValueAtTime(1, t0 + XF);
+    g.gain.setValueAtTime(1, t0 + d - XF); g.gain.linearRampToValueAtTime(0, t0 + d);
+    s.start(t0); s.stop(t0 + d + .05);
+    amb.srcs.push(s); if (amb.srcs.length > 3) amb.srcs.shift();
+    amb.k = amb.k === 1 ? 2 : 1;
+    var next = t0 + d - XF, x = amb;
+    amb.lt = setTimeout(function(){ if (amb === x) ambLayer(next, false); }, Math.max(0, (next - AC.currentTime - 1) * 1000));
+  }
+  function ambTick(){ clearTimeout(ambT); ambT = setTimeout(function(){ if (!amb) return; var r = Math.random();
+      if (r < .45) { tone(2600 + Math.random() * 900, .15, 'sine', .012); setTimeout(function(){ tone(3100 + Math.random() * 600, .1, 'sine', .008); }, 70); }
+      else if (r < .62) playS(Math.random() < .5 ? 'burp' : 'burp2', .16 + Math.random() * .12, .85 + Math.random() * .3);
+      else if (r < .75) noise(.25, .04, 900);
+      ambTick(); }, 6000 + Math.random() * 14000); }
+  function ambOff(){ clearTimeout(ambT); if (!amb) return; var x = amb; amb = null; clearTimeout(x.lt); try { x.g.gain.setTargetAtTime(0, AC.currentTime, .3); setTimeout(function(){ x.srcs.forEach(function(s){ try { s.stop(); } catch(e){} }); x.g.disconnect(); }, 1500); } catch(e){} }
+
   // ---------- rendering ----------
   // which played cards belong to this lap, and which one is being asked for
   var lapIds = {};
@@ -2833,11 +2885,13 @@ body.kiropen{overflow:hidden}
       $('kfinal' + i).innerHTML = reveal && p.hand[0] ? cardHTML(p.hand[0], (st.result.losers.indexOf(i) >= 0 ? 'lose' : '')) : '';
       $('kplayed' + i).innerHTML = p.played.map(function(c){ return cardHTML(c, cls(c)); }).join('');
     }
-    $('kmyplate').querySelector('b').textContent = online ? me.name : 'SINÄ'; $('kmypts').textContent = me.pts; $('kmyplate').classList.toggle('turn', st.phase === 'play' && st.turn === 0);
+    $('kmyplate').querySelector('b').textContent = online ? me.name : 'SINÄ';
+    var mt = $('kmyplate').querySelector('.tag'); if (mt) mt.textContent = online && online.watch ? 'PÖYTÄ' : ''; $('kmypts').textContent = me.pts; $('kmyplate').classList.toggle('turn', st.phase === 'play' && st.turn === 0);
     $('kmyplayed').innerHTML = me.played.map(function(c){ return cardHTML(c, cls(c)); }).join('');
     renderHand(); renderPhone(); hint();
   }
   function renderHand(){
+    if (online && online.watch){ $('kmyhand').innerHTML = ''; return; }
     var me = st.players[0], myTurn = st.phase === 'play' && st.turn === 0 && !busy, lg = myTurn ? K.legal(me.hand, st.last).map(function(c){ return c.id; }) : [];
     var lose = st.phase !== 'play' && st.result && st.result.losers.indexOf(0) >= 0;
     $('kmyhand').innerHTML = me.hand.map(function(c){ var cls = myTurn ? (lg.indexOf(c.id) >= 0 ? 'ok' : 'no') : ''; if (selected === c.id && myTurn) cls += ' sel'; if (lose) cls += ' lose'; return cardHTML(c, cls); }).join('');
@@ -2845,11 +2899,12 @@ body.kiropen{overflow:hidden}
   }
   function hint(){
     var h = '', me = st.players[0];
+    if (online && online.watch){ $('khint').textContent = st.phase === 'play' ? 'Katsot pöytää · ' + st.players[st.turn].name + ' miettii…' : 'Katsot pöytää'; return; }
     if (st.phase === 'play' && st.turn === 0 && !busy){
       if (st.last == null) h = (st.lap > 1 ? 'Isoin oli sinun, aloitat kierroksen ' : 'Kierros ') + st.lap + '/5 · pelaa mikä tahansa';
       else { var m = K.minV(me.hand), any = me.hand.some(function(c){ return c.v >= st.last; }), who = st.players[st.lastBy].name;
         h = any ? 'Kysytty ' + nm(st.last) + ' · ' + who + ' · tai pienin ' + nm(m) : 'Kysytty ' + nm(st.last) + ' · pakko pelata pienin ' + nm(m); }
-      if (selected != null) h = 'Napauta uudestaan: pelaa';
+      if (selected != null) h = 'Pyyhkäise ylös tai napauta uudestaan';
       if (me.hand.length === 2 && selected == null) h += ' · toinen jää';
     } else if (st.phase === 'play' && me.out) h = 'Olet ulkona. Katsot loppuun.';
     else if (st.phase === 'play') h = (st.last == null && st.lap > 1 ? st.players[st.turn].name + ' pelasi isoimman ja aloittaa kierroksen ' + st.lap + '/5' : st.players[st.turn].name + ' miettii…');
@@ -2857,8 +2912,9 @@ body.kiropen{overflow:hidden}
   }
   function nm(v){ return v <= 10 ? String(v) : {11:'J', 12:'Q', 13:'K', 14:'A', 15:'JOK', 16:'EJ'}[v]; }
   function renderPhone(flashIds, add){
-    var rows = st.players.map(function(p){ var a = add && add[p.id] ? '<span class="add"> +' + add[p.id] + '</span>' : '';
-      return '<tr class="' + (p.out ? 'o ' : '') + (p.id === 0 ? 'me ' : '') + (flashIds && flashIds.indexOf(p.id) >= 0 ? 'flash' : '') + '"><td>' + p.name + '<div class="bar"><i style="width:' + Math.min(100, p.pts / 21 * 100) + '%"></i></div></td><td class="p">' + p.pts + a + '</td></tr>'; }).join('');
+    var order = st.players.slice().sort(function(a, b){ return (b.pts + (b.out ? 100 : 0)) - (a.pts + (a.out ? 100 : 0)) || a.id - b.id; });
+    var rows = order.map(function(p){ var a = add && add[p.id] ? '<span class="add"> +' + add[p.id] + '</span>' : '';
+      return '<tr class="' + (p.out ? 'o ' : '') + (p.id === 0 ? 'me ' : '') + (flashIds && flashIds.indexOf(p.id) >= 0 ? 'flash ' : '') + (st.phase === 'play' && st.turn === p.id ? 'now' : '') + '"><td>' + p.name + '<div class="bar"><i style="width:' + Math.min(100, p.pts / 21 * 100) + '%"></i></div></td><td class="p">' + p.pts + a + '</td></tr>'; }).join('');
     var lbl = st.phase === 'over' ? 'LOPPU' : st.headsUp ? 'HEADS UP' : 'JAKO ' + st.round;
     $('kscr').innerHTML = '<h4><span>KIRILII</span><span>' + lbl + '</span></h4><table>' + rows + '</table><div class="ft">RAJA 21</div>';
   }
@@ -2907,14 +2963,20 @@ body.kiropen{overflow:hidden}
   $('kmyhand').addEventListener('pointerdown', function(e){
     ac(); var el = e.target.closest('.kc'); if (!el || !st || st.phase !== 'play' || st.turn !== 0 || busy) return;
     if (!el.classList.contains('ok')) { tone(160, .08, 'square', .03); el.animate([{transform:'translateX(-4px)'}, {transform:'translateX(4px)'}, {transform:'none'}], {duration:180}); return; }
-    drag = {id:+el.dataset.id, y:e.clientY, el:el, moved:false}; try { el.setPointerCapture(e.pointerId); } catch(_){}
+    drag = {id:+el.dataset.id, x:e.clientX, y:e.clientY, t:performance.now(), el:el, moved:false}; try { el.setPointerCapture(e.pointerId); } catch(_){}
   });
-  $('kmyhand').addEventListener('pointermove', function(e){ if (!drag) return; var dy = e.clientY - drag.y; if (dy < -6){ drag.moved = true; drag.el.style.transform = 'translateY(' + Math.max(-90, dy) + 'px)'; } });
+  $('kmyhand').addEventListener('pointermove', function(e){ if (!drag) return; var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) < 8) return; drag.moved = true; drag.el.classList.add('drag');
+    drag.el.style.transform = 'translate(' + dx * .6 + 'px,' + Math.min(20, dy) + 'px) rotate(' + dx * .05 + 'deg) scale(' + (1 + Math.min(.12, Math.max(0, -dy) / 600)) + ')';
+    $('khint').textContent = dy < -55 ? 'Päästä irti: pelaa' : 'Pyyhkäise ylös'; });
   function endDrag(e, cancel){
-    if (!drag) return; var d = drag; drag = null; var dy = e.clientY - d.y; d.el.style.transform = '';
-    if (cancel) return;
-    if (dy < -45){ play(d.id, d.el); return; }
-    if (!d.moved){ if (selected === d.id) play(d.id, d.el); else { selected = d.id; renderHand(); hint(); } }
+    if (!drag) return; var d = drag; drag = null; var dy = e.clientY - d.y, dt = performance.now() - d.t, fast = dy < -30 && dt < 260;
+    d.el.classList.remove('drag');
+    if (cancel){ d.el.style.transform = ''; return; }
+    if (dy < -55 || fast){ play(d.id, d.el); return; }
+    if (d.moved){ d.el.animate([{transform:d.el.style.transform}, {transform:'none'}], {duration:180, easing:'ease-out'}); d.el.style.transform = ''; hint(); return; }
+    d.el.style.transform = '';
+    if (selected === d.id) play(d.id, d.el); else { selected = d.id; SFX.flip(); renderHand(); hint(); }
   }
   $('kmyhand').addEventListener('pointerup', function(e){ endDrag(e); });
   $('kmyhand').addEventListener('pointercancel', function(e){ endDrag(e, true); });
@@ -2955,11 +3017,11 @@ body.kiropen{overflow:hidden}
   function roundEnd(my){
     if (my !== gen) return;
     revealing = true; var R = st.result, T = 0, me = st.players[0];
-    busy = true; render(); persist(); noise(.25, .2, 900);
+    busy = true; render(); persist(); SFX.cards();
     var seq = [];
     function at(ms, fn){ seq.push(setTimeout(function(){ if (my === gen) fn(); }, ms * 1.4)); }
     // the cards are already face up; mark the losers
-    at(450, function(){ R.losers.forEach(function(id){ var pl = id === 0 ? $('kmyplate') : $('kplate' + id); if (pl){ pl.classList.add('lose', 'hit'); } }); if (R.losers.length) SFX.thud(); });
+    at(450, function(){ R.losers.forEach(function(id){ var pl = id === 0 ? $('kmyplate') : $('kplate' + id); if (pl){ pl.classList.add('lose', 'hit'); } }); if (R.losers.length){ SFX.thud(); if (R.losers.length >= 3) vox(['idiots'], .5); else if (Math.random() < .7) vox(R.losers.indexOf(0) >= 0 ? ['nouhh', 'sonofa'] : ['no1', 'no2', 'sonofa'], .45); } });
     // the phone wakes up with the new points
     at(1100, function(){ var add = {}; R.losers.forEach(function(id){ add[id] = R.pen; });
       st.players.forEach(function(p){ p._show = p.pts; }); renderPhone(R.losers, add); $('kscr').classList.add('wake'); SFX.phone(); });
@@ -2971,7 +3033,7 @@ body.kiropen{overflow:hidden}
         var by = st.players[h.by].name, vic = st.players[h.victim].name;
         if (h.mcbueno){ $('kvhs').classList.remove('on'); void $('kvhs').offsetWidth; $('kvhs').classList.add('on'); big('HÖYLÄ McBUENO!', by + ' → ' + vic, true); shake(true); wobble(true); tipGlass(); SFX.mcbueno(); $('kscr').classList.add('mc');
           setTimeout(function(){ $('kscr').classList.remove('mc'); }, 2100); if (herjaOk() || settings.herja !== 'pois') say(speakerFor(h.victim, h.by), pick(LINES.mc), 'McBUENO');
-        } else { big('HÖYLÄYS!', by + ' höyläsi: ' + vic); shake(false); wobble(false); SFX.hoyla(); SFX.clink();
+        } else { big('HÖYLÄYS!', by + ' höyläsi: ' + vic); shake(false); wobble(false); SFX.hoyla(); SFX.clink(); (function(by, vi){ setTimeout(function(){ vox(vi === 0 ? ['impossible', 'nouhh'] : ['no1', 'no2', 'sonofa'], .55, true); }, 900); if (by !== 0) setTimeout(function(){ vox(['laughr', 'laughe'], .45, true); }, 2300); })(h.by, h.victim);
           var pl = h.victim === 0 ? $('kmyplate') : $('kplate' + h.victim); if (pl){ pl.classList.remove('hit'); void pl.offsetWidth; pl.classList.add('hit'); }
           if (herjaOk()) say(speakerFor(h.victim, h.by), pick(LINES.hoyla)); }
       });
@@ -2989,7 +3051,7 @@ body.kiropen{overflow:hidden}
     }
     // eliminations
     if (R.out.length){
-      at(T, function(){ R.out.forEach(function(id){ SFX.out(); var pl = id === 0 ? $('kmyplate') : $('kplate' + id); if (pl) pl.classList.add('hit'); });
+      at(T, function(){ if (R.out.indexOf(0) >= 0 && !(online && online.watch)) playS('over', .6); R.out.forEach(function(id){ SFX.out(); var pl = id === 0 ? $('kmyplate') : $('kplate' + id); if (pl) pl.classList.add('hit'); });
         render(); renderPhone(R.out);
         var names = R.out.map(function(id){ return st.players[id].name; }).join(', ');
         big(R.out.indexOf(0) >= 0 ? 'ULKONA' : 'PUDOTUS', names + ' poistuu pöydästä');
@@ -2998,7 +3060,7 @@ body.kiropen{overflow:hidden}
     }
     if (R.headsUp){ at(T, function(){ root.classList.add('hu'); big('HEADS UP', st.players.filter(function(p){ return !p.out; }).map(function(p){ return p.name; }).join(' vs ')); SFX.headsup(); shake(false); }); T += 2000; }
     // stats from what actually happened
-    if (!R.replay){
+    if (!R.replay && !(online && online.watch)){
       if (R.losers.indexOf(0) >= 0){ stats.roundsLost++; stats.penalty += R.pen; stats.biggest = Math.max(stats.biggest, R.pen); if (R.max === 15) stats.jokerLoss++; if (R.max === 16) stats.ekstraLoss++; if (R.max >= 14) stats.bans++; }
       R.hoyla.forEach(function(h){ if (h.by === 0){ stats.hoylays++; if (h.mcbueno) stats.mcbuenos++; } });
       lsSet(STATS, stats);
@@ -3025,10 +3087,10 @@ body.kiropen{overflow:hidden}
   // ---------- game over, wins of the day ----------
   var API = 'https://api.viistone.com/api/scores?g=kirilii', myT = 0;
   function gameOver(){
-    var w = st.players[st.winner], won = st.winner === 0;
-    stats.games++; if (won){ stats.wins++; if (st.headsUp) stats.headsUpWins++; } lsSet(STATS, stats);
+    var w = st.players[st.winner], won = st.winner === 0 && !(online && online.watch);
+    if (!(online && online.watch)) stats.games++; if (won){ stats.wins++; if (st.headsUp) stats.headsUpWins++; } lsSet(STATS, stats);
     if (online) leaveOnline(true); else try { localStorage.removeItem(SAVE); } catch(e){}
-    big(won ? 'VIIMEINEN PÖYDÄSSÄ' : w.name + ' VEI', won ? 'Sinä voitit.' : 'Viimeinen pöydässä.'); if (won){ SFX.clink(); playS('bell', .4); } else playS('laugh', .4);
+    big(won ? 'VIIMEINEN PÖYDÄSSÄ' : w.name + ' VEI', won ? 'Sinä voitit.' : 'Viimeinen pöydässä.'); if (won){ SFX.clink(); playS('bell', .4); setTimeout(function(){ vox(['yes'], .6, true); }, 500); } else { playS('over', .55); setTimeout(function(){ playS('laugh', .35); }, 1400); }
     setTimeout(function(){
       $('kovh').textContent = won ? 'VIIMEINEN PÖYDÄSSÄ' : w.name + ' VOITTI';
       $('kovs').textContent = won ? 'Kaikki muut lähtivät pöydästä. Sinä et.' : 'Sinä et ollut viimeinen pöydässä. Ensi kerralla.';
@@ -3067,7 +3129,7 @@ body.kiropen{overflow:hidden}
   $('kdiff').addEventListener('click', function(){ cycle('difficulty', ['easy', 'normal', 'hard']); });
   $('kherja').addEventListener('click', function(){ cycle('herja', ['paljon', 'vahan', 'pois']); });
   $('ktie').addEventListener('click', function(){ cycle('tie', ['lowest', 'replay']); });
-  $('kfx').addEventListener('click', function(){ ac(); settings.fx = !settings.fx; syncOpts(); this.blur(); });
+  $('kfx').addEventListener('click', function(){ ac(); settings.fx = !settings.fx; syncOpts(); if (settings.fx) ambOn(); else ambOff(); this.blur(); });
   function showPanel(id){ ['kmenu', 'krules', 'kstats', 'kover', 'klobby'].forEach(function(p){ $(p).classList.toggle('on', p === id); }); }
   function hidePanels(){ ['kmenu', 'krules', 'kstats', 'kover', 'klobby'].forEach(function(p){ $(p).classList.remove('on'); }); }
   function menu(){ var has = !!lsGet(SAVE, null); $('kcont').hidden = online || !has || !st || st.phase === 'over'; $('kocont').hidden = !lsGet(OSAVE, null); showPanel('kmenu'); root.classList.add('idle'); }
@@ -3082,7 +3144,7 @@ body.kiropen{overflow:hidden}
     if (online) leaveOnline(false);
     ac(); gen++; clearTimeout(autoNext); busy = false; selected = null; root.classList.remove('hu');
     st = K.newGame({difficulty:settings.difficulty, tieRule:settings.tie}); persist(); gameMusic();
-    hidePanels(); root.classList.remove('idle'); $('knext').classList.remove('on'); render(); SFX.shuffle(); dealAnim();
+    hidePanels(); root.classList.remove('idle'); $('knext').classList.remove('on'); render(); SFX.shuffle(); dealAnim(); setTimeout(function(){ vox(['aboard'], .5, true); }, 400);
     big('JAKO', st.players[st.starter].name === 'SINÄ' ? 'Sinä aloitat' : st.players[st.starter].name + ' aloittaa'); schedule();
   }
   function resume(){
@@ -3101,7 +3163,7 @@ body.kiropen{overflow:hidden}
   // ---------- online: a table with friends; the server deals, checks and plays the bots ----------
   var OAPI = 'https://api.viistone.com/api/kirilii/', OSAVE = 'kirilii-online', online = null, pollT = 0, revealing = false, pending = null, seenShouts = {}, myRect = null;
   function oerr(t){ $('koerr').textContent = t || ''; }
-  var OERR = {name:'Kolme kirjainta, kiitos.', room:'Pöytää ei löytynyt.', started:'Peli on jo alkanut.', full:'Pöytä on täynnä.', taken:'Nimikirjaimet on jo käytössä tässä pöydässä.', seat:'Paikkaa ei löytynyt.', offline:'Pöydät eivät ole nyt auki.', busy:'Ruuhkaa, yritä uudelleen.'};
+  var OERR = {watch:'Katsot pöytää.', name:'Kolme kirjainta, kiitos.', room:'Pöytää ei löytynyt.', started:'Peli on jo alkanut.', full:'Pöytä on täynnä.', taken:'Nimikirjaimet on jo käytössä tässä pöydässä.', seat:'Paikkaa ei löytynyt.', offline:'Pöydät eivät ole nyt auki.', busy:'Ruuhkaa, yritä uudelleen.'};
   function opost(op, body){ return fetch(OAPI + op, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)}).then(function(r){ return r.json().then(function(d){ d._s = r.status; return d; }); }); }
   function oget(){ return fetch(OAPI + 'state?room=' + online.room + '&t=' + online.token, {cache:'no-store'}).then(function(r){ return r.json().then(function(d){ d._s = r.status; return d; }); }); }
   function clean3(el){ el.addEventListener('input', function(){ var v = this.value.toUpperCase().replace(/[^A-ZÅÄÖ]/g, '').slice(0, +this.maxLength); if (v !== this.value) this.value = v; }); el.addEventListener('keydown', function(e){ e.stopPropagation(); }, true); }
@@ -3111,7 +3173,8 @@ body.kiropen{overflow:hidden}
     $('kentry').style.display = 'flex'; $('kroom').style.display = 'none'; showPanel('klobby'); root.classList.add('idle');
   }
   function enter(d, name){
-    online = {room:d.room, token:d.token, seat:d.seat, name:name, view:null, away:{}}; lsSet(OSAVE, {room:d.room, token:d.token, seat:d.seat, name:name});
+    online = {room:d.room, token:d.token, seat:d.seat, name:name, view:null, away:{}, watch:!!d.watch}; lsSet(OSAVE, {room:d.room, token:d.token, seat:d.seat, name:name, watch:!!d.watch});
+    root.classList.toggle('watch', !!d.watch);
     try { localStorage.setItem('viistone-2048-name', name); } catch(e){}
     root.classList.add('online'); seenShouts = {}; (d.shouts || []).forEach(function(x){ seenShouts[x.id] = 1; });
     history.replaceState(null, '', '#kirilii-' + d.room); applyView(d); poll();
@@ -3127,10 +3190,10 @@ body.kiropen{overflow:hidden}
     if (navigator.share) navigator.share({title:'Kirilii', text:'Kirilii-pöytä ' + online.room, url:url}).catch(function(){});
     else if (navigator.clipboard) navigator.clipboard.writeText(url).then(function(){ b.textContent = 'LINKKI KOPIOITU'; setTimeout(function(){ b.textContent = 'JAA LINKKI'; }, 1600); }); });
   $('koleave').addEventListener('click', function(){ if (online && online.view && online.view.phase === 'game' && st && st.phase !== 'over'){ menu(); return; } leaveOnline(false); menu(); });
-  $('kocont').addEventListener('click', function(){ var o = lsGet(OSAVE, null); if (!o) return; ac(); online = {room:o.room, token:o.token, seat:o.seat, name:o.name, view:null, away:{}}; root.classList.add('online'); seenShouts = {};
+  $('kocont').addEventListener('click', function(){ var o = lsGet(OSAVE, null); if (!o) return; ac(); online = {room:o.room, token:o.token, seat:o.seat, name:o.name, view:null, away:{}, watch:!!o.watch}; root.classList.add('online'); root.classList.toggle('watch', !!o.watch); seenShouts = {};
     oget().then(function(d){ if (d._s !== 200){ leaveOnline(false); menu(); return; } (d.shouts || []).forEach(function(x){ seenShouts[x.id] = 1; }); st = null; applyView(d); poll(); }).catch(function(){ oerr('Ei yhteyttä.'); }); });
   function leaveOnline(keepTable){ stopPoll(); if (!keepTable){ try { localStorage.removeItem(OSAVE); } catch(e){} } else { try { localStorage.removeItem(OSAVE); } catch(e){} }
-    online = null; root.classList.remove('online'); pending = null; revealing = false; if (/^#kirilii-/.test(location.hash)) history.replaceState(null, '', '#kirilii'); }
+    online = null; root.classList.remove('online', 'watch'); pending = null; revealing = false; if (/^#kirilii-/.test(location.hash)) history.replaceState(null, '', '#kirilii'); }
   function stopPoll(){ clearTimeout(pollT); pollT = 0; }
   function poll(){ stopPoll(); if (!online || !root.classList.contains('on')) return;
     oget().then(function(d){ if (!online) return; if (d._s === 200) applyView(d); else if (d._s === 404 || d._s === 403){ leaveOnline(false); $('khint').textContent = 'Pöytä on suljettu.'; menu(); return; } })
@@ -3138,7 +3201,7 @@ body.kiropen{overflow:hidden}
       .then(function(){ if (online) pollT = setTimeout(poll, document.hidden ? 4000 : 800); }); }
   // the server sends every view from its own seat; turn it so I sit at the bottom
   function fromView(v){
-    var S = v.st, me = v.me, R = function(i){ return i == null ? i : (i - me + 6) % 6; }, players = [];
+    var S = v.st, me = v.me < 0 ? 0 : v.me, R = function(i){ return i == null ? i : (i - me + 6) % 6; }, players = [];
     S.players.forEach(function(p){ var q = Object.assign({}, p); q.id = R(p.id); players[q.id] = q; });
     function H(x){ return {by:R(x.by), victim:R(x.victim), mcbueno:x.mcbueno}; }
     return Object.assign({}, S, {players:players, turn:R(S.turn), starter:R(S.starter), lastBy:R(S.lastBy), winner:R(S.winner),
@@ -3150,6 +3213,7 @@ body.kiropen{overflow:hidden}
     $('kentry').style.display = 'none'; $('kroom').style.display = 'flex'; $('kocodeview').textContent = v.room;
     var h = ''; for (var i = 0; i < 6; i++){ var s0 = v.seats[i]; h += s0 ? '<span class="' + (i === v.me ? 'me' : '') + '">' + s0.name + (i === 0 ? ' ★' : '') + '</span>' : '<span class="bot">BOTTI</span>'; }
     $('koseats').innerHTML = h; $('kostart').style.display = v.host ? '' : 'none';
+    if (v.me < 0){ $('kowait').textContent = 'Pöytä on täynnä, katsot peliä. ' + v.seats[0].name + ' aloittaa.'; return; }
     $('kowait').textContent = v.host ? 'Tyhjät paikat täytetään boteilla. Aloita kun porukka on paikalla.' : v.seats[0].name + ' aloittaa pelin. Tyhjät paikat täytetään boteilla.';
     if (!$('klobby').classList.contains('on')) showPanel('klobby');
   }
@@ -3157,12 +3221,12 @@ body.kiropen{overflow:hidden}
     if (!online) return;
     online.view = v; online.away = {};
     if (v.phase === 'lobby'){ renderLobby(v); return; }
-    v.seats.forEach(function(s0, i){ if (s0.away) online.away[(i - v.me + 6) % 6] = 1; });
+    v.seats.forEach(function(s0, i){ if (s0.away) online.away[(i - Math.max(0, v.me) + 6) % 6] = 1; });
     showShouts(v);
     var ns = fromView(v);
     if (revealing){ pending = ns; return; }
     applyState(ns);
-    var sh = $('kshout').querySelectorAll('button'); for (var i = 0; i < sh.length; i++) sh[i].disabled = !v.canShout || ns.phase === 'over';
+    var sh = $('kshout').querySelectorAll('button'); for (var i = 0; i < sh.length; i++) sh[i].disabled = !(Array.isArray(v.canShout) ? v.canShout[+sh[i].dataset.k] : v.canShout) || ns.phase === 'over';
   }
   function flushPending(){ if (pending){ var p = pending; pending = null; applyState(p); } }
   function applyState(ns){
@@ -3172,7 +3236,7 @@ body.kiropen{overflow:hidden}
       st = ns; busy = false; selected = null; hidePanels(); root.classList.remove('idle'); gameMusic(); root.classList.toggle('hu', !!st.headsUp);
       document.querySelectorAll('#kir .plate').forEach(function(p){ p.classList.remove('lose', 'hit'); });
       $('knext').classList.remove('on'); render();
-      if (newRound || first && ns.roundLog.length === 0){ SFX.shuffle(); dealAnim(); }
+      if (newRound || first && ns.roundLog.length === 0){ SFX.shuffle(); dealAnim(); if (ns.round === 1 && ns.roundLog.length === 0) setTimeout(function(){ vox(['aboard'], .5, true); }, 400); }
       if (first && ns.phase === 'over'){ gameOver(); }
       else if (ns.phase === 'reveal') $('khint').textContent = 'Seuraava jako alkaa…';
       return;
@@ -3194,22 +3258,22 @@ body.kiropen{overflow:hidden}
     myRect = rect; selected = null;
     opost('play', {room:online.room, t:online.token, c:id}).then(function(d){ if (d.st) applyView(d); busy = false; if (d._s !== 200) render(); }).catch(function(){ busy = false; render(); $('khint').textContent = 'Ei yhteyttä, yritä uudelleen.'; });
   }
-  // the only thing anyone can send besides a card: one of two shouts, once per lap
-  var SHOUTS = ['HÖYLÄ!', 'HÖYLÄ McBUENO!!!'];
+  // the only thing anyone can send besides a card: four fixed shouts, each once per lap
+  var SHOUTS = ['HÖYLÄ!', 'HÖYLÄ McBUENO!!!', 'TÄÄ ON MUN PIENIN!', 'EIIIIHHH!!!'];
   Array.prototype.forEach.call($('kshout').querySelectorAll('button'), function(b){
-    b.addEventListener('click', function(){ if (!online) return; ac(); var bs = $('kshout').querySelectorAll('button'); for (var i = 0; i < bs.length; i++) bs[i].disabled = true;
+    b.addEventListener('click', function(){ if (!online) return; ac(); if (b.disabled) return; b.disabled = true;
       opost('shout', {room:online.room, t:online.token, k:+b.dataset.k}).then(function(d){ if (d.st) applyView(d); }).catch(function(){}); });
   });
   function showShouts(v){
     (v.shouts || []).forEach(function(x){ if (seenShouts[x.id]) return; seenShouts[x.id] = 1;
-      var pid = (x.seat - v.me + 6) % 6, name = v.seats[x.seat] ? v.seats[x.seat].name : '';
+      var pid = (x.seat - Math.max(0, v.me) + 6) % 6, name = v.seats[x.seat] ? v.seats[x.seat].name : '';
       var anchor = pid === 0 ? $('kmyplate') : $('kplate' + pid); if (!anchor) return;
       var r = anchor.getBoundingClientRect(), sr = root.getBoundingClientRect(), b = document.createElement('div'); b.className = 'bub shout';
       b.innerHTML = '<b>' + name + '</b>' + SHOUTS[x.k]; root.appendChild(b);
       var x0 = Math.min(sr.width - 230, Math.max(8, r.left - sr.left + r.width / 2 - 90)), y0 = pid === 0 ? r.top - sr.top - 70 : r.bottom - sr.top + 6;
       b.style.left = x0 + 'px'; b.style.top = y0 + 'px'; requestAnimationFrame(function(){ b.classList.add('on'); });
       setTimeout(function(){ b.classList.remove('on'); setTimeout(function(){ b.remove(); }, 300); }, 2800);
-      if (x.k) { shake(true); SFX.mcbueno(); } else { shake(false); SFX.hoyla(); }
+      if (x.k === 1){ shake(true); SFX.mcbueno(); } else if (x.k === 0){ shake(false); SFX.hoyla(); } else if (x.k === 2){ SFX.clink(); tone(220, .3, 'triangle', .05, 330); } else { if (bufs.nouhh) vox(['nouhh'], .6, true); else tone(880, 1.1, 'sawtooth', .05, 110); wobble(false); }
     });
   }
 
@@ -3220,7 +3284,7 @@ body.kiropen{overflow:hidden}
   function open(){
     window.__gameOpen = true; var ga = document.getElementById('ga'); if (ga) ga.pause();
     root.classList.add('on'); document.body.classList.add('kiropen'); lastLand = innerWidth > innerHeight;
-    layout(); syncOpts(); mode = ''; menuMusic();
+    layout(); syncOpts(); mode = ''; menuMusic(); ac(); ambOn();
     try { var s = localStorage.getItem(SAVE); if (s && !st){ st = K.load(s); st.players.forEach(function(p){ p._show = p.pts; }); } } catch(e){ st = null; }
     if (st) render();
     menu();
@@ -3228,7 +3292,7 @@ body.kiropen{overflow:hidden}
     if (location.hash !== '#kirilii') history.replaceState(null, '', '#kirilii');
   }
   function close(){
-    gen++; clearTimeout(autoNext); audio.pause(); root.classList.remove('on'); document.body.classList.remove('kiropen'); window.__gameOpen = false; phoneBig(false);
+    gen++; clearTimeout(autoNext); audio.pause(); ambOff(); root.classList.remove('on'); document.body.classList.remove('kiropen'); window.__gameOpen = false; phoneBig(false);
     if (/^#kirilii/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
     if (st && st.phase === 'play') busy = false;
     stopPoll();

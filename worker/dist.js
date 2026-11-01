@@ -455,7 +455,7 @@ export default {
 
 // CH 09 Kirilii online. One room per table, the whole state lives in D1 (binding KDB).
 // The server runs the same engine as the browser, deals, checks every move and plays the bots.
-// Players can only send a card number, or one of two fixed shouts (HÖYLÄ!, HÖYLÄ McBUENO!!!) once per lap.
+// Players can only send a card number, or one of four fixed shouts; each shout once per lap. Anyone may join a running table to watch.
 // There is no chat and no free text: names are three letters.
 // A player never receives anyone else's hidden cards or the shuffle seed.
 
@@ -489,6 +489,7 @@ async function koUpdate(db, room, v) {
 function koToken() { return Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, '0')).join(''); }
 function koCode() { const a = crypto.getRandomValues(new Uint8Array(4)); let s = ''; for (const b of a) s += KO.CODE[b % KO.CODE.length]; return s; }
 function koName(n) { n = String(n || '').toUpperCase(); return /^[A-ZÅÄÖ]{3}$/.test(n) && !BLOCK.has(n) ? n : null; }
+function koWatcher(room, t) { if (typeof t !== 'string' || !/^[0-9a-f]{32}$/.test(t)) return false; return (room.watch || []).some(w => w.token === t); }
 function koSeat(room, t) { if (typeof t !== 'string' || !/^[0-9a-f]{32}$/.test(t)) return -1; return room.seats.findIndex(s => s.token === t); }
 
 function koRevealMs(res) {
@@ -540,7 +541,9 @@ function koView(room, seat) {
   } : null;
   base.at = room.at;
   base.shouts = (room.shouts || []).filter(x => now - x.at < KO.SHOUT_MS).map(x => ({ id: x.id, seat: x.seat, k: x.k }));
-  base.canShout = !(room.shouts || []).some(x => x.seat === seat && x.lap === koLapKey(room.st));
+  const lk = koLapKey(room.st), used = (room.shouts || []).filter(x => x.seat === seat && x.lap === lk).map(x => x.k);
+  base.canShout = seat >= 0 ? [0, 1, 2, 3].map(k => used.indexOf(k) < 0) : [false, false, false, false];
+  base.watchers = (room.watch || []).length;
   base.st = {
     v: 1, players, round: st.round, starter: st.starter, turn: st.turn, last: st.last, lastBy: st.lastBy, lastId: st.lastId,
     lapN: st.lapN, lapPos: st.lapPos, lap: st.lap, phase: st.phase, headsUp: st.headsUp, winner: st.winner, settings: st.settings,
@@ -568,7 +571,11 @@ async function kiriliiOnline(req, env, url) {
       const got = await koLoad(db, code);
       if (!got) return json(req, { error: 'room' }, 404);
       const room = got.room, seat = koSeat(room, url.searchParams.get('t'));
-      if (seat < 0) return json(req, { error: 'seat' }, 403);
+      if (seat < 0 && !koWatcher(room, url.searchParams.get('t'))) return json(req, { error: 'seat' }, 403);
+      if (seat < 0) {
+        if (koTick(room, now, env.KO_FAST ? (Number(env.KO_FAST) || 0.01) : 1) && !(await koUpdate(db, room, got.v))) continue;
+        return json(req, koView(room, -1));
+      }
       const stale = now - (room.seen[seat] || 0) > KO.SEEN_WRITE_MS;
       room.seen[seat] = now;
       const changed = koTick(room, now, env.KO_FAST ? (Number(env.KO_FAST) || 0.01) : 1);
@@ -602,9 +609,15 @@ async function kiriliiOnline(req, env, url) {
 
     if (op === 'join') {
       const n = koName(b.n); if (!n) return json(req, { error: 'name' }, 400);
-      if (room.phase !== 'lobby') return json(req, { error: 'started' }, 409);
-      if (room.seats.length >= 6) return json(req, { error: 'full' }, 409);
-      if (room.seats.some(s => s.name === n)) return json(req, { error: 'taken' }, 409);
+      if (room.seats.some(s => s.name === n) || (room.watch || []).some(w => w.name === n)) return json(req, { error: 'taken' }, 409);
+      if (room.phase !== 'lobby' || room.seats.length >= 6) {
+        // the table is running or full: come and watch
+        room.watch = room.watch || [];
+        if (room.watch.length >= 12) return json(req, { error: 'full' }, 409);
+        const wt = koToken(); room.watch.push({ name: n, token: wt });
+        if (await koUpdate(db, room, got.v)) return json(req, Object.assign(koView(room, -1), { token: wt, seat: -1, watch: true }));
+        continue;
+      }
       const token = koToken(); room.seats.push({ name: n, token }); const seat = room.seats.length - 1; room.seen[seat] = now; room.at = now;
       if (await koUpdate(db, room, got.v)) return json(req, Object.assign(koView(room, seat), { token, seat }));
       continue;
@@ -637,11 +650,11 @@ async function kiriliiOnline(req, env, url) {
 
     if (op === 'shout') {
       const k = b.k;
-      if (k !== 0 && k !== 1) return json(req, { error: 'shout' }, 400);
+      if (k !== 0 && k !== 1 && k !== 2 && k !== 3) return json(req, { error: 'shout' }, 400);
       if (room.phase !== 'game' || room.st.phase === 'over') return json(req, { error: 'shout' }, 409);
       const key = koLapKey(room.st);
       room.shouts = (room.shouts || []).filter(x => now - x.at < 60000);
-      if (room.shouts.some(x => x.seat === seat && x.lap === key)) return json(req, Object.assign(koView(room, seat), { error: 'used' }), 409);
+      if (room.shouts.some(x => x.seat === seat && x.lap === key && x.k === k)) return json(req, Object.assign(koView(room, seat), { error: 'used' }), 409);
       room.shoutN = (room.shoutN || 0) + 1;
       room.shouts.push({ id: room.shoutN, seat, k, lap: key, at: now });
       if (await koUpdate(db, room, got.v)) return json(req, koView(room, seat));
