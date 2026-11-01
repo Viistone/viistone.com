@@ -290,7 +290,7 @@ function showZone(n, sub){ const el = $('zone'); el.innerHTML = n + (sub ? '<sma
 function zoneTick(){ if (!rag || state !== 'fly') return; const z = zoneAt(rag.torso.position.x); if (z && !z.seen){ z.seen = true; showZone(ZDEF[z.k].n, ZDEF[z.k].s); } }
 function fling(vx, vy){ rag.all.forEach(q => Body.setVelocity(q, {x:vx + (rnd() - .5) * 3, y:vy + (rnd() - .5) * 3})); }
 const NPCTXT = {piru:'PIRU HEITTÄÄ', skater:'SKEITTARI HEITTÄÄ', spuge:'SPUGE POTKAISEE', loyly:'LÖYLYMIES HEITTÄÄ', pallo:'PURKUPALLO', tykki:'IHMISTYKKI', kauppias:'KAUPPIAS HEITTÄÄ', kiekko:'LÄMÄRI!', magneetti:'MAGNEETTI', hirvi:'HIRVI PUSKEE', lokki:'LOKKI NAPPAA'};
-function npcGo(n){ n.used = true; if (rag){ rag.dives = Math.min(2, (rag.dives || 0) + 1); diveHud(); } n.ph = 'act'; n.at = 0; const x = n.x, y = n.y; pops.push({x, y:y - 260, t:0, s:NPCTXT[n.kind], col:'#ffd28a'}); award(1500, x, y - 200); shake = Math.max(shake, 10); mEv(n.kind);
+function npcGo(n){ n.used = true; n.ph = 'act'; n.at = 0; const x = n.x, y = n.y; pops.push({x, y:y - 260, t:0, s:NPCTXT[n.kind], col:'#ffd28a'}); award(1500, x, y - 200); shake = Math.max(shake, 10); mEv(n.kind);
   const hold = (k) => { n.ph = 'hold'; n.ht = 0; n.c = Constraint.create({pointA:{x:rag.torso.position.x, y:rag.torso.position.y}, bodyB:rag.torso, pointB:{x:0, y:0}, stiffness:.4, damping:.1, length:0}); Composite.add(world, n.c); };
   switch (n.kind){
     case 'skater': fling(31, -13); sfx('wood_pile', .8, {x, y, force:true}); sfx('fireball', .5, {force:true, rate:1.3}); break;
@@ -625,7 +625,7 @@ function toWorld(cx, cy){ const z = baseZ() * cam.z; return {x:(cx - W / 2) / z 
 let ptr = null, ptrHist = [];
 const GRAB_C = {x:STAGE.x + 120, y:STAGE.y - 230}, GRAB_R = 280;
 function clampGrab(p){ const cx = GRAB_C.x, cy = GRAB_C.y, dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy), R0 = GRAB_R; return d > R0 ? {x:cx + dx / d * R0, y:cy + dy / d * R0} : p; }
-cv.addEventListener('pointerdown', e => { if (state === 'fly'){ dive(); return; } if (state !== 'stage') return; audioInit(); const w = toWorld(e.clientX, e.clientY);
+cv.addEventListener('pointerdown', e => { if (state !== 'stage') return; audioInit(); const w = toWorld(e.clientX, e.clientY);
   if (Math.hypot(w.x - (STAGE.x + 10), w.y - (STAGE.y - 110)) > 160) return;
   e.preventDefault(); cv.setPointerCapture(e.pointerId); ptr = e.pointerId; doGrab(w); });
 cv.addEventListener('pointermove', e => { if (e.pointerId !== ptr || !grab) return; const w = clampGrab(toWorld(e.clientX, e.clientY)); grab.pointA.x = w.x; grab.pointA.y = w.y; spinTrack(w); ptrHist.push({t:performance.now(), x:w.x, y:w.y}); if (ptrHist.length > 8) ptrHist.shift(); });
@@ -660,7 +660,7 @@ function release(){ document.body.classList.remove('grab'); Composite.remove(wor
   rag.all.forEach(b => { let vx = (b.velocity.x * .35 + pvx * .95) * pw, vy = (b.velocity.y * .35 + pvy * .95) * pw; const s = Math.hypot(vx, vy); if (s > cap){ vx *= cap / s; vy *= cap / s; } Body.setVelocity(b, {x:vx + spinTurns * 1.5, y:vy - spinTurns * 2}); });
   rag.throwV = Math.hypot(pvx, pvy);
   rag.face = 'ouch'; sfx('yell_strained', .85, {force:true}); sfx('crowd_shout', .6, {force:true, x:STAGE.x, y:STAGE.y});
-  rag.dives = 2; diveHud(); let n2 = 0; try { n2 = +localStorage.getItem('viistone-heita-tips') || 0; localStorage.setItem('viistone-heita-tips', n2 + 1); } catch(e){} if (n2 < 4) setTimeout(() => { if (state === 'fly') showZone('NAPAUTA', 'SYÖKSY ALAS'); }, 900); }
+  rag.dives = 0; }
 
 // ---------- game flow ----------
 function newGame(){ if (engine){ Composite.clear(engine.world, false); Engine.clear(engine); }
@@ -750,10 +750,10 @@ function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= d
   if (state === 'fly'){ flyT += dt; const t = rag.torso, d = (t.position.x - STAGE.x) / PXM; maxDist = Math.max(maxDist, d);
     let mv = 0; rag.all.forEach(b => { if (b !== rag.mic) mv = Math.max(mv, Math.hypot(b.velocity.x, b.velocity.y)); });
     const near = o => Math.abs(o.position.x - t.position.x) < 1400; const busy = NPCS.some(n2 => n2.ph === 'hold') || BIGR.some(r2 => r2.st === 'fly') || rag.latchT > 0 || TREES.some(tr => tr.ph === 'load') || timers.length > 0 || rockets.some(near) || bodies.some(b => b.plugin && b.plugin.armed && !b.plugin.boomed && !b.plugin.zapped && near(b));
-    const tv = Math.hypot(t.velocity.x, t.velocity.y); const quiet = !busy && simT - lastHit > 1.2; restT = tv < .7 && mv < 2 && quiet ? restT + dt : 0; rag.slowT = tv < .8 && quiet ? (rag.slowT || 0) + dt : 0; if (rag.slowT > 3.5) restT = 99;
-    rag.stillT = tv < .9 ? (rag.stillT || 0) + dt : 0; if (rag.stillT > 7) restT = 99;
+    const tv = Math.hypot(t.velocity.x, t.velocity.y); const quiet = !busy && simT - lastHit > 1.2; restT = tv < .7 && mv < 2 && quiet ? restT + dt : 0; rag.slowT = tv < .5 && mv < 2.5 && quiet ? (rag.slowT || 0) + dt : 0; if (rag.slowT > 3.5) restT = 99;
+    rag.stillT = tv < .45 && mv < 3 ? (rag.stillT || 0) + dt : 0; if (rag.stillT > 9) restT = 99;
     if (rag.face === 'ouch' && simT - (rag.faceT || 0) > 1.2) rag.face = rag.off.head ? 'out' : 'shock';
-    if (restT > 1.6 || flyT > 60){ if (maxDist < 6 && flyT < 20){ backOnStage(); } else { rag.face = 'out'; finish(); } } }
+    if (restT > 1.6 || flyT > 240){ if (maxDist < 6 && flyT < 20){ backOnStage(); } else { rag.face = 'out'; finish(); } } }
   // fallen bits far behind the camera are let go
   const left = cam.x - viewW() * .5 - 2500; for (let i = bodies.length - 1; i >= 0; i--){ const b = bodies[i]; if (!b.isStatic && b.position.x < left && b.plugin && b.plugin.kind !== 'speaker'){ removeBody(b); } }
   for (const b of bodies){ if (!b.isStatic && b.position.y > gy(b.position.x) + 600) removeBody(b); }
