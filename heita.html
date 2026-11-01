@@ -62,9 +62,9 @@ body.menu .hud{opacity:0}
 .panel .rows{font-size:clamp(18px,2.6vw,24px);color:#b3b0aa;line-height:1.35;margin-bottom:16px}
 .panel .rec{color:#e7c25a}
 .plab{font-size:16px;letter-spacing:.2em;color:#b3b0aa;margin:0 0 4px}
-.pinit{display:none;flex-direction:column;align-items:center;gap:6px;margin:4px 0 10px}
+.pinit{display:none;flex-direction:column;align-items:center;gap:8px;margin:6px 0 12px;padding:10px 18px 12px;background:rgba(15,13,16,.92);border:2px solid #ff6a33;border-radius:6px}
 .pinit.on{display:flex}
-.pname{font:inherit;font-size:52px;line-height:1;letter-spacing:.25em;text-transform:uppercase;text-align:center;width:5.2ch;padding:2px 0 4px .25em;box-sizing:border-box;background:transparent;color:#ece4cc;border:0;border-bottom:2px solid #ff6a33;border-radius:0;outline:none;caret-color:#ff6a33;-webkit-appearance:none;appearance:none}
+.pname{font:inherit;font-size:52px;background:#1b1714 !important;line-height:1;letter-spacing:.25em;text-transform:uppercase;text-align:center;width:5.2ch;padding:2px 0 4px .25em;box-sizing:border-box;background:transparent;color:#ece4cc;border:0;border-bottom:2px solid #ff6a33;border-radius:0;outline:none;caret-color:#ff6a33;-webkit-appearance:none;appearance:none}
 .pname::placeholder{color:rgba(236,228,204,.3)}
 .panel .sm{font-size:22px;padding:3px 16px}
 .boards{display:grid;grid-template-columns:1fr 1fr;gap:4px 28px;width:min(520px,100%);text-align:left;margin:0 0 14px}
@@ -94,7 +94,7 @@ body.menu .hud{opacity:0}
 <div class="panel on" id="start"><h1>HEITÄ VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Mitä useampi kierros, sitä pidempi lento.</p><p>Mäki on pitkä. Kukaan ei ole nähnyt sen loppua.</p><div class="act" style="margin-top:6px"><button class="go" id="bgo">ALOITA</button></div><button id="bclear" class="reset">NOLLAA ENNÄTYKSET</button></div>
 <div id="next"><div id="nres"></div><button id="bnext">SEURAAVA HEITTO</button></div>
 <div id="zone"></div>
-<div class="panel" id="over"><h1 id="oh">VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div id="omiss"></div>
+<div class="panel" id="over" style="background:rgba(15,13,16,.82)"><h1 id="oh">VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div id="omiss"></div>
 <div class="pinit" id="pinit"><p class="plab">PÄÄSIT LISTALLE. NIMIKIRJAIMET:</p><input class="pname" id="pname" type="text" maxlength="3" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done" aria-label="Kolme nimikirjainta" placeholder="___"><button class="alt sm" id="psave" type="button">TALLENNA</button></div>
 <div class="boards"><div><p class="plab">TÄNÄÄN</p><ol id="btoday"></ol></div><div><p class="plab">KAIKKIEN AIKOJEN</p><ol id="ball"></ol></div></div><div class="act"><button class="go" id="bagain">UUDESTAAN</button><a class="alt" href="/#pelit">KOTISIVULLE</a></div></div>
 <script src="assets/lib/matter.min.js"></script>
