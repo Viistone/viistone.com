@@ -30,6 +30,32 @@ function insert(rows, entry) {
   return rows.slice(0, KEEP);
 }
 
+// CH 09 Kirilii: wins are counted per name, for the day and for all time
+function top(map, me, t) {
+  return Object.keys(map).map(n => ({ n, s: map[n], t: n === me ? t : 0 })).sort((a, b) => b.s - a.s || a.n.localeCompare(b.n)).slice(0, KEEP);
+}
+async function rateOk(req, env, day) {
+  const ip = req.headers.get('CF-Connecting-IP') || 'x';
+  const h = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ip + day)))).slice(0, 8).map(b => b.toString(16).padStart(2, '0')).join('');
+  const lastT = Number(await env.SCORES.get('rl:' + h)) || 0;
+  if (Date.now() - lastT < 15000) return false;
+  await env.SCORES.put('rl:' + h, String(Date.now()), { expirationTtl: 60 });
+  return true;
+}
+async function kirilii(req, env, day, body) {
+  const dk = 'kir:day:' + day, ak = 'kir:all';
+  const [d, a] = await Promise.all([env.SCORES.get(dk, 'json'), env.SCORES.get(ak, 'json')]);
+  const dm = d || {}, am = a || {};
+  if (req.method === 'GET') return json(req, { day, game: 'kirilii', today: top(dm), all: top(am) });
+  const n = String((body && body.n) || '').toUpperCase();
+  if (!/^[A-ZÅÄÖ]{3}$/.test(n) || BLOCK.has(n)) return json(req, { error: 'name' }, 400);
+  if (!(await rateOk(req, env, day))) return json(req, { error: 'slow down' }, 429);
+  dm[n] = (dm[n] || 0) + 1; am[n] = (am[n] || 0) + 1;
+  await Promise.all([env.SCORES.put(dk, JSON.stringify(dm), { expirationTtl: 60 * 60 * 24 * 4 }), env.SCORES.put(ak, JSON.stringify(am))]);
+  const t = Date.now();
+  return json(req, { day, game: 'kirilii', today: top(dm, n, t), all: top(am, n, t), t });
+}
+
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
@@ -37,7 +63,9 @@ export default {
     if (url.pathname !== '/api/scores') return json(req, { error: 'not found' }, 404);
 
     const day = today();
-    const game = (url.searchParams.get('g') || '') === 'posti' ? 'posti' : '2048';
+    const qg = url.searchParams.get('g') || '';
+    if (qg === 'kirilii' && req.method === 'GET') return kirilii(req, env, day);
+    const game = qg === 'posti' ? 'posti' : '2048';
     const pre = game === 'posti' ? 'posti:' : '';
     let dayKey = pre + 'day:' + day, allKey = pre + 'all';
 
@@ -49,6 +77,7 @@ export default {
     if (req.method === 'POST') {
       let body;
       try { body = await req.json(); } catch (e) { return json(req, { error: 'bad json' }, 400); }
+      if (body.g === 'kirilii') return kirilii(req, env, day, body);
       const bg = body.g === 'posti' ? 'posti' : game, bpre = bg === 'posti' ? 'posti:' : '';
       dayKey = bpre + 'day:' + day; allKey = bpre + 'all';
       const n = String(body.n || '').toUpperCase();

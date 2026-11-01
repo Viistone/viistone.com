@@ -86,7 +86,7 @@ main{max-width:980px;margin:0 auto;position:relative;z-index:1}
 .logo.glitch .main{clip-path:inset(0 0 0 0);transform:translateX(2px) skewX(-2deg)}
 .logo .main{transition:transform .08s steps(2)}
 .playlink{margin:clamp(44px, 7vh, 72px) 0 0;text-align:center}
-.hiscores{display:grid;grid-template-columns:repeat(2,minmax(0,170px));gap:16px;justify-content:center;margin:14px auto 0;font-family:var(--f-osd);font-size:18px;letter-spacing:.05em;color:var(--grey);text-align:left}
+.hiscores{display:grid;grid-template-columns:repeat(3,minmax(0,170px));gap:16px;justify-content:center;margin:14px auto 0;font-family:var(--f-osd);font-size:18px;letter-spacing:.05em;color:var(--grey);text-align:left}
 .hiscores[hidden],.gamepick[hidden] + .hiscores{display:none}
 .hiscores .hg{display:block;padding:0 4px}
 .hiscores .hg[hidden]{display:block;visibility:hidden}
@@ -97,7 +97,7 @@ main{max-width:980px;margin:0 auto;position:relative;z-index:1}
 .hiscores .sep{display:none}
 .hiscores b{font-weight:400;color:var(--osd)}
 .hiscores em{font-style:normal;color:#ff6a33}
-@media (max-width:380px){ .hiscores{gap:10px;font-size:16px} }
+@media (max-width:520px){ .hiscores{gap:8px;font-size:15px} .hiscores .hl{font-size:11px;letter-spacing:.14em} }
 .tapebtn{display:inline-block;background:none;border:0;padding:0;cursor:pointer;width:min(240px,62vw);transform:rotate(-2deg);transition:transform .25s ease, filter .25s;
   filter:drop-shadow(0 10px 18px rgba(0,0,0,.6)) brightness(.92)}
 .tapebtn svg{display:block;width:100%;height:auto}
@@ -108,7 +108,7 @@ main{max-width:980px;margin:0 auto;position:relative;z-index:1}
 .tapelabel{font-family:"Permanent Marker","Comic Sans MS",cursive;font-size:21px;fill:#1b1a18;letter-spacing:.02em}
 .tapesmall{font-family:"IBM Plex Mono",monospace;font-size:7px;fill:#1b1a18;letter-spacing:.12em}
 @media (prefers-reduced-motion:reduce){.tapebtn:hover .reel{animation:none}}
-.gamepick{display:grid;grid-template-columns:repeat(2,minmax(0,170px));gap:16px;justify-content:center;margin:30px auto 0}
+.gamepick{display:grid;grid-template-columns:repeat(3,minmax(0,170px));gap:16px;justify-content:center;margin:30px auto 0}
 .gamepick[hidden]{display:none}
 .gamepick.in{animation:pickin .45s steps(4) both}
 @keyframes pickin{0%{opacity:0;transform:translateY(8px) skewX(4deg);filter:brightness(2)}60%{opacity:1;filter:brightness(1.4)}100%{opacity:1;transform:none;filter:none}}
@@ -116,6 +116,9 @@ main{max-width:980px;margin:0 auto;position:relative;z-index:1}
   text-align:left;transition:transform .2s ease,border-color .2s;box-shadow:0 10px 18px rgba(0,0,0,.5)}
 .pick:nth-child(1){transform:rotate(-1.5deg)}
 .pick:nth-child(2){transform:rotate(1.2deg)}
+.pick:nth-child(3){transform:rotate(-.8deg)}
+.pick .img.kthumb{background-size:cover}
+@media (max-width:520px){ .gamepick{gap:8px;margin-top:24px} .pick{padding:7px 7px 9px;gap:6px} .pick .img{height:92px} .pick .ch{font-size:18px} .pick .nm{font-size:8.5px;letter-spacing:.1em;overflow-wrap:anywhere} }
 .pick:hover,.pick:focus-visible{transform:rotate(0) translateY(-3px);border-color:var(--cream)}
 .pick .img{display:block;height:118px;background:#0b0b0a center/contain no-repeat;border:1px solid #232220}
 .pick .img.rat{background-color:#2a3226;background-size:92% auto}
@@ -329,8 +332,9 @@ body.paused main{animation:hold .12s steps(2) infinite}
       <div class="gamepick" id="gamepick" hidden>
         <button class="pick" id="pick03" type="button"><span class="img" style="background-image:url(assets/peli/thumb.jpg)" aria-hidden="true"></span><span class="ch">CH 03</span><span class="nm">Tulitikusta maailmankaikkeuteen</span></button>
         <button class="pick" id="ch06b" type="button"><span class="img rat" style="background-image:url(assets/posti/rat.webp)" aria-hidden="true"></span><span class="ch">CH 06</span><span class="nm">Postinkantaja</span></button>
+        <button class="pick" id="pick09" type="button"><span class="img kthumb" style="background-image:url(assets/kirilii/thumb.jpg)" aria-hidden="true"></span><span class="ch">CH 09</span><span class="nm">Kirilii</span></button>
       </div>
-      <div class="hiscores" id="hiscores" aria-live="polite" hidden><div class="hg" id="hs03" hidden><p class="hgn">CH 03 · TULITIKUSTA</p><div><span class="hl">TÄNÄÄN</span><span class="ht"></span></div><div><span class="hl">ENNÄTYS</span><span class="ha"></span></div></div><div class="hg" id="hs06" hidden><p class="hgn">CH 06 · POSTINKANTAJA</p><div><span class="hl">TÄNÄÄN</span><span class="ht"></span></div><div><span class="hl">ENNÄTYS</span><span class="ha"></span></div></div></div>
+      <div class="hiscores" id="hiscores" aria-live="polite" hidden><div class="hg" id="hs03" hidden><p class="hgn">CH 03 · TULITIKUSTA</p><div><span class="hl">TÄNÄÄN</span><span class="ht"></span></div><div><span class="hl">ENNÄTYS</span><span class="ha"></span></div></div><div class="hg" id="hs06" hidden><p class="hgn">CH 06 · POSTINKANTAJA</p><div><span class="hl">TÄNÄÄN</span><span class="ht"></span></div><div><span class="hl">ENNÄTYS</span><span class="ha"></span></div></div><div class="hg" id="hs09" hidden><p class="hgn">CH 09 · KIRILII</p><div><span class="hl">TÄNÄÄN</span><span class="ht"></span></div><div><span class="hl">ENITEN</span><span class="ha"></span></div></div></div>
     </div>
   </header>
 
@@ -1300,18 +1304,18 @@ body.gameopen{overflow:hidden}
 <script>
 (function(){ // the day's best and the record, under the cassette
   var box = document.getElementById('hiscores'); if (!box || !window.fetch) return;
-  function row(r){ return '<b>' + r.n + '</b> <em>' + r.s + '</em>'; }
-  function one(id, q, want){
+  function row(r, suf){ return '<b>' + r.n + '</b> <em>' + r.s + (suf || '') + '</em>'; }
+  function one(id, q, want, suf){
     var g = document.getElementById(id);
     return fetch('https://api.viistone.com/api/scores' + q, {cache: 'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
       if (!d || (want && d.game !== want)) return false;
       var t = (d.today || []).slice(0, 3), a = (d.all || [])[0];
-      g.querySelector('.ht').innerHTML = t.length ? t.map(function(r, i){ return '<span class="e">' + (i + 1) + '. ' + row(r) + '</span>'; }).join('<span class="sep">·</span>') : 'ei vielä tuloksia, ole ensimmäinen';
-      g.querySelector('.ha').innerHTML = a ? row(a) : '<b>---</b> <em>0</em>';
+      g.querySelector('.ht').innerHTML = t.length ? t.map(function(r, i){ return '<span class="e">' + (i + 1) + '. ' + row(r, suf) + '</span>'; }).join('<span class="sep">·</span>') : 'ei vielä tuloksia, ole ensimmäinen';
+      g.querySelector('.ha').innerHTML = a ? row(a, suf) : '<b>---</b> <em>0</em>';
       g.hidden = false; box.hidden = false; return true;
     }).catch(function(){ return false; });
   }
-  function load(){ one('hs03', '', null); one('hs06', '?g=posti', 'posti'); }
+  function load(){ one('hs03', '', null); one('hs06', '?g=posti', 'posti'); one('hs09', '?g=kirilii', 'kirilii', ' V'); }
   setTimeout(load, 600);
   document.addEventListener('visibilitychange', function(){ if (!document.hidden) load(); });
 })();
@@ -2321,6 +2325,664 @@ body.postiopen{overflow:hidden}
 })();
 </script>
 <!--/POSTI-->
+<!--KIRILII-->
+<style>
+/* CH 09: KIRILII. A card game on a worn Finnish bar table. Six at the table, the last one left wins. */
+.kir{position:fixed;inset:0;z-index:74;display:none;overflow:hidden;background:#120d09;color:#e8e0c8;user-select:none;-webkit-user-select:none;
+  --cw:56px;--ch:80px;--sw:26px;--sh:37px;--hand:142px;font-family:var(--f-mono)}
+.kir.on{display:block}
+body.kiropen{overflow:hidden}
+.kir .kwood{position:absolute;inset:-4%;background:#2f1f14 center/512px 512px repeat;filter:saturate(.85) contrast(1.05);transform-origin:50% 45%;transition:transform .6s}
+.kir.hu .kwood{transform:scale(1.06)}
+.kir .kvig{position:absolute;inset:0;pointer-events:none;z-index:6;background:radial-gradient(ellipse at 50% 46%, transparent 38%, rgba(0,0,0,.55) 82%, rgba(0,0,0,.8) 100%);transition:background .6s}
+.kir.hu .kvig{background:radial-gradient(ellipse at 50% 46%, transparent 28%, rgba(10,0,0,.7) 78%, rgba(0,0,0,.9) 100%)}
+.kir .kscan{position:absolute;inset:0;pointer-events:none;z-index:7;opacity:.22;background:repeating-linear-gradient(to bottom, rgba(0,0,0,.25) 0 1px, transparent 1px 3px)}
+.kir .kstage{position:absolute;left:0;right:0;top:0;bottom:var(--hand);transform-origin:50% 50%}
+.kir .kstage.shake{animation:kshake .45s steps(6)}
+.kir .kstage.quake{animation:kquake .9s steps(10)}
+@keyframes kshake{20%{transform:translate(4px,-2px) rotate(.4deg)}40%{transform:translate(-5px,2px)}60%{transform:translate(3px,1px) scale(1.02)}80%{transform:translate(-2px,-1px)}}
+@keyframes kquake{10%{transform:translate(9px,-4px) rotate(1deg) scale(1.05)}25%{transform:translate(-10px,5px) rotate(-1.2deg) scale(1.06)}40%{transform:translate(7px,3px) scale(1.05)}55%{transform:translate(-6px,-4px) rotate(.6deg) scale(1.04)}70%{transform:translate(4px,2px) scale(1.02)}85%{transform:translate(-2px,1px)}}
+.kir .kprops{position:absolute;inset:0;pointer-events:none}
+.kir .kprops svg{position:absolute;overflow:visible;transition:transform .25s}
+.kir .kprops svg.wob{animation:kwob .5s steps(5)}
+.kir .kprops svg.tip{transition:transform .5s cubic-bezier(.5,-0.4,.6,1.4)}
+@keyframes kwob{25%{transform:translate(2px,-1px) rotate(4deg)}50%{transform:translate(-2px,1px) rotate(-3deg)}75%{transform:translate(1px,0) rotate(2deg)}}
+/* top bar */
+.kir .kosd{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:max(14px, env(safe-area-inset-left,0px));z-index:9;font-family:var(--f-osd);font-size:28px;letter-spacing:.04em;color:#e9e4d8;
+  text-shadow:1.5px 0 0 rgba(255,60,60,.35),-1.5px 0 0 rgba(60,200,255,.35)}
+.kir .ktop{position:absolute;top:calc(8px + env(safe-area-inset-top,0px));right:max(10px, env(safe-area-inset-right,0px));z-index:9;display:flex;gap:6px}
+.kir .kbtn{font-family:var(--f-osd);font-size:22px;letter-spacing:.04em;color:#e9e4d8;background:rgba(14,10,7,.62);border:1px solid rgba(232,224,200,.3);padding:0 9px;cursor:pointer;line-height:1.3}
+.kir .kbtn:hover{border-color:#e8e0c8}
+.kir .kbtn.off{opacity:.45;text-decoration:line-through}
+/* seats */
+.kir .seat{position:absolute;z-index:3;display:flex;flex-direction:column;align-items:center;gap:4px;width:104px;transition:opacity .8s, filter .8s}
+.kir .seat.out{opacity:.38;filter:grayscale(1)}
+.kir .plate{position:relative;display:flex;align-items:baseline;justify-content:center;gap:6px;min-width:84px;padding:2px 8px 3px;background:#d9cfb4;color:#1a140e;
+  font-family:var(--f-osd);font-size:21px;line-height:1;letter-spacing:.05em;box-shadow:2px 3px 0 rgba(0,0,0,.45);transform:rotate(-1.5deg);border:1px solid #6d5d43}
+.kir .seat:nth-child(even) .plate{transform:rotate(1.2deg)}
+.kir .plate small{font-size:15px;color:#6b4a2a}
+.kir .plate.turn{background:#ffb35c;animation:kturn .7s steps(2) infinite}
+@keyframes kturn{50%{background:#ffd8a0}}
+.kir .plate.lose{background:#c8321f;color:#fff}
+.kir .plate.lose small{color:#ffd2c6}
+.kir .plate .dots{position:absolute;right:-18px;top:2px;font-size:20px;color:#ffd28a}
+.kir .plate.hit{animation:khit .5s steps(6)}
+@keyframes khit{20%{transform:translateX(-6px) rotate(-4deg)}40%{transform:translateX(6px) rotate(3deg)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.kir .stamp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-12deg);font-family:var(--f-osd);font-size:24px;letter-spacing:.08em;color:#c8321f;border:2px solid #c8321f;padding:0 6px;background:rgba(217,207,180,.75);white-space:nowrap}
+.kir .backs{display:flex;height:calc(var(--sh) * .62)}
+.kir .backs i{display:block;width:calc(var(--sw) * .62);height:calc(var(--sh) * .62);margin-left:-9px;border-radius:2px;background:#151311 url(assets/peli/mark.png) center/70% no-repeat;border:1px solid #4b443a;box-shadow:1px 1px 0 rgba(0,0,0,.5)}
+.kir .backs i:first-child{margin-left:0}
+.kir .played{display:flex;min-height:var(--sh);padding-left:0}
+.kir .played .kc{margin-left:calc(var(--sw) * -.42)}
+.kir .played .kc:first-child{margin-left:0}
+.kir .final{display:flex;justify-content:center;min-height:0}
+/* cards */
+.kc{position:relative;flex:none;width:var(--sw);height:var(--sh);border-radius:3px;background:#efe6cf;color:#1d1a16;box-shadow:1px 2px 0 rgba(0,0,0,.45), inset 0 0 0 1px rgba(80,60,30,.35), inset 0 0 8px rgba(120,90,40,.25);
+  font-family:Georgia, "Times New Roman", serif;overflow:hidden}
+.kc::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 20% 15%, rgba(255,255,255,.25), transparent 40%), radial-gradient(circle at 80% 90%, rgba(120,80,30,.18), transparent 50%)}
+.kc.red{color:#a3241a}
+.kc .tl{position:absolute;left:2px;top:1px;font-size:calc(var(--sw) * .36);line-height:.95;font-weight:700;text-align:center}
+.kc .ctr{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-size:calc(var(--sw) * .55);line-height:1}
+.kc .br{position:absolute;right:2px;bottom:1px;font-size:calc(var(--sw) * .36);line-height:.95;font-weight:700;text-align:center;transform:rotate(180deg)}
+.kc.face .ctr{font-size:calc(var(--sw) * .62);font-weight:700;border:1px solid currentColor;margin:0 18%;padding:4% 0;background:rgba(200,170,110,.25)}
+.kc.jok{background:#efe2c4}
+.kc.jok .ctr svg,.kc.xj .ctr img{display:block;margin:0 auto;width:62%;height:auto}
+.kc.xj{background:#1b1712;color:#f0c35a;box-shadow:1px 2px 0 rgba(0,0,0,.5), inset 0 0 0 1px #c99a3a, inset 0 0 10px rgba(240,195,90,.35)}
+.kc.xj .tl,.kc.xj .br{font-family:var(--f-osd);font-weight:400;font-size:calc(var(--sw) * .34)}
+.kc.xj .ctr small{display:block;font-family:var(--f-osd);font-size:calc(var(--sw) * .2);letter-spacing:.06em;margin-top:2px}
+.kc.back{background:#151311;border:1px solid #4b443a}
+.kc.back::before{content:"";position:absolute;inset:8%;border:1px solid rgba(232,224,200,.25);background:repeating-linear-gradient(45deg, rgba(232,224,200,.05) 0 2px, transparent 2px 6px)}
+.kc.back b{position:absolute;inset:0;background:url(assets/peli/mark.png) center/58% no-repeat;opacity:.85}
+.kc.back i{position:absolute;left:12%;right:12%;bottom:12%;height:9%;background:url(assets/logo.png) center/contain no-repeat;opacity:.7}
+.kc.last{outline:2px solid #ffb35c;outline-offset:1px;z-index:2;transform:translateY(-4px)}
+.kc.lose{outline:3px solid #ff3a22;outline-offset:1px;animation:klose .6s steps(2) 3}
+@keyframes klose{50%{outline-color:#ffd28a}}
+/* my area */
+.kir .mine{position:absolute;left:0;right:0;bottom:0;height:var(--hand);z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(to top, rgba(10,7,5,.85), rgba(10,7,5,.35) 70%, transparent)}
+.kir .myplayed{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:3;display:flex}
+.kir .myplayed .kc{--sw:30px;--sh:43px;margin-left:-12px}
+.kir .myplayed .kc:first-child{margin-left:0}
+.kir .myrow{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.kir .myrow .plate{transform:rotate(-1deg)}
+.kir .hint{font-family:var(--f-osd);font-size:18px;letter-spacing:.05em;color:#ffd28a;text-shadow:0 1px 0 #000;min-height:20px}
+.kir .myhand{display:flex;gap:6px;justify-content:center;align-items:flex-end;height:calc(var(--ch) + 14px)}
+.kir .myhand .kc{--sw:var(--cw);--sh:var(--ch);cursor:pointer;transition:transform .15s, filter .2s, opacity .2s;touch-action:none}
+.kir .myhand .kc.no{filter:brightness(.45) saturate(.4);cursor:not-allowed}
+.kir .myhand .kc.ok{box-shadow:1px 2px 0 rgba(0,0,0,.45), 0 0 0 2px rgba(255,179,92,.7), 0 0 14px rgba(255,179,92,.35)}
+.kir .myhand .kc.sel{transform:translateY(-16px)}
+.kir .myhand .kc.ok:hover{transform:translateY(-8px)}
+.kir .myhand .kc.sel:hover{transform:translateY(-16px)}
+.kir .myhand.wait .kc{cursor:default}
+/* phone */
+.kir .kphone{position:absolute;z-index:4;width:122px;height:206px;border-radius:14px;background:#151515;padding:9px 6px 12px;box-shadow:4px 7px 0 rgba(0,0,0,.45), inset 0 0 0 2px #2c2c2c, inset 0 0 0 3px #0a0a0a;
+  transform:rotate(-9deg);cursor:pointer}
+.kir .kphone::before{content:"";position:absolute;left:50%;top:4px;width:18px;height:3px;margin-left:-9px;border-radius:2px;background:#2a2a2a}
+.kir .kphone .crack{position:absolute;right:8px;top:28px;width:40px;height:40px;pointer-events:none;opacity:.5}
+.kir .scr{position:relative;height:100%;border-radius:6px;overflow:hidden;background:#0d1410;color:#9fe0a8;font-family:var(--f-osd);letter-spacing:.04em;transition:background .3s, filter .3s;filter:brightness(.82)}
+.kir .scr.wake{background:#16271c;filter:brightness(1.15)}
+.kir .scr.mc{animation:kmc .25s steps(2) 8}
+@keyframes kmc{50%{background:#5a1a10;color:#fff}}
+.kir .scr h4{margin:0;padding:3px 5px 2px;font-weight:400;font-size:13px;white-space:nowrap;background:#9fe0a8;color:#0d1410;display:flex;justify-content:space-between}
+.kir .scr table{width:100%;border-collapse:collapse;font-size:15px;line-height:1.1;margin-top:3px}
+.kir .scr td{padding:1px 4px;white-space:nowrap}
+.kir .scr td.p{text-align:right}
+.kir .scr tr.o{opacity:.4;text-decoration:line-through}
+.kir .scr tr.me td:first-child::before{content:"▸"}
+.kir .scr tr.flash{background:#c8321f;color:#fff}
+.kir .scr .bar{height:2px;background:rgba(159,224,168,.18);margin:0 0 2px}
+.kir .scr .bar i{display:block;height:100%;background:#9fe0a8}
+.kir .scr .ft{position:absolute;left:0;right:0;bottom:3px;text-align:center;font-size:12px;opacity:.75}
+.kir .scr .add{color:#ff8a6a}
+.kir .kphone.big{position:fixed;left:50% !important;top:50% !important;width:min(300px,82vw);height:min(520px,78vh);transform:translate(-50%,-50%) rotate(0);z-index:12;border-radius:26px;padding:20px 12px 22px}
+.kir .kphone.big .scr table{font-size:24px;line-height:1.25}
+.kir .kphone.big .scr h4{font-size:24px;padding:6px 10px}
+.kir .kphone.big .scr .ft{font-size:16px}
+.kir .kphone.big .scr .bar{height:3px}
+.kir .kdim{position:fixed;inset:0;z-index:11;background:rgba(0,0,0,.6);display:none}
+.kir .kdim.on{display:block}
+/* bubbles and big texts */
+.kir .bub{position:absolute;z-index:8;max-width:150px;padding:5px 8px 6px;background:#f2ead6;color:#17120c;font-family:var(--f-mono);font-size:11px;line-height:1.35;letter-spacing:.02em;border:1px solid #3a2a1a;
+  box-shadow:2px 3px 0 rgba(0,0,0,.45);opacity:0;transform:translateY(6px) rotate(-1deg);transition:opacity .2s, transform .2s;pointer-events:none}
+.kir .bub.on{opacity:1;transform:translateY(0) rotate(-1deg)}
+.kir .bub b{display:block;font-family:var(--f-osd);font-weight:400;font-size:15px;letter-spacing:.06em;color:#8a2a1a}
+.kir .kbig{position:absolute;left:50%;top:42%;z-index:10;transform:translate(-50%,-50%) rotate(-3deg);font-family:var(--f-osd);font-size:clamp(46px,13vw,110px);line-height:.9;letter-spacing:.04em;
+  color:#ffe0a8;text-align:center;white-space:nowrap;pointer-events:none;opacity:0;text-shadow:3px 0 0 rgba(255,40,40,.6),-3px 0 0 rgba(40,200,255,.55),0 4px 0 #000}
+.kir .kbig small{display:block;font-size:.32em;letter-spacing:.08em;color:#e8e0c8;margin-top:8px;white-space:normal}
+.kir .kbig.on{animation:kbig 1.6s steps(12) forwards}
+.kir .kbig.mc{color:#ffd23a;font-size:clamp(40px,12vw,104px)}
+.kir .kbig.mc.on{animation:kmcbig 3s steps(24) forwards}
+@keyframes kbig{0%{opacity:0;transform:translate(-50%,-50%) rotate(-3deg) scale(2.2)}12%{opacity:1;transform:translate(-50%,-50%) rotate(-3deg) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) rotate(-3deg) scale(.96)}}
+@keyframes kmcbig{0%{opacity:0;transform:translate(-50%,-50%) rotate(-6deg) scale(3)}8%{opacity:1;transform:translate(-50%,-50%) rotate(-6deg) scale(1)}12%{transform:translate(-48%,-52%) rotate(-4deg) scale(1.04)}16%{transform:translate(-52%,-49%) rotate(-7deg)}20%{transform:translate(-50%,-50%) rotate(-5deg)}85%{opacity:1}100%{opacity:0}}
+.kir .kvhs{position:absolute;inset:0;z-index:9;pointer-events:none;opacity:0;background:repeating-linear-gradient(to bottom, rgba(255,255,255,.08) 0 2px, transparent 2px 9px), linear-gradient(transparent 40%, rgba(255,255,255,.12) 45%, transparent 52%)}
+.kir .kvhs.on{animation:kvhs 2.6s steps(16)}
+@keyframes kvhs{0%,100%{opacity:0}10%{opacity:1;transform:translateY(-4%)}30%{opacity:.7;transform:translateY(6%) skewX(3deg)}60%{opacity:.9;transform:translateY(-2%)}80%{opacity:.5}}
+/* panels */
+.kir .kpanel{position:absolute;inset:0;z-index:13;display:none;flex-direction:column;align-items:center;gap:12px;padding:calc(24px + env(safe-area-inset-top,0px)) 18px 24px;overflow-y:auto;text-align:center;background:rgba(14,10,7,.9)}
+.kir .kpanel.on{display:flex}
+.kir .kpanel > :first-child{margin-top:auto}
+.kir .kpanel > :last-child{margin-bottom:auto}
+.kir .kpanel h2{margin:0;font-family:var(--f-osd);font-weight:400;font-size:clamp(56px,16vw,96px);line-height:.85;letter-spacing:.06em;color:#e9e4d8;transform:rotate(-2deg);
+  text-shadow:3px 0 0 rgba(255,60,60,.4),-3px 0 0 rgba(60,200,255,.4)}
+.kir .kpanel .sub{font-family:var(--f-osd);font-size:24px;color:#ffd28a;letter-spacing:.05em;margin:0}
+.kir .kpanel p{margin:0;max-width:40ch;font-size:12px;line-height:1.65;letter-spacing:.06em;color:rgba(232,224,200,.8)}
+.kir .kpanel .go{font-family:var(--f-osd);font-size:30px;letter-spacing:.06em;color:#14130f;background:#e8e0c8;border:0;padding:4px 24px;cursor:pointer;transform:rotate(-1deg)}
+.kir .kpanel .go:hover{background:#fff}
+.kir .kpanel .ln{font-family:var(--f-osd);font-size:22px;letter-spacing:.05em;color:#e8e0c8;background:transparent;border:1px solid rgba(232,224,200,.5);padding:2px 16px;cursor:pointer}
+.kir .kpanel .ln:hover{border-color:#fff;color:#fff}
+.kir .opts{display:grid;grid-template-columns:auto auto;gap:6px 10px;align-items:center;font-family:var(--f-osd);font-size:20px;letter-spacing:.05em}
+.kir .opts span{text-align:right;color:rgba(232,224,200,.7)}
+.kir .opts button{font-family:var(--f-osd);font-size:20px;letter-spacing:.05em;color:#ffd28a;background:transparent;border:1px solid rgba(255,210,138,.4);padding:0 10px;cursor:pointer;text-align:left;min-width:150px}
+.kir .rules{max-width:46ch;text-align:left;font-size:12px;line-height:1.7;letter-spacing:.04em;color:rgba(232,224,200,.85)}
+.kir .rules b{color:#ffd28a;font-weight:400}
+.kir .stats{display:grid;grid-template-columns:1fr auto;gap:2px 18px;font-family:var(--f-osd);font-size:20px;letter-spacing:.04em;min-width:240px;text-align:left}
+.kir .stats em{font-style:normal;color:#ffd28a;text-align:right}
+.kir .kboards{display:grid;grid-template-columns:1fr 1fr;gap:6px 26px;width:min(440px,100%);text-align:left}
+.kir .kboards p{margin:0 0 4px;font-size:11px;letter-spacing:.22em;text-transform:uppercase}
+.kir .kboards ol{list-style:none;margin:0;padding:0;font-family:var(--f-osd);font-size:19px;color:rgba(233,228,216,.78)}
+.kir .kboards li{display:grid;grid-template-columns:20px 44px 1fr;gap:6px}
+.kir .kboards li b{font-weight:400;color:#fff}
+.kir .kboards li em{font-style:normal;text-align:right;color:#ffb48a}
+.kir .kboards li.me{background:rgba(255,106,51,.25);color:#fff}
+.kir .kboards li.empty{opacity:.35}
+.kir .kinit{display:none;flex-direction:column;align-items:center;gap:8px}
+.kir .kinit.on{display:flex}
+.kir .kname{font-family:var(--f-osd);font-size:52px;line-height:1;letter-spacing:.25em;text-transform:uppercase;text-align:center;width:5.2ch;padding:2px 0 4px .25em;box-sizing:border-box;background:transparent;color:#e9e4d8;border:0;border-bottom:2px solid #ff6a33;border-radius:0;outline:none;-webkit-appearance:none;appearance:none}
+.kir .kname::placeholder{color:rgba(232,224,200,.3)}
+.kir .knext{white-space:nowrap;position:absolute;z-index:9;left:50%;bottom:calc(var(--hand) + 60px);transform:translateX(-50%) rotate(-1deg);display:none;font-family:var(--f-osd);font-size:26px;letter-spacing:.06em;color:#14130f;background:#ffb35c;border:0;padding:4px 18px;cursor:pointer;box-shadow:3px 4px 0 rgba(0,0,0,.5)}
+.kir .knext.on{display:block;animation:kturn .9s steps(2) infinite}
+.kir .kfly{position:fixed;z-index:15;pointer-events:none}
+.kir.idle .seat,.kir.idle .kphone,.kir.idle .mine,.kir.idle .myplayed{visibility:hidden}
+/* landscape and desktop: roomier */
+@media (min-aspect-ratio: 1/1){ .kir{--cw:70px;--ch:100px;--sw:34px;--sh:48px;--hand:170px} .kir .seat{width:150px} .kir .kphone{width:136px;height:230px} .kir .scr table{font-size:17px} .kir .myplayed .kc{--sw:38px;--sh:54px} .kir .bub{font-size:12px;max-width:190px} }
+@media (min-width: 1000px) and (min-aspect-ratio: 1/1){ .kir{--cw:82px;--ch:116px;--sw:40px;--sh:57px;--hand:190px} .kir .myplayed .kc{--sw:46px;--sh:65px} }
+@media (max-height: 640px) and (max-aspect-ratio: 1/1){ .kir{--cw:48px;--ch:68px;--sw:22px;--sh:32px;--hand:124px} .kir .kphone{width:104px;height:176px} .kir .scr table{font-size:13px} }
+@media (prefers-reduced-motion: reduce){ .kir .kstage.shake,.kir .kstage.quake,.kir .kvhs.on{animation:none} }
+</style>
+<div class="kir idle" id="kir" role="dialog" aria-label="Peli: Kirilii">
+  <div class="kwood" id="kwood"></div>
+  <div class="kstage" id="kstage">
+    <div class="kprops" id="kprops"></div>
+    <div id="kseats"></div>
+    <div class="kphone" id="kphone" role="button" tabindex="0" aria-label="Pistetaulukko, suurenna"><div class="scr" id="kscr"></div>
+      <svg class="crack" viewBox="0 0 40 40" aria-hidden="true"><path d="M2 4 L14 16 L11 22 L22 30 L38 36 M14 16 L26 12 M22 30 L18 38" stroke="#cfd8d0" stroke-width=".7" fill="none"/></svg></div>
+    <div class="myplayed" id="kmyplayed"></div>
+  </div>
+  <div class="mine" id="kmine">
+    <div class="hint" id="khint" aria-live="polite"></div>
+    <div class="myrow"><div class="plate" id="kmyplate"><b>SINÄ</b><small id="kmypts">0</small></div></div>
+    <div class="myhand" id="kmyhand" role="group" aria-label="Kätesi"></div>
+  </div>
+  <button class="knext" id="knext" type="button">SEURAAVA JAKO ▶</button>
+  <div class="kvig" aria-hidden="true"></div>
+  <div class="kscan" aria-hidden="true"></div>
+  <div class="kvhs" id="kvhs" aria-hidden="true"></div>
+  <div class="kbig" id="kbig" aria-live="assertive"></div>
+  <div class="kosd">CH 09</div>
+  <div class="ktop"><button class="kbtn" id="kfx" type="button" aria-pressed="true">FX</button><button class="kbtn" id="kmenub" type="button" aria-label="Valikko">≡</button><button class="kbtn" id="keject" type="button" aria-label="Kotisivulle">⏏</button></div>
+  <div class="kdim" id="kdim"></div>
+  <div class="kpanel on" id="kmenu">
+    <h2>KIRILII</h2>
+    <p class="sub">Viimeinen pöydässä voittaa.</p>
+    <p>Kuusi pelaajaa, kuusi korttia. Pelaa viisi, viimeinen jää käteen. Isoin jäljelle jäänyt kortti tuo pisteet, 21 pistettä ja olet ulkona.</p>
+    <button class="go" id="kcont" type="button" hidden>JATKA PELIÄ ▶</button>
+    <button class="go" id="knew" type="button">UUSI PELI ▶</button>
+    <div class="opts">
+      <span>VASTUSTAJAT</span><button type="button" id="kdiff"></button>
+      <span>HERJAT</span><button type="button" id="kherja"></button>
+      <span>KAIKKI YLI 21</span><button type="button" id="ktie"></button>
+    </div>
+    <button class="ln" id="krulesb" type="button">SÄÄNNÖT</button>
+    <button class="ln" id="kstatsb" type="button">TILASTOT</button>
+    <button class="ln" id="khome" type="button">⏏ KOTISIVULLE</button>
+  </div>
+  <div class="kpanel" id="krules">
+    <h2 style="font-size:52px">SÄÄNNÖT</h2>
+    <div class="rules">
+      <p><b>Kortit.</b> 55 korttia: tavalliset 2–A, kaksi jokeria (15) ja yksi Ekstrajokka (16). Maat eivät merkitse mitään.</p>
+      <p><b>Jako.</b> Jokainen saa kuusi korttia. Kortteja ei nosteta.</p>
+      <p><b>Vuoro.</b> Pelaa kortti omaan eteesi. Sen pitää olla vähintään yhtä suuri kuin viimeksi pelattu kortti, kenen tahansa edessä se on. Käden pienimmän saa aina pelata. Vuoroa ei voi ohittaa.</p>
+      <p><b>Loppu.</b> Kun jokaisella on yksi kortti, kortit paljastetaan. Suurimman kortin jättänyt saa sen arvon pisteinä, tasatilanteessa kaikki suurimmat. 21 pistettä ja olet ulkona.</p>
+      <p><b>Höylääminen.</b> Säästä iso kortti loppuun ja pelaa se juuri ennen vastustajaa. Hänen on pakko pelata pienin korttinsa ja iso jää käteen. Ekstrajokalla tehtynä se on <b>Höylä McBueno</b>.</p>
+      <p><b>Heads Up.</b> Kun kaksi on jäljellä, alkaa finaali. Viimeinen pöydässä voittaa.</p>
+    </div>
+    <button class="ln" data-back type="button">TAKAISIN</button>
+  </div>
+  <div class="kpanel" id="kstats">
+    <h2 style="font-size:52px">TILASTOT</h2>
+    <div class="stats" id="kstatlist"></div>
+    <button class="ln" data-back type="button">TAKAISIN</button>
+  </div>
+  <div class="kpanel" id="kover">
+    <h2 id="kovh">VIIMEINEN PÖYDÄSSÄ</h2>
+    <p class="sub" id="kovs"></p>
+    <div class="kinit" id="kinit">
+      <p style="font-size:11px;letter-spacing:.24em">VOITTO KIRJATAAN PÄIVÄN TAULUUN. NIMIKIRJAIMET:</p>
+      <input class="kname" id="kname" type="text" maxlength="3" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done" aria-label="Kolme nimikirjainta" placeholder="___">
+      <button class="ln" id="ksave" type="button">KIRJAA VOITTO</button>
+    </div>
+    <div class="kboards"><div><p>Voitot tänään</p><ol id="ktoday"></ol></div><div><p>Kaikkien aikojen</p><ol id="kall"></ol></div></div>
+    <button class="go" id="kagain" type="button">UUSI PELI ▶</button>
+    <button class="ln" id="khome2" type="button">⏏ KOTISIVULLE</button>
+  </div>
+</div>
+<script src="assets/kirilii/engine.js"></script>
+<script>
+(function(){
+  var root = document.getElementById('kir'); if (!root || !window.Kirilii) return;
+  var K = window.Kirilii, $ = function(id){ return document.getElementById(id); };
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SAVE = 'kirilii-save', SET = 'kirilii-settings', STATS = 'kirilii-stats';
+  function lsGet(k, d){ try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } }
+  function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  var settings = Object.assign({difficulty:'normal', herja:'paljon', tie:'lowest', fx:true}, lsGet(SET, {}));
+  var stats = Object.assign({games:0, wins:0, roundsLost:0, penalty:0, hoylays:0, mcbuenos:0, jokerLoss:0, ekstraLoss:0, bans:0, headsUpWins:0, biggest:0}, lsGet(STATS, {}));
+  var st = null, gen = 0, busy = false, selected = null;
+
+  // ---------- table texture: worn varnish, grain, rings, scratches ----------
+  function wood(){
+    var c = document.createElement('canvas'); c.width = c.height = 512; var g = c.getContext('2d');
+    g.fillStyle = '#3a2617'; g.fillRect(0, 0, 512, 512);
+    for (var y = 0; y < 512; y++){ var v = Math.sin(y * .09 + Math.sin(y * .013) * 4) * .5 + Math.sin(y * .31) * .2 + Math.sin(y * .021 + 1) * .3;
+      g.fillStyle = v > 0 ? 'rgba(90,58,32,' + (v * .32) + ')' : 'rgba(18,10,5,' + (-v * .36) + ')'; g.fillRect(0, y, 512, 1); }
+    for (var i = 0; i < 2600; i++){ var x = Math.random() * 512, yy = Math.random() * 512, l = 6 + Math.random() * 40;
+      g.fillStyle = Math.random() < .5 ? 'rgba(20,11,5,.12)' : 'rgba(120,85,50,.07)'; g.fillRect(x, yy, l, 1); }
+    for (i = 0; i < 70; i++){ var sx = Math.random() * 512, sy = Math.random() * 512, a = Math.random() * 6.28, L = 10 + Math.random() * 70;
+      g.strokeStyle = 'rgba(205,170,120,' + (.05 + Math.random() * .1) + ')'; g.lineWidth = .7; g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + Math.cos(a) * L, sy + Math.sin(a) * L); g.stroke(); }
+    for (i = 0; i < 9; i++){ var rx = Math.random() * 512, ry = Math.random() * 512, r = 26 + Math.random() * 14;
+      g.strokeStyle = 'rgba(15,8,3,' + (.18 + Math.random() * .2) + ')'; g.lineWidth = 2 + Math.random() * 3; g.beginPath(); g.arc(rx, ry, r, Math.random() * 2, 2 + Math.random() * 4.2); g.stroke(); }
+    for (i = 0; i < 14; i++){ var bx = Math.random() * 512, by = Math.random() * 512, br = 10 + Math.random() * 40, gr = g.createRadialGradient(bx, by, 0, bx, by, br);
+      gr.addColorStop(0, 'rgba(10,5,2,' + (.15 + Math.random() * .25) + ')'); gr.addColorStop(1, 'rgba(10,5,2,0)'); g.fillStyle = gr; g.fillRect(bx - br, by - br, br * 2, br * 2); }
+    for (i = 0; i < 40; i++){ var wx = Math.random() * 512, wy = Math.random() * 512; g.fillStyle = 'rgba(200,180,140,.07)'; g.fillRect(wx, wy, 3 + Math.random() * 30, 2 + Math.random() * 12); }
+    for (i = 0; i < 3000; i++){ g.fillStyle = 'rgba(0,0,0,' + Math.random() * .12 + ')'; g.fillRect(Math.random() * 512, Math.random() * 512, 1, 1); }
+    $('kwood').style.backgroundImage = 'url(' + c.toDataURL('image/jpeg', .82) + ')';
+  }
+
+  // ---------- props: drawn, not emoji ----------
+  var PROPS = [];
+  function pint(full){ var h = 'rgba(232,224,200,.5)', lvl = full ? 1 : .45;
+    return '<svg width="64" height="64" viewBox="-34 -34 68 68"><ellipse cx="4" cy="6" rx="28" ry="26" fill="rgba(0,0,0,.35)"/><circle r="27" fill="rgba(200,190,170,.12)" stroke="' + h + '" stroke-width="2"/>' +
+      '<circle r="' + (24 * lvl) + '" fill="#b8741c" opacity=".85"/><circle r="' + (21 * lvl) + '" fill="#d99a35" opacity=".6"/>' + (full ? '<circle r="18" fill="#efe3c4" opacity=".85"/><circle cx="-5" cy="-4" r="6" fill="#fff8e6" opacity=".6"/>' : '') +
+      '<path d="M26 -8 Q40 -8 40 4 Q40 16 26 14" fill="none" stroke="' + h + '" stroke-width="4"/><circle cx="-12" cy="-14" r="5" fill="rgba(255,255,255,.18)"/></svg>'; }
+  function glass(){ return '<svg width="48" height="48" viewBox="-24 -24 48 48"><ellipse cx="3" cy="4" rx="20" ry="19" fill="rgba(0,0,0,.35)"/><circle r="19" fill="rgba(200,190,170,.1)" stroke="rgba(232,224,200,.45)" stroke-width="2"/><circle r="11" fill="#a86a1c" opacity=".55"/><circle cx="-7" cy="-8" r="4" fill="rgba(255,255,255,.2)"/></svg>'; }
+  function can(col){ return '<svg width="40" height="40" viewBox="-20 -20 40 40"><ellipse cx="3" cy="4" rx="17" ry="16" fill="rgba(0,0,0,.4)"/><circle r="16" fill="' + col + '"/><circle r="13" fill="#bdbab2"/><circle r="11" fill="#a9a59c"/><rect x="-3" y="-9" width="6" height="9" rx="3" fill="#8a867d"/><ellipse cy="5" rx="5" ry="3" fill="#2a2724"/></svg>'; }
+  function lyingCan(col){ return '<svg width="70" height="34" viewBox="-35 -17 70 34"><rect x="-30" y="-12" width="58" height="26" rx="5" fill="rgba(0,0,0,.35)"/><rect x="-32" y="-14" width="58" height="26" rx="5" fill="' + col + '"/><rect x="-32" y="-14" width="7" height="26" rx="2" fill="#bdbab2"/><rect x="-14" y="-10" width="30" height="4" fill="rgba(255,255,255,.25)"/><text x="2" y="7" font-family="VT323, monospace" font-size="11" fill="rgba(255,255,255,.75)" text-anchor="middle">IV A</text></svg>'; }
+  function receipt(){ var ln = ''; for (var i = 0; i < 9; i++) ln += '<rect x="6" y="' + (12 + i * 7) + '" width="' + (20 + (i * 13) % 22) + '" height="2" fill="#7d776a"/>';
+    return '<svg width="54" height="96" viewBox="0 0 54 96"><path d="M4 6 L50 3 L52 90 L6 94 Z" fill="rgba(0,0,0,.3)" transform="translate(3,3)"/><path d="M2 4 L48 2 L50 88 L4 92 Z" fill="#ece6d6"/>' + ln + '<rect x="6" y="78" width="22" height="3" fill="#3b372f"/><rect x="32" y="78" width="12" height="3" fill="#3b372f"/></svg>'; }
+  function coins(){ return '<svg width="54" height="34" viewBox="0 0 54 34"><circle cx="12" cy="16" r="9" fill="#b07a3a" stroke="#6d4a20"/><circle cx="26" cy="20" r="10" fill="#c8c2b0" stroke="#7b766a"/><circle cx="42" cy="12" r="7" fill="#b07a3a" stroke="#6d4a20"/><circle cx="26" cy="20" r="6" fill="none" stroke="#9a9484"/></svg>'; }
+  function caps(){ var s = ''; [[8, 8, '#c8321f'], [26, 14, '#d4b23a'], [14, 26, '#4a6a8a']].forEach(function(c){ s += '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="6.5" fill="' + c[2] + '" stroke="#2a2420" stroke-dasharray="2 1.4"/>'; });
+    return '<svg width="36" height="36" viewBox="0 0 36 36">' + s + '</svg>'; }
+  function keys(){ return '<svg width="64" height="40" viewBox="0 0 64 40"><circle cx="12" cy="20" r="9" fill="none" stroke="#b9b4a6" stroke-width="2.5"/><path d="M20 18 L50 12 L52 16 L46 17 L47 20 L42 21 L42 18 L21 23 Z" fill="#c9a24a"/><path d="M18 24 L44 32 L42 36 L18 28 Z" fill="#a8a294"/><rect x="38" y="4" width="16" height="10" rx="3" fill="#2a2a2a" transform="rotate(14 46 9)"/></svg>'; }
+  function napkin(){ return '<svg width="62" height="58" viewBox="0 0 62 58"><path d="M8 14 L22 4 L40 8 L56 2 L52 22 L60 38 L42 52 L24 56 L10 44 L2 28 Z" fill="rgba(0,0,0,.28)" transform="translate(3,3)"/><path d="M8 14 L22 4 L40 8 L56 2 L52 22 L60 38 L42 52 L24 56 L10 44 L2 28 Z" fill="#e9e3d3"/><path d="M14 20 L30 26 L46 18 M20 40 L34 30 L48 40 M26 10 L30 26 L24 48" stroke="#c9c1ad" fill="none"/></svg>'; }
+  function stain(){ return '<svg width="70" height="70" viewBox="0 0 70 70"><circle cx="35" cy="35" r="27" fill="none" stroke="rgba(15,8,3,.35)" stroke-width="3"/><circle cx="37" cy="33" r="25" fill="none" stroke="rgba(15,8,3,.2)" stroke-width="1.5"/></svg>'; }
+  function buildProps(){
+    var land = innerWidth > innerHeight, P = $('kprops'), html = '';
+    PROPS = land ? [
+      ['stain', 30, 52, 0], ['stain', 68, 30, 0], ['pint', 13, 34, -10, 'p1'], ['pint', 86, 33, 12, 'p5', 1], ['glass', 37, 22, 0, 'g3'], ['glass', 63, 24, 0], ['can', 24, 72, 0, 'c1', '#7a1e18'],
+      ['lcan', 74, 70, -20, '', '#2a4a6a'], ['receipt', 58, 50, 18], ['coins', 44, 66, 0], ['caps', 64, 62, 0], ['keys', 31, 42, -18], ['napkin', 80, 54, 0], ['pint', 30, 80, 0, 'p3', 1]
+    ] : [
+      ['stain', 22, 82, 0], ['stain', 66, 44, 0], ['glass', 29, 10, 0, 'g3'], ['glass', 71, 11, 0], ['keys', 50, 24, -16], ['pint', 13, 80, -10, 'p1'], ['pint', 86, 79, 12, 'p5', 1],
+      ['can', 34, 72, 0, 'c1', '#7a1e18'], ['lcan', 72, 90, -24, '', '#2a4a6a'], ['receipt', 62, 78, 16], ['coins', 44, 82, 0], ['caps', 30, 92, 0], ['napkin', 12, 94, 0]
+    ];
+    PROPS.forEach(function(p){ var f = {stain:stain, pint:function(){ return pint(p[5]); }, glass:glass, can:function(){ return can(p[5]); }, lcan:function(){ return lyingCan(p[5]); }, receipt:receipt, coins:coins, caps:caps, keys:keys, napkin:napkin}[p[0]];
+      var s = f(); html += s.replace('<svg ', '<svg data-k="' + (p[4] || '') + '" style="left:' + p[1] + '%;top:' + p[2] + '%;transform:translate(-50%,-50%) rotate(' + p[3] + 'deg)" '); });
+    P.innerHTML = html;
+  }
+  function wobble(all){ var l = $('kprops').querySelectorAll('svg'); for (var i = 0; i < l.length; i++){ if (!all && Math.random() < .5) continue; l[i].classList.remove('wob'); void l[i].getBBox; l[i].getBoundingClientRect(); l[i].classList.add('wob'); } }
+  function tipGlass(){ var g = $('kprops').querySelector('[data-k="p3"]') || $('kprops').querySelector('[data-k="p1"]'); if (!g) return; g.classList.add('tip');
+    var base = g.style.transform; g.style.transform = base.replace(/rotate\([^)]*\)/, 'rotate(78deg)') + ' translate(14px,6px)'; playS('burp', .5);
+    setTimeout(function(){ g.style.transform = base; g.classList.remove('tip'); }, 4200); }
+
+  // ---------- seats: clockwise from me at the bottom ----------
+  var POS_P = [null, {l:'6px', t:'49%'}, {l:'6px', t:'17%'}, {l:'50%', t:'3%', c:1}, {r:'6px', t:'17%'}, {r:'6px', t:'49%'}];
+  var POS_L = [null, {l:'3%', t:'40%'}, {l:'17%', t:'6%'}, {l:'50%', t:'3%', c:1}, {r:'17%', t:'6%'}, {r:'3%', t:'40%'}];
+  function buildSeats(){
+    var land = innerWidth > innerHeight, P = land ? POS_L : POS_P, h = '';
+    for (var i = 1; i <= 5; i++){ var p = P[i], s = 'top:' + p.t + ';' + (p.l != null ? 'left:' + p.l + ';' : '') + (p.r != null ? 'right:' + p.r + ';' : '') + (p.c ? 'transform:translateX(-50%);' : '');
+      h += '<div class="seat" id="kseat' + i + '" style="' + s + '"><div class="plate" id="kplate' + i + '"><b></b><small></small></div><div class="backs" id="kbacks' + i + '"></div><div class="final" id="kfinal' + i + '"></div><div class="played" id="kplayed' + i + '"></div></div>'; }
+    $('kseats').innerHTML = h;
+    var ph = $('kphone'); if (land){ ph.style.left = 'calc(50% - 68px)'; ph.style.top = '33%'; } else { ph.style.left = 'calc(50% - 61px)'; ph.style.top = '29%'; }
+  }
+
+  // ---------- cards ----------
+  var SUIT = {S:'♠', H:'♥', D:'♦', C:'♣'};
+  var JESTER = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9 L5 3 L8 7 L10 2 L12 7 L15 3 L17 9 Z" fill="#a3241a"/><circle cx="5" cy="3" r="1.2" fill="#d4a62a"/><circle cx="10" cy="2" r="1.2" fill="#d4a62a"/><circle cx="15" cy="3" r="1.2" fill="#d4a62a"/><circle cx="10" cy="13" r="5" fill="#f2d9b0" stroke="#1d1a16" stroke-width=".8"/><circle cx="8.2" cy="12" r=".8" fill="#1d1a16"/><circle cx="11.8" cy="12" r=".8" fill="#1d1a16"/><path d="M7.3 14.6 Q10 17.4 12.7 14.6" stroke="#a3241a" stroke-width="1" fill="none"/></svg>';
+  function cardHTML(c, extra){
+    if (!c) return '<div class="kc back ' + (extra || '') + '"><b></b><i></i></div>';
+    if (c.v === 16) return '<div class="kc xj ' + (extra || '') + '" data-id="' + c.id + '"><span class="tl">EJ</span><span class="ctr"><img src="assets/peli/mark.png" alt=""><small>EKSTRA</small></span><span class="br">EJ</span></div>';
+    if (c.v === 15) return '<div class="kc jok ' + (extra || '') + '" data-id="' + c.id + '"><span class="tl">JO<br>K</span><span class="ctr">' + JESTER + '</span><span class="br">JO<br>K</span></div>';
+    var red = c.s === 'H' || c.s === 'D', lab = K.label(c), face = c.v >= 11 && c.v <= 13;
+    return '<div class="kc ' + (red ? 'red ' : '') + (face ? 'face ' : '') + (extra || '') + '" data-id="' + c.id + '"><span class="tl">' + lab + '<br>' + SUIT[c.s] + '</span><span class="ctr">' + (face ? lab : SUIT[c.s]) + '</span><span class="br">' + lab + '<br>' + SUIT[c.s] + '</span></div>';
+  }
+
+  // ---------- sound ----------
+  var AC = null, bufs = {}, FILES = {smash:'posti/sfx/smash.mp3', boom:'posti/sfx/boom4.mp3', laugh:'posti/sfx/laugh2.mp3', burp:'posti/sfx/burp1.mp3', bell:'posti/sfx/bell1.mp3', open:'posti/sfx/open.mp3', fart:'posti/sfx/fart3.mp3'};
+  function ac(){ if (!AC){ try { AC = new (window.AudioContext || window.webkitAudioContext)(); Object.keys(FILES).forEach(function(k){ fetch('assets/' + FILES[k]).then(function(r){ return r.arrayBuffer(); }).then(function(a){ return new Promise(function(ok, no){ AC.decodeAudioData(a, ok, no); }); }).then(function(b){ bufs[k] = b; }).catch(function(){}); }); } catch(e){} }
+    if (AC && AC.state === 'suspended') AC.resume(); }
+  function playS(k, vol, rate){ if (!settings.fx || !AC || !bufs[k]) return; var s = AC.createBufferSource(), g = AC.createGain(); s.buffer = bufs[k]; s.playbackRate.value = rate || 1; g.gain.value = vol == null ? .5 : vol; s.connect(g).connect(AC.destination); s.start(); }
+  function noise(d, vol, f){ if (!settings.fx || !AC) return; var n = Math.floor(AC.sampleRate * d), b = AC.createBuffer(1, n, AC.sampleRate), a = b.getChannelData(0); for (var i = 0; i < n; i++) a[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
+    var s = AC.createBufferSource(), g = AC.createGain(), fl = AC.createBiquadFilter(); fl.type = 'bandpass'; fl.frequency.value = f || 2200; fl.Q.value = .8; s.buffer = b; g.gain.value = vol || .3; s.connect(fl).connect(g).connect(AC.destination); s.start(); }
+  function tone(f, d, type, vol, f2){ if (!settings.fx || !AC) return; var o = AC.createOscillator(), g = AC.createGain(), n = AC.currentTime; o.type = type || 'square'; o.frequency.setValueAtTime(f, n); if (f2) o.frequency.exponentialRampToValueAtTime(f2, n + d);
+    g.gain.setValueAtTime(vol || .05, n); g.gain.exponentialRampToValueAtTime(.0001, n + d); o.connect(g).connect(AC.destination); o.start(n); o.stop(n + d + .02); }
+  var SFX = {
+    slap: function(){ noise(.07, .45, 1800); tone(120, .06, 'sine', .12, 70); },
+    shuffle: function(){ for (var i = 0; i < 9; i++) setTimeout(function(){ noise(.03, .18, 3200); }, i * 45 + Math.random() * 20); },
+    phone: function(){ tone(1320, .09, 'sine', .07); setTimeout(function(){ tone(1760, .12, 'sine', .07); }, 110); },
+    clink: function(){ tone(2400, .18, 'sine', .05); tone(3300, .12, 'sine', .03); },
+    thud: function(){ tone(70, .25, 'sine', .35, 40); noise(.12, .25, 400); },
+    hoyla: function(){ if (!settings.fx || !AC) return; var n = Math.floor(AC.sampleRate * .55), b = AC.createBuffer(1, n, AC.sampleRate), a = b.getChannelData(0); for (var i = 0; i < n; i++) a[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n);
+      var s = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain(), t = AC.currentTime; fl.type = 'bandpass'; fl.Q.value = 2; fl.frequency.setValueAtTime(600, t); fl.frequency.exponentialRampToValueAtTime(4200, t + .45); g.gain.value = .5; s.buffer = b; s.connect(fl).connect(g).connect(AC.destination); s.start();
+      setTimeout(SFX.thud, 420); },
+    mcbueno: function(){ playS('boom', .7, .8); [523, 659, 784, 1047].forEach(function(f, i){ setTimeout(function(){ tone(f, .22, 'square', .05); }, 300 + i * 120); }); setTimeout(function(){ tone(196, .9, 'sawtooth', .07, 98); }, 860); setTimeout(function(){ playS('laugh', .6, .9); }, 1200); },
+    out: function(){ tone(300, .5, 'triangle', .06, 120); setTimeout(function(){ playS('open', .4, .8); }, 200); },
+    headsup: function(){ tone(110, 1.2, 'sawtooth', .06, 220); setTimeout(function(){ tone(220, .9, 'square', .04); }, 400); setTimeout(SFX.thud, 900); }
+  };
+
+  // ---------- rendering ----------
+  function render(){
+    if (!st) return;
+    var me = st.players[0], land = innerWidth > innerHeight;
+    for (var i = 1; i <= 5; i++){
+      var p = st.players[i], seat = $('kseat' + i), plate = $('kplate' + i);
+      seat.classList.toggle('out', p.out);
+      plate.querySelector('b').textContent = p.name; plate.querySelector('small').textContent = p.pts;
+      plate.classList.toggle('turn', st.phase === 'play' && st.turn === i);
+      var stamp = plate.querySelector('.stamp'); if (p.out && !stamp){ plate.insertAdjacentHTML('beforeend', '<span class="stamp">' + (p.outRound === st.round && st.phase !== 'play' ? 'ULOS' : 'ULKONA') + '</span>'); }
+      if (!p.out && stamp) stamp.remove();
+      var reveal = st.phase !== 'play' && st.result && !p.out || (st.phase !== 'play' && st.result && st.result.out.indexOf(i) >= 0);
+      $('kbacks' + i).innerHTML = reveal ? '' : new Array(p.hand.length + 1).join('<i></i>');
+      $('kfinal' + i).innerHTML = reveal && p.hand[0] ? cardHTML(p.hand[0], (st.result.losers.indexOf(i) >= 0 ? 'lose' : '')) : '';
+      $('kplayed' + i).innerHTML = p.played.map(function(c){ return cardHTML(c, st.lastBy === i && st.last === c.v && p.played[p.played.length - 1] === c ? 'last' : ''); }).join('');
+    }
+    $('kmypts').textContent = me.pts; $('kmyplate').classList.toggle('turn', st.phase === 'play' && st.turn === 0);
+    $('kmyplayed').innerHTML = me.played.map(function(c, j){ return cardHTML(c, st.lastBy === 0 && j === me.played.length - 1 ? 'last' : ''); }).join('');
+    renderHand(); renderPhone(); hint();
+  }
+  function renderHand(){
+    var me = st.players[0], myTurn = st.phase === 'play' && st.turn === 0 && !busy, lg = myTurn ? K.legal(me.hand, st.last).map(function(c){ return c.id; }) : [];
+    var lose = st.phase !== 'play' && st.result && st.result.losers.indexOf(0) >= 0;
+    $('kmyhand').innerHTML = me.hand.map(function(c){ var cls = myTurn ? (lg.indexOf(c.id) >= 0 ? 'ok' : 'no') : ''; if (selected === c.id && myTurn) cls += ' sel'; if (lose) cls += ' lose'; return cardHTML(c, cls); }).join('');
+    $('kmyhand').classList.toggle('wait', !myTurn);
+  }
+  function hint(){
+    var h = '', me = st.players[0];
+    if (st.phase === 'play' && st.turn === 0 && !busy){
+      if (me.hand.length === 6 && st.last == null) h = 'Aloitat. Pelaa mikä tahansa.';
+      else if (st.last == null) h = 'Pelaa mikä tahansa.';
+      else { var m = K.minV(me.hand), any = me.hand.some(function(c){ return c.v >= st.last; });
+        h = any ? 'Vähintään ' + nm(st.last) + ' tai pienin (' + nm(m) + ')' : 'Pakko pelata pienin (' + nm(m) + ')'; }
+      if (selected != null) h = 'Napauta uudestaan: pelaa';
+      if (me.hand.length === 2 && selected == null) h += ' · toinen jää';
+    } else if (st.phase === 'play' && me.out) h = 'Olet ulkona. Katsot loppuun.';
+    else if (st.phase === 'play') h = st.players[st.turn].name + ' miettii…';
+    $('khint').textContent = h;
+  }
+  function nm(v){ return v <= 10 ? String(v) : {11:'J', 12:'Q', 13:'K', 14:'A', 15:'jokeri', 16:'Ekstrajokka'}[v]; }
+  function renderPhone(flashIds, add){
+    var rows = st.players.map(function(p){ var a = add && add[p.id] ? '<span class="add"> +' + add[p.id] + '</span>' : '';
+      return '<tr class="' + (p.out ? 'o ' : '') + (p.id === 0 ? 'me ' : '') + (flashIds && flashIds.indexOf(p.id) >= 0 ? 'flash' : '') + '"><td>' + p.name + '<div class="bar"><i style="width:' + Math.min(100, p.pts / 21 * 100) + '%"></i></div></td><td class="p">' + p.pts + a + '</td></tr>'; }).join('');
+    var lbl = st.phase === 'over' ? 'LOPPU' : st.headsUp ? 'HEADS UP' : 'JAKO ' + st.round;
+    $('kscr').innerHTML = '<h4><span>KIRILII</span><span>' + lbl + '</span></h4><table>' + rows + '</table><div class="ft">RAJA 21</div>';
+  }
+
+  // ---------- flying card animation ----------
+  function fly(fromRect, card, toEl, done){
+    if (reduce || !fromRect || !toEl){ done && done(); return; }
+    var to = toEl.getBoundingClientRect(), wrap = document.createElement('div'); wrap.className = 'kfly'; wrap.innerHTML = cardHTML(card);
+    var el = wrap.firstChild; el.style.setProperty('--sw', to.width + 'px'); el.style.setProperty('--sh', to.height + 'px');
+    wrap.style.left = to.left + 'px'; wrap.style.top = to.top + 'px'; root.appendChild(wrap); toEl.style.visibility = 'hidden';
+    var dx = fromRect.left + fromRect.width / 2 - (to.left + to.width / 2), dy = fromRect.top + fromRect.height / 2 - (to.top + to.height / 2), sc = fromRect.width / to.width;
+    var a = wrap.animate([{transform:'translate(' + dx + 'px,' + dy + 'px) scale(' + sc + ') rotate(' + ((Math.random() - .5) * 30) + 'deg)'}, {transform:'translate(0,0) scale(1) rotate(0)'}], {duration:260, easing:'cubic-bezier(.2,.7,.3,1)'});
+    a.onfinish = function(){ wrap.remove(); toEl.style.visibility = ''; done && done(); };
+  }
+  function lastPlayedEl(pid){ var box = pid === 0 ? $('kmyplayed') : $('kplayed' + pid); return box.lastElementChild; }
+
+  // ---------- turn loop ----------
+  function persist(){ try { localStorage.setItem(SAVE, K.save(st)); } catch(e){} }
+  function doPlay(pid, cardId, fromRect){
+    var p = st.players[pid], card = null; p.hand.forEach(function(c){ if (c.id === cardId) card = c; });
+    var ev = K.play(st, pid, cardId); selected = null; persist();
+    render(); SFX.slap(); if (Math.random() < .25) wobble(false);
+    fly(fromRect, card, lastPlayedEl(pid));
+    if (st.phase !== 'play') setTimeout(function(){ roundEnd(gen); }, 650);
+    else schedule();
+    return ev;
+  }
+  function schedule(){
+    var my = gen;
+    if (st.phase !== 'play') return;
+    if (st.turn === 0){ busy = false; render(); return; }
+    busy = true; render(); showThinking(st.turn, true);
+    var fast = st.players[0].out ? .35 : 1, delay = (520 + Math.random() * 520) * fast;
+    setTimeout(function(){
+      if (my !== gen || !st || st.phase !== 'play') return;
+      var pid = st.turn; showThinking(pid, false);
+      var from = $('kbacks' + pid).getBoundingClientRect();
+      var id = K.choose(K.view(st, pid)); busy = false; doPlay(pid, id, from);
+    }, delay);
+  }
+  function showThinking(pid, on){ var pl = $('kplate' + pid); if (!pl) return; var d = pl.querySelector('.dots'); if (on && !d) pl.insertAdjacentHTML('beforeend', '<span class="dots">…</span>'); if (!on && d) d.remove(); }
+
+  // my hand: tap to select, tap again or swipe up to play; illegal cards never play
+  var drag = null;
+  $('kmyhand').addEventListener('pointerdown', function(e){
+    ac(); var el = e.target.closest('.kc'); if (!el || !st || st.phase !== 'play' || st.turn !== 0 || busy) return;
+    if (!el.classList.contains('ok')) { tone(160, .08, 'square', .03); el.animate([{transform:'translateX(-4px)'}, {transform:'translateX(4px)'}, {transform:'none'}], {duration:180}); return; }
+    drag = {id:+el.dataset.id, y:e.clientY, el:el, moved:false}; try { el.setPointerCapture(e.pointerId); } catch(_){}
+  });
+  $('kmyhand').addEventListener('pointermove', function(e){ if (!drag) return; var dy = e.clientY - drag.y; if (dy < -6){ drag.moved = true; drag.el.style.transform = 'translateY(' + Math.max(-90, dy) + 'px)'; } });
+  function endDrag(e, cancel){
+    if (!drag) return; var d = drag; drag = null; var dy = e.clientY - d.y; d.el.style.transform = '';
+    if (cancel) return;
+    if (dy < -45){ play(d.id, d.el); return; }
+    if (!d.moved){ if (selected === d.id) play(d.id, d.el); else { selected = d.id; renderHand(); hint(); } }
+  }
+  $('kmyhand').addEventListener('pointerup', function(e){ endDrag(e); });
+  $('kmyhand').addEventListener('pointercancel', function(e){ endDrag(e, true); });
+  function play(id, el){ if (st.turn !== 0 || busy) return; var r = el.getBoundingClientRect(); busy = true; try { doPlay(0, id, r); } catch(err){ busy = false; render(); } }
+  addEventListener('keydown', function(e){
+    if (!root.classList.contains('on')) return;
+    if (e.key === 'Escape'){ if ($('kphone').classList.contains('big')) phoneBig(false); else close(); return; }
+    if (!st || st.phase !== 'play' || st.turn !== 0 || busy) return;
+    var n = parseInt(e.key, 10); if (n >= 1 && n <= 6){ var el = $('kmyhand').children[n - 1]; if (el && el.classList.contains('ok')) play(+el.dataset.id, el); }
+  });
+
+  // ---------- end of a round: reveal, points, reactions, comments ----------
+  var LINES = {
+    k: ['SAAT LÄHTEÄ PÖYDÄSTÄ.'], ban: ['ELINIKÄINEN PELIKIELTO.'],
+    hoyla: ['Kyllä nyt höylättiin.', 'Olisit vähän ennakoinut.', 'Kannattiko pantata?', 'Mitä sä oikein säästelit?', 'Ei ollu ihan loppuun asti mietitty.'],
+    out: ['Ovi löytyy tuolta.', 'Kiitos osallistumisesta.', 'Pelaamallahan sitä oppii.'],
+    kurko: ['Jahas, kurko käteen.', 'Mites se strategia?'],
+    sixteen: ['Aika komea 16 pistettä.'],
+    gen: ['Ei auta enää selitellä.', 'Tämä oli varmaan ihan suunniteltu.', 'Sellainen suoritus.', 'Mites se strategia?', 'Pelaamallahan sitä oppii.'],
+    mc: ['McBueno. Hyvää kotimatkaa.']
+  };
+  function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
+  function speakerFor(target, prefer){ var c = st.players.filter(function(p){ return !p.out && p.id !== target && p.id !== 0; }); if (prefer != null && prefer !== 0 && prefer !== target && !st.players[prefer].out) return prefer;
+    if (!c.length) c = st.players.filter(function(p){ return p.id !== target && p.id !== 0; }); return c.length ? pick(c).id : null; }
+  function say(pid, text, title, ms){
+    if (pid == null) return; var anchor = pid === 0 ? $('kmyplate') : $('kplate' + pid); if (!anchor) return;
+    var r = anchor.getBoundingClientRect(), sr = root.getBoundingClientRect(), b = document.createElement('div'); b.className = 'bub';
+    b.innerHTML = (title ? '<b>' + title + '</b>' : '') + text; root.appendChild(b);
+    var bw = sr.width > sr.height ? 200 : 160, x = Math.min(sr.width - bw, Math.max(8, r.left - sr.left + r.width / 2 - 70)), y = r.bottom - sr.top + 6; if (pid === 0) y = r.top - sr.top - 54;
+    if (y > sr.height - 200 && pid !== 0) y = r.top - sr.top - 54;
+    b.style.left = x + 'px'; b.style.top = y + 'px'; requestAnimationFrame(function(){ b.classList.add('on'); });
+    setTimeout(function(){ b.classList.remove('on'); setTimeout(function(){ b.remove(); }, 300); }, ms || 2600);
+  }
+  function herjaOk(){ return settings.herja === 'paljon' ? true : settings.herja === 'vahan' ? Math.random() < .45 : false; }
+  function big(text, sub, mc, ms){ var b = $('kbig'); b.className = 'kbig' + (mc ? ' mc' : ''); b.innerHTML = text + (sub ? '<small>' + sub + '</small>' : ''); void b.offsetWidth; b.classList.add('on'); }
+  function shake(q){ var s = $('kstage'); s.classList.remove('shake', 'quake'); void s.offsetWidth; s.classList.add(q ? 'quake' : 'shake'); }
+
+  function roundEnd(my){
+    if (my !== gen) return; var R = st.result, T = 0, me = st.players[0];
+    busy = true; render(); persist(); noise(.25, .2, 900);
+    var seq = [];
+    function at(ms, fn){ seq.push(setTimeout(function(){ if (my === gen) fn(); }, ms)); }
+    // the cards are already face up; mark the losers
+    at(450, function(){ R.losers.forEach(function(id){ var pl = id === 0 ? $('kmyplate') : $('kplate' + id); if (pl){ pl.classList.add('lose', 'hit'); } }); if (R.losers.length) SFX.thud(); });
+    // the phone wakes up with the new points
+    at(1100, function(){ var add = {}; R.losers.forEach(function(id){ add[id] = R.pen; });
+      st.players.forEach(function(p){ p._show = p.pts; }); renderPhone(R.losers, add); $('kscr').classList.add('wake'); SFX.phone(); });
+    T = 1700;
+    if (R.replay){ at(T, function(){ big('UUSINTAJAKO', 'Kaikki olisivat pudonneet. Pisteet eivät jääneet.'); }); T += 1700; }
+    // planing: big reactions only for confirmed ones
+    R.hoyla.forEach(function(h){
+      at(T, function(){
+        var by = st.players[h.by].name, vic = st.players[h.victim].name;
+        if (h.mcbueno){ $('kvhs').classList.remove('on'); void $('kvhs').offsetWidth; $('kvhs').classList.add('on'); big('HÖYLÄ McBUENO!', by + ' → ' + vic, true); shake(true); wobble(true); tipGlass(); SFX.mcbueno(); $('kscr').classList.add('mc');
+          setTimeout(function(){ $('kscr').classList.remove('mc'); }, 2100); if (herjaOk() || settings.herja !== 'pois') say(speakerFor(h.victim, h.by), pick(LINES.mc), 'McBUENO');
+        } else { big('HÖYLÄYS!', by + ' höyläsi: ' + vic); shake(false); wobble(false); SFX.hoyla(); SFX.clink();
+          var pl = h.victim === 0 ? $('kmyplate') : $('kplate' + h.victim); if (pl){ pl.classList.remove('hit'); void pl.offsetWidth; pl.classList.add('hit'); }
+          if (herjaOk()) say(speakerFor(h.victim, h.by), pick(LINES.hoyla)); }
+      });
+      T += h.mcbueno ? 3200 : 1800;
+    });
+    // the classics
+    if (R.losers.length && !R.replay){
+      at(T, function(){ var v = R.max, vic = pick(R.losers), sp = speakerFor(vic);
+        if (!herjaOk()) return;
+        if (v >= 14) say(sp, (v === 16 ? 'Ekstrajokka käteen. ' : '') + pick(LINES.ban), st.players[vic].name);
+        else if (v === 13) say(sp, pick(LINES.k.concat(LINES.kurko)), st.players[vic].name);
+        else if (Math.random() < .5) say(sp, pick(LINES.gen), st.players[vic].name);
+        if (v === 16 && Math.random() < .5) setTimeout(function(){ say(speakerFor(vic, sp), pick(LINES.sixteen)); }, 1200); });
+      T += 1300;
+    }
+    // eliminations
+    if (R.out.length){
+      at(T, function(){ R.out.forEach(function(id){ SFX.out(); var pl = id === 0 ? $('kmyplate') : $('kplate' + id); if (pl) pl.classList.add('hit'); });
+        render(); renderPhone(R.out);
+        var names = R.out.map(function(id){ return st.players[id].name; }).join(', ');
+        big(R.out.indexOf(0) >= 0 ? 'ULKONA' : 'PUDOTUS', names + ' poistuu pöydästä');
+        if (herjaOk()) setTimeout(function(){ say(speakerFor(R.out[0]), pick(LINES.out)); }, 700); });
+      T += 1900;
+    }
+    if (R.headsUp){ at(T, function(){ root.classList.add('hu'); big('HEADS UP', st.players.filter(function(p){ return !p.out; }).map(function(p){ return p.name; }).join(' vs ')); SFX.headsup(); shake(false); }); T += 2000; }
+    // stats from what actually happened
+    if (!R.replay){
+      if (R.losers.indexOf(0) >= 0){ stats.roundsLost++; stats.penalty += R.pen; stats.biggest = Math.max(stats.biggest, R.pen); if (R.max === 15) stats.jokerLoss++; if (R.max === 16) stats.ekstraLoss++; if (R.max >= 14) stats.bans++; }
+      R.hoyla.forEach(function(h){ if (h.by === 0){ stats.hoylays++; if (h.mcbueno) stats.mcbuenos++; } });
+      lsSet(STATS, stats);
+    }
+    at(T, function(){
+      $('kscr').classList.remove('wake'); renderPhone();
+      if (st.phase === 'over'){ gameOver(); return; }
+      busy = false;
+      var nb = $('knext'); nb.textContent = me.out ? 'JATKA (ULKONA) ▶' : 'SEURAAVA JAKO ▶'; nb.classList.add('on');
+      autoNext = setTimeout(function(){ if (my === gen && $('knext').classList.contains('on') && me.out) next(); }, 1500);
+    });
+  }
+  var autoNext = 0;
+  function next(){
+    clearTimeout(autoNext); $('knext').classList.remove('on'); if (!st || st.phase !== 'reveal') return;
+    K.nextRound(st); persist(); selected = null;
+    document.querySelectorAll('#kir .plate').forEach(function(p){ p.classList.remove('lose', 'hit'); });
+    SFX.shuffle(); render(); dealAnim(); schedule();
+  }
+  function dealAnim(){ if (reduce) return; var cards = $('kmyhand').children; for (var i = 0; i < cards.length; i++) cards[i].animate([{transform:'translateY(60px) rotate(' + ((i - 3) * 8) + 'deg)', opacity:0}, {transform:'none', opacity:1}], {duration:300, delay:i * 60, easing:'cubic-bezier(.2,.7,.3,1)', fill:'backwards'}); }
+  $('knext').addEventListener('click', function(){ ac(); next(); });
+
+  // ---------- game over, wins of the day ----------
+  var API = 'https://api.viistone.com/api/scores?g=kirilii', myT = 0;
+  function gameOver(){
+    var w = st.players[st.winner], won = st.winner === 0;
+    stats.games++; if (won){ stats.wins++; if (st.headsUp) stats.headsUpWins++; } lsSet(STATS, stats);
+    try { localStorage.removeItem(SAVE); } catch(e){}
+    big(won ? 'VIIMEINEN PÖYDÄSSÄ' : w.name + ' VEI', won ? 'Sinä voitit.' : 'Viimeinen pöydässä.'); if (won){ SFX.clink(); playS('bell', .4); } else playS('laugh', .4);
+    setTimeout(function(){
+      $('kovh').textContent = won ? 'VIIMEINEN PÖYDÄSSÄ' : w.name + ' VOITTI';
+      $('kovs').textContent = won ? 'Kaikki muut lähtivät pöydästä. Sinä et.' : 'Sinä et ollut viimeinen pöydässä. Ensi kerralla.';
+      $('kinit').classList.toggle('on', won); $('kname').value = savedName();
+      boards(); showPanel('kover'); root.classList.add('idle');
+    }, 1900);
+  }
+  function savedName(){ try { return (localStorage.getItem('viistone-2048-name') || '').slice(0, 3); } catch(e){ return ''; } }
+  function fill(id, rows, failed){ var h = '';
+    if (failed) h = '<li class="empty"><span></span><b>EI</b><em>YHTEYTTÄ</em></li>';
+    else { (rows || []).forEach(function(r, i){ h += '<li class="' + (r.t === myT ? 'me' : '') + '"><span>' + (i + 1) + '</span><b>' + r.n + '</b><em>' + r.s + ' V</em></li>'; });
+      for (var i = (rows || []).length; i < 10; i++) h += '<li class="empty"><span>' + (i + 1) + '</span><b>---</b><em>0</em></li>'; }
+    $(id).innerHTML = h; }
+  function boards(d){ if (d){ fill('ktoday', d.today); fill('kall', d.all); return; } fill('ktoday', []); fill('kall', []);
+    fetch(API, {cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }).then(function(x){ if (!x || x.game !== 'kirilii'){ fill('ktoday', null, true); fill('kall', null, true); return; } fill('ktoday', x.today); fill('kall', x.all); }); }
+  $('kname').addEventListener('input', function(){ var v = this.value.toUpperCase().replace(/[^A-ZÅÄÖ]/g, '').slice(0, 3); if (v !== this.value) this.value = v; });
+  $('kname').addEventListener('keydown', function(e){ e.stopPropagation(); if (e.key === 'Enter'){ e.preventDefault(); saveWin(); } }, true);
+  function saveWin(){
+    var n = $('kname').value.toUpperCase(), b = $('ksave');
+    if (!/^[A-ZÅÄÖ]{3}$/.test(n)){ b.textContent = 'KOLME KIRJAINTA'; setTimeout(function(){ b.textContent = 'KIRJAA VOITTO'; }, 1500); return; }
+    try { localStorage.setItem('viistone-2048-name', n); } catch(e){}
+    b.disabled = true; b.textContent = 'KIRJATAAN';
+    fetch(API, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({n:n, s:1, l:0, g:'kirilii'})}).then(function(r){ return r.json().then(function(d){ return {ok:r.ok, d:d}; }); })
+      .then(function(x){ b.disabled = false; b.textContent = 'KIRJAA VOITTO'; if (!x.ok || x.d.game !== 'kirilii'){ b.textContent = x.d && x.d.error === 'name' ? 'VALITSE TOISET KIRJAIMET' : 'EI ONNISTUNUT'; setTimeout(function(){ b.textContent = 'KIRJAA VOITTO'; }, 1800); return; }
+        myT = x.d.t; boards(x.d); $('kinit').classList.remove('on'); })
+      .catch(function(){ b.disabled = false; b.textContent = 'EI YHTEYTTÄ'; setTimeout(function(){ b.textContent = 'KIRJAA VOITTO'; }, 1800); });
+  }
+  $('ksave').addEventListener('click', saveWin);
+
+  // ---------- menu, settings, stats ----------
+  var DIFFN = {easy:'HELPOT', normal:'NORMAALIT', hard:'KOVAT'}, HERJAN = {paljon:'PALJON', vahan:'VÄHÄN', pois:'POIS'}, TIEN = {lowest:'PIENIN SÄILYY', replay:'UUSINTAJAKO'};
+  function syncOpts(){ $('kdiff').textContent = DIFFN[settings.difficulty]; $('kherja').textContent = HERJAN[settings.herja]; $('ktie').textContent = TIEN[settings.tie];
+    $('kfx').classList.toggle('off', !settings.fx); $('kfx').setAttribute('aria-pressed', settings.fx); lsSet(SET, settings);
+    if (st){ st.settings.difficulty = settings.difficulty; st.settings.tieRule = settings.tie; } }
+  function cycle(key, list){ var i = list.indexOf(settings[key]); settings[key] = list[(i + 1) % list.length]; syncOpts(); }
+  $('kdiff').addEventListener('click', function(){ cycle('difficulty', ['easy', 'normal', 'hard']); });
+  $('kherja').addEventListener('click', function(){ cycle('herja', ['paljon', 'vahan', 'pois']); });
+  $('ktie').addEventListener('click', function(){ cycle('tie', ['lowest', 'replay']); });
+  $('kfx').addEventListener('click', function(){ ac(); settings.fx = !settings.fx; syncOpts(); this.blur(); });
+  function showPanel(id){ ['kmenu', 'krules', 'kstats', 'kover'].forEach(function(p){ $(p).classList.toggle('on', p === id); }); }
+  function hidePanels(){ ['kmenu', 'krules', 'kstats', 'kover'].forEach(function(p){ $(p).classList.remove('on'); }); }
+  function menu(){ var has = !!lsGet(SAVE, null); $('kcont').hidden = !has || !st || st.phase === 'over'; showPanel('kmenu'); root.classList.add('idle'); }
+  $('kmenub').addEventListener('click', function(){ if ($('kmenu').classList.contains('on')){ if (st && st.phase !== 'over'){ hidePanels(); root.classList.remove('idle'); } } else menu(); });
+  $('krulesb').addEventListener('click', function(){ showPanel('krules'); });
+  $('kstatsb').addEventListener('click', function(){
+    var L = [['Pelejä', stats.games], ['Voittoja', stats.wins], ['Heads Up -voittoja', stats.headsUpWins], ['Hävityt jaot', stats.roundsLost], ['Rangaistuspisteet', stats.penalty], ['Suurin rangaistus', stats.biggest],
+      ['Onnistuneet höyläykset', stats.hoylays], ['Höylä McBuenot', stats.mcbuenos], ['Jokerilla hävityt', stats.jokerLoss], ['Ekstrajokalla hävityt', stats.ekstraLoss], ['Elinikäiset pelikiellot', stats.bans]];
+    $('kstatlist').innerHTML = L.map(function(r){ return '<span>' + r[0] + '</span><em>' + r[1] + '</em>'; }).join(''); showPanel('kstats'); });
+  root.querySelectorAll('[data-back]').forEach(function(b){ b.addEventListener('click', menu); });
+  function startNew(){
+    ac(); gen++; clearTimeout(autoNext); busy = false; selected = null; root.classList.remove('hu');
+    st = K.newGame({difficulty:settings.difficulty, tieRule:settings.tie}); persist();
+    hidePanels(); root.classList.remove('idle'); $('knext').classList.remove('on'); render(); SFX.shuffle(); dealAnim();
+    big('JAKO', st.players[st.starter].name === 'SINÄ' ? 'Sinä aloitat' : st.players[st.starter].name + ' aloittaa'); schedule();
+  }
+  function resume(){
+    ac(); gen++; hidePanels(); root.classList.remove('idle'); root.classList.toggle('hu', !!st.headsUp); render();
+    if (st.phase === 'reveal'){ $('knext').classList.add('on'); busy = false; } else schedule();
+  }
+  $('knew').addEventListener('click', startNew); $('kagain').addEventListener('click', startNew);
+  $('kcont').addEventListener('click', resume);
+
+  // phone: tap to enlarge
+  function phoneBig(on){ var ph = $('kphone'); ph.classList.toggle('big', on); $('kdim').classList.toggle('on', on); if (on) SFX.phone(); }
+  $('kphone').addEventListener('click', function(){ phoneBig(!this.classList.contains('big')); });
+  $('kphone').addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); phoneBig(!this.classList.contains('big')); } });
+  $('kdim').addEventListener('click', function(){ phoneBig(false); });
+
+  // ---------- open and close ----------
+  function layout(){ buildSeats(); buildProps(); if (st) render(); }
+  var lastLand = null;
+  addEventListener('resize', function(){ if (!root.classList.contains('on')) return; var land = innerWidth > innerHeight; if (land !== lastLand){ lastLand = land; layout(); } });
+  function open(){
+    window.__gameOpen = true; var ga = document.getElementById('ga'); if (ga) ga.pause();
+    root.classList.add('on'); document.body.classList.add('kiropen'); lastLand = innerWidth > innerHeight;
+    if (!$('kwood').style.backgroundImage) wood();
+    layout(); syncOpts();
+    try { var s = localStorage.getItem(SAVE); if (s && !st){ st = K.load(s); st.players.forEach(function(p){ p._show = p.pts; }); } } catch(e){ st = null; }
+    if (st) render();
+    menu();
+    if (location.hash !== '#kirilii') history.replaceState(null, '', '#kirilii');
+  }
+  function close(){
+    gen++; clearTimeout(autoNext); root.classList.remove('on'); document.body.classList.remove('kiropen'); window.__gameOpen = false; phoneBig(false);
+    if (location.hash === '#kirilii') history.replaceState(null, '', location.pathname + location.search);
+    if (st && st.phase === 'play') busy = false;
+  }
+  function home(){ close(); if (window.__showGames) setTimeout(window.__showGames, 200); }
+  $('keject').addEventListener('click', home); $('khome').addEventListener('click', home); $('khome2').addEventListener('click', home);
+  var pb = document.getElementById('pick09'); if (pb) pb.addEventListener('click', open);
+  if (location.hash === '#kirilii') open();
+  window.__kirilii = {open:open, close:close, state:function(){ return st; }, newGame:startNew, next:next, settings:settings};
+})();
+</script>
+<!--/KIRILII-->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "ee2b454609c9430fbfa3eb180dacb01d"}'></script>
 </body>
 </html>
