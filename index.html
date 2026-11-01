@@ -2747,7 +2747,8 @@ body.kiropen{overflow:hidden}
 .kir.online .kshout{display:flex}
 @media (min-aspect-ratio: 1/1){ .kir .kshout{left:calc(7% + 14px) !important;bottom:calc(var(--hand) + 30px)} }
 .kir.watch .myhand,.kir.online.watch .kshout,.kir.online.idle .kshout{display:none}
-.kir .kshout button{font-size:16px !important;padding:3px 8px !important;width:auto;white-space:nowrap}
+.kir .kshout button{font-size:15px !important;padding:2px 8px !important;width:auto;white-space:nowrap}
+@media (max-aspect-ratio: 1/1){ .kir .kshout{gap:4px} .kir .kshout button.mcb{font-size:16px !important;padding:3px 9px !important} }
 .kir .myhand .kc.drag{transition:none;z-index:5;box-shadow:0 calc(10px + var(--lift,0) * 26px) calc(18px + var(--lift,0) * 30px) rgba(0,0,0,.55), 0 0 0 2px rgba(255,179,92,.8)}
 @media (prefers-reduced-motion: reduce){ .kir .ktrack,.kir .kscan,.kir .ktbl{animation:none} }
 .kir .plate .tag{position:absolute;right:-6px;top:-11px;font-family:var(--f-mono);font-size:9px;letter-spacing:.14em;font-style:normal;padding:1px 4px;background:#1c1f1c;color:#9fe0a8;border:1px solid #3a4a3a;transform:rotate(3deg)}
@@ -2854,7 +2855,7 @@ body.kiropen{overflow:hidden}
     <div class="myhand" id="kmyhand" role="group" aria-label="Kätesi"></div>
   </div>
   <button class="knext" id="knext" type="button">SEURAAVA JAKO ▶</button>
-  <div class="kshout" id="kshout"><button type="button" data-k="1" class="mcb">HÖYLÄ McBUENO!!!</button><button type="button" data-k="0">HÖYLÄ!</button><button type="button" data-k="2">TÄÄ ON MUN PIENIN!</button><button type="button" data-k="3">EIIIIHHH!!!</button><button type="button" data-k="4">HÖLÖMÖ</button><button type="button" data-k="5">HEHE</button></div>
+  <div class="kshout" id="kshout"><button type="button" data-k="1" class="mcb">HÖYLÄ McBUENO!!!</button><button type="button" data-k="2">TÄÄ ON MUN PIENIN!</button><button type="button" data-k="3">EIIIIHHH!!!</button><button type="button" data-k="4">HÖLÖMÖ</button><button type="button" data-k="5">HEHE</button></div>
   <button class="kbangb" id="kbang" type="button" aria-label="Paukuta pöytää">PAUKUTA</button>
   <div class="kmatch" id="kmatch" aria-hidden="true"><svg viewBox="0 0 58 10"><defs><linearGradient id="kmw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8c48c"/><stop offset=".55" stop-color="#c99a5c"/><stop offset="1" stop-color="#9c7140"/></linearGradient><radialGradient id="kmh" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#d4483a"/><stop offset=".6" stop-color="#8f1f17"/><stop offset="1" stop-color="#4a0f0b"/></radialGradient></defs><rect x="1" y="3.2" width="48" height="3.6" rx=".6" fill="url(#kmw)"/><path d="M6 4.2h30M14 5.8h26" stroke="rgba(120,80,40,.35)" stroke-width=".4"/><ellipse cx="51.5" cy="5" rx="5.6" ry="3.9" fill="url(#kmh)"/></svg></div>
   <div class="kvig" aria-hidden="true"></div>
