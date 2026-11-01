@@ -51,7 +51,7 @@ test('10. kierroksen isoin kortti ohjaa ja uusi kierros alkaa vapaana', () => {
   K.play(st, 1, 12); assert.strictEqual(st.last, 7, 'a lower card does not lower the lap reference');
   assert.deepStrictEqual(K.legal(st.players[2].hand, st.last).map(x => x.v).sort((a, b) => a - b), [2, 9]);
   K.play(st, 2, 23); assert.strictEqual(st.last, null, 'new lap is free');
-  assert.deepStrictEqual(K.legal(st.players[0].hand, st.last).length, 2);
+  assert.strictEqual(st.turn, 2, 'the biggest card of the lap leads the next lap');
 });
 test('11. kortit sijoitetaan pelaajakohtaisesti', () => {
   const st = K.newGame({ seed: 5 });
@@ -110,23 +110,28 @@ test('kaikki yli rajan: pienin kokonaispiste säilyy', () => {
   K.play(st, 0, 1); K.play(st, 1, 11);
   assert.strictEqual(st.players[0].out, false); assert.strictEqual(st.players[1].out, true); assert.strictEqual(st.winner, 0);
 });
+function threeHands(top) {
+  // A plans a big card for the last lap; C wins every lap so it leads; B keeps a big card and gets planed
+  return [
+    [c(1, 2), c(2, 2, 'H'), c(3, 3), c(4, 3, 'H'), c(5, top, top === 16 ? 'X' : 'S'), c(6, 4)],
+    [c(11, 7), c(12, 8), c(13, 9), c(14, 10), c(15, 4, 'D'), c(16, top === 16 ? 14 : 13)],
+    [c(21, 2, 'C'), c(22, 5, 'C'), c(23, 10, 'C'), c(24, 11, 'C'), c(25, 12, 'C'), c(26, 13, 'C')]
+  ];
+}
+function playThree(st) {
+  [[0, 1], [1, 15], [2, 26], [2, 25], [0, 2], [1, 11], [2, 24], [0, 3], [1, 12], [2, 23], [0, 4], [1, 13], [2, 22], [0, 5], [1, 14]]
+    .forEach(([p, id]) => { assert.strictEqual(st.turn, p, 'turn order'); K.play(st, p, id); });
+}
+test('kierroksen voittaja aloittaa seuraavan', () => {
+  const st = K.newGame({ seed: 30 });
+  setHands(st, threeHands(14), 0);
+  K.play(st, 0, 1); K.play(st, 1, 15); K.play(st, 2, 26);
+  assert.strictEqual(st.turn, 2);
+});
 test('19. höyläys tunnistetaan', () => {
-  // A saves an ace; B has 4 and K at the end. A plays the ace right before B, B must drop the 4, keeps K and loses.
   const st = K.newGame({ seed: 12 });
-  setHands(st, [
-    [c(1, 2), c(2, 3), c(3, 4, 'H'), c(4, 14)],      // A (0)
-    [c(11, 5), c(12, 6), c(13, 4), c(14, 13)],       // B (1)
-    [c(21, 2, 'H'), c(22, 3, 'H'), c(23, 5, 'H'), c(24, 7)] // C (2)
-  ], 0);
-  K.play(st, 0, 1);  // A 2
-  K.play(st, 1, 11); // B 5
-  K.play(st, 2, 24); // C 7
-  K.play(st, 0, 2);  // A 3 (lowest)
-  K.play(st, 1, 12); // B 6
-  K.play(st, 2, 21); // C 2 (lowest)
-  K.play(st, 0, 4);  // A ace!
-  K.play(st, 1, 13); // B forced 4, keeps K
-  K.play(st, 2, 22); // C 3, keeps 5
+  setHands(st, threeHands(14), 0);
+  playThree(st);
   assert.strictEqual(st.phase, 'reveal');
   assert.deepStrictEqual(st.result.losers, [1]);
   assert.strictEqual(st.result.hoyla.length, 1); assert.strictEqual(st.result.hoyla[0].by, 0); assert.strictEqual(st.result.hoyla[0].mcbueno, false);
@@ -134,22 +139,13 @@ test('19. höyläys tunnistetaan', () => {
 test('pelkkä iso kortti ei ole höyläys', () => {
   const st = K.newGame({ seed: 13 });
   setHands(st, [[c(1, 2), c(2, 14)], [c(11, 5), c(12, 13)], [c(21, 6), c(22, 3)]], 0);
-  K.play(st, 0, 2); // A plays ace first: B can still play K
-  K.play(st, 1, 11); // B chooses 5 (lowest), keeps K by own choice -> n=1 so not late
-  K.play(st, 2, 22);
+  K.play(st, 0, 2); K.play(st, 1, 11); K.play(st, 2, 22);
   assert.deepStrictEqual(st.result.losers, [1]); assert.strictEqual(st.result.hoyla.length, 0);
 });
 test('20. McBueno tunnistetaan', () => {
   const st = K.newGame({ seed: 14 });
-  const A = [c(1, 2), c(2, 3), c(3, 4, 'H'), c(4, 5, 'H'), c(5, 16, 'X'), c(6, 2, 'D')];
-  const B = [c(11, 6), c(12, 7), c(13, 8), c(14, 9), c(15, 3, 'C'), c(16, 14)];
-  setHands(st, [A, B], 0);
-  st.players.forEach((p, i) => { if (i > 1) p.out = true; });
-  K.play(st, 0, 1); K.play(st, 1, 15); // 2, 3
-  K.play(st, 0, 2); K.play(st, 1, 11); // 3, 6
-  K.play(st, 0, 6); K.play(st, 1, 12); // 2(lowest), 7
-  K.play(st, 0, 3); K.play(st, 1, 13); // 4(lowest), 8
-  K.play(st, 0, 5); K.play(st, 1, 14); // EKSTRAJOKKA (A's 5th), B forced 9, keeps ace
+  setHands(st, threeHands(16), 0);
+  playThree(st);
   assert.deepStrictEqual(st.result.losers, [1]);
   assert.strictEqual(st.result.hoyla.length, 1); assert.strictEqual(st.result.hoyla[0].mcbueno, true);
 });

@@ -42,6 +42,7 @@
   // ---------- rules ----------
   // A lap is one card from every player still in. The first card of a lap is free; after that every card is compared
   // to the biggest card played in this lap, whoever played it. The lowest card of your hand is always allowed.
+  // Whoever played the biggest card of a lap (the latest one if equal) starts the next lap.
   function legal(hand, last) {
     if (last == null) return hand.slice();
     var m = minV(hand);
@@ -110,10 +111,11 @@
     // the biggest card of the current lap is what the next player has to beat; a new lap starts free
     if (st.last == null || card.v >= st.last){ st.last = card.v; st.lastBy = pid; st.lastId = card.id; }
     st.lapPos++;
-    if (st.lapPos >= st.lapN){ st.lapPos = 0; st.lap++; st.last = null; st.lastBy = null; st.lastId = null; }
+    var lead = null;
+    if (st.lapPos >= st.lapN){ lead = st.lastBy; ev.lapWinner = lead; st.lapPos = 0; st.lap++; st.last = null; st.lastBy = null; st.lastId = null; }
     st.roundLog.push(ev);
     if (active(st).every(function (q) { return q.hand.length === 1; })) { ev.endsRound = true; endRound(st); }
-    else st.turn = nextActive(st, pid);
+    else st.turn = lead != null ? lead : nextActive(st, pid); // whoever played the biggest card of the lap (the latest of equals) leads the next one
     return ev;
   }
 
@@ -216,15 +218,16 @@
     var hands = {}, order = [], me = v.me;
     v.players.forEach(function (p) { if (!p.out) { order.push(p.id); hands[p.id] = deal[p.id].slice(); } });
     hands[me] = hands[me].filter(function (c) { return c.id !== firstCard.id; });
-    var n = order.length, pos = (v.lapPos || 0) + 1, last = v.last == null ? firstCard.v : Math.max(v.last, firstCard.v), turn = me;
-    if (pos >= n){ pos = 0; last = null; }
+    var n = order.length, pos = (v.lapPos || 0) + 1, last, lead, next;
+    if (v.last == null || firstCard.v >= v.last){ last = firstCard.v; lead = me; } else { last = v.last; lead = v.lastBy; }
+    if (pos >= n){ pos = 0; last = null; next = lead; } else next = nextOf(me);
     function nextOf(id) { var i = order.indexOf(id); return order[(i + 1) % n]; }
     var guard = 0;
     while (!order.every(function (id) { return hands[id].length === 1; }) && guard++ < 200) {
-      turn = nextOf(turn);
-      var h = hands[turn], c = rolloutPick(h, last, rnd);
+      var turn = next, h = hands[turn], c = rolloutPick(h, last, rnd);
       hands[turn] = h.filter(function (x) { return x.id !== c.id; });
-      last = last == null ? c.v : Math.max(last, c.v); pos++; if (pos >= n){ pos = 0; last = null; }
+      if (last == null || c.v >= last){ last = c.v; lead = turn; }
+      pos++; if (pos >= n){ pos = 0; last = null; next = lead; } else next = nextOf(turn);
     }
     var max = 0; order.forEach(function (id) { if (hands[id][0].v > max) max = hands[id][0].v; });
     var pen = {}; order.forEach(function (id) { pen[id] = hands[id][0].v === max ? max : 0; });

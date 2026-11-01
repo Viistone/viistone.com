@@ -2332,7 +2332,15 @@ body.postiopen{overflow:hidden}
   --cw:60px;--ch:88px;--sw:34px;--sh:49px;--hand:158px;font-family:var(--f-mono)}
 .kir.on{display:block}
 body.kiropen{overflow:hidden}
-.kir .kwood{position:absolute;inset:-4%;background:#2f1f14 center/512px 512px repeat;filter:saturate(.85) contrast(1.05);transform-origin:50% 45%;transition:transform .6s}
+.kir .kwood{position:absolute;inset:0;background:radial-gradient(ellipse 70% 45% at 50% 30%, rgba(255,170,90,.16), transparent 70%), radial-gradient(ellipse at 50% 120%, #1a0f0a, #080504 70%), #070504}
+.kir .kwood::before,.kir .kwood::after{content:"";position:absolute;top:0;bottom:0;width:13%;background:linear-gradient(90deg, #120b08, #1d120d 60%, #0c0806);box-shadow:inset -6px 0 12px rgba(0,0,0,.7)}
+.kir .kwood::before{left:0}
+.kir .kwood::after{right:0;transform:scaleX(-1)}
+.kir .ktbl{position:absolute;left:10%;right:10%;top:5%;bottom:-24px;border-radius:12px;background:#6b2414 center/cover;
+  box-shadow:0 0 0 3px #2a0b05, 0 0 0 5px rgba(255,190,150,.12), 0 30px 70px rgba(0,0,0,.85), inset 0 0 40px rgba(20,4,0,.55), inset 0 2px 0 rgba(255,210,180,.25)}
+.kir .ktbl::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(100deg, transparent 20%, rgba(255,235,210,.07) 32%, transparent 40%, transparent 60%, rgba(255,235,210,.05) 70%, transparent 78%), radial-gradient(ellipse 40% 14% at 50% 22%, rgba(255,225,190,.16), transparent 70%), radial-gradient(ellipse 30% 10% at 46% 62%, rgba(255,225,190,.1), transparent 70%)}
+@media (min-aspect-ratio: 1/1){ .kir .ktbl{left:7%;right:7%;top:13%;bottom:-30px} .kir .kwood::before,.kir .kwood::after{width:0} }
 .kir.hu .kwood{transform:scale(1.06)}
 .kir .kvig{position:absolute;inset:0;pointer-events:none;z-index:6;background:radial-gradient(ellipse at 50% 46%, transparent 38%, rgba(0,0,0,.55) 82%, rgba(0,0,0,.8) 100%);transition:background .6s}
 .kir.hu .kvig{background:radial-gradient(ellipse at 50% 46%, transparent 28%, rgba(10,0,0,.7) 78%, rgba(0,0,0,.9) 100%)}
@@ -2343,7 +2351,7 @@ body.kiropen{overflow:hidden}
 @keyframes kshake{20%{transform:translate(4px,-2px) rotate(.4deg)}40%{transform:translate(-5px,2px)}60%{transform:translate(3px,1px) scale(1.02)}80%{transform:translate(-2px,-1px)}}
 @keyframes kquake{10%{transform:translate(9px,-4px) rotate(1deg) scale(1.05)}25%{transform:translate(-10px,5px) rotate(-1.2deg) scale(1.06)}40%{transform:translate(7px,3px) scale(1.05)}55%{transform:translate(-6px,-4px) rotate(.6deg) scale(1.04)}70%{transform:translate(4px,2px) scale(1.02)}85%{transform:translate(-2px,1px)}}
 .kir .kprops{position:absolute;inset:0;pointer-events:none}
-.kir .kprops svg{position:absolute;overflow:visible;transition:transform .25s}
+.kir .kprops svg{position:absolute;overflow:visible;transition:transform .25s;filter:drop-shadow(2px 6px 5px rgba(0,0,0,.55))}
 .kir .kprops svg.wob{animation:kwob .5s steps(5)}
 .kir .kprops svg.tip{transition:transform .5s cubic-bezier(.5,-0.4,.6,1.4)}
 @keyframes kwob{25%{transform:translate(2px,-1px) rotate(4deg)}50%{transform:translate(-2px,1px) rotate(-3deg)}75%{transform:translate(1px,0) rotate(2deg)}}
@@ -2370,30 +2378,43 @@ body.kiropen{overflow:hidden}
 @keyframes khit{20%{transform:translateX(-6px) rotate(-4deg)}40%{transform:translateX(6px) rotate(3deg)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
 .kir .stamp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-12deg);font-family:var(--f-osd);font-size:24px;letter-spacing:.08em;color:#c8321f;border:2px solid #c8321f;padding:0 6px;background:rgba(217,207,180,.75);white-space:nowrap}
 .kir .backs{display:flex;height:calc(var(--sh) * .62)}
-.kir .backs i{display:block;width:calc(var(--sw) * .62);height:calc(var(--sh) * .62);margin-left:-9px;border-radius:2px;background:#151311 url(assets/peli/mark.png) center/70% no-repeat;border:1px solid #4b443a;box-shadow:1px 1px 0 rgba(0,0,0,.5)}
+.kir .backs i{display:block;width:calc(var(--sw) * .62);height:calc(var(--sh) * .62);margin-left:-9px;border-radius:2px;background:url(assets/peli/mark.png) center/56% no-repeat, radial-gradient(circle, #2a1612, #120a08 70%);border:2px solid #fbf9f2;box-shadow:1px 2px 3px rgba(0,0,0,.55)}
 .kir .backs i:first-child{margin-left:0}
 .kir .played{display:flex;min-height:var(--sh);padding-left:0}
 .kir .played .kc{margin-left:calc(var(--sw) * -.42)}
 .kir .played .kc:first-child{margin-left:0}
 .kir .final{display:flex;justify-content:center;min-height:0}
 /* cards */
-.kc{position:relative;flex:none;width:var(--sw);height:var(--sh);border-radius:3px;background:#efe6cf;color:#1d1a16;box-shadow:1px 2px 0 rgba(0,0,0,.45), inset 0 0 0 1px rgba(80,60,30,.35), inset 0 0 8px rgba(120,90,40,.25);
-  font-family:Georgia, "Times New Roman", serif;overflow:hidden}
-.kc::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 20% 15%, rgba(255,255,255,.25), transparent 40%), radial-gradient(circle at 80% 90%, rgba(120,80,30,.18), transparent 50%)}
-.kc.red{color:#a3241a}
-.kc .tl{position:absolute;left:2px;top:1px;font-size:calc(var(--sw) * .36);line-height:.95;font-weight:700;text-align:center}
-.kc .ctr{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-size:calc(var(--sw) * .55);line-height:1}
-.kc .br{position:absolute;right:2px;bottom:1px;font-size:calc(var(--sw) * .36);line-height:.95;font-weight:700;text-align:center;transform:rotate(180deg)}
-.kc.face .ctr{font-size:calc(var(--sw) * .62);font-weight:700;border:1px solid currentColor;margin:0 18%;padding:4% 0;background:rgba(200,170,110,.25)}
-.kc.jok{background:#efe2c4}
-.kc.jok .ctr svg,.kc.xj .ctr img{display:block;margin:0 auto;width:62%;height:auto}
-.kc.xj{background:#1b1712;color:#f0c35a;box-shadow:1px 2px 0 rgba(0,0,0,.5), inset 0 0 0 1px #c99a3a, inset 0 0 10px rgba(240,195,90,.35)}
-.kc.xj .tl,.kc.xj .br{font-family:var(--f-osd);font-weight:400;font-size:calc(var(--sw) * .34)}
-.kc.xj .ctr small{display:block;font-family:var(--f-osd);font-size:calc(var(--sw) * .2);letter-spacing:.06em;margin-top:2px}
-.kc.back{background:#151311;border:1px solid #4b443a}
-.kc.back::before{content:"";position:absolute;inset:8%;border:1px solid rgba(232,224,200,.25);background:repeating-linear-gradient(45deg, rgba(232,224,200,.05) 0 2px, transparent 2px 6px)}
-.kc.back b{position:absolute;inset:0;background:url(assets/peli/mark.png) center/58% no-repeat;opacity:.85}
-.kc.back i{position:absolute;left:12%;right:12%;bottom:12%;height:9%;background:url(assets/logo.png) center/contain no-repeat;opacity:.7}
+.kc{position:relative;flex:none;width:var(--sw);height:var(--sh);border-radius:calc(var(--sw) * .08);background:#fbf9f2;color:#151515;
+  box-shadow:0 1px 0 rgba(0,0,0,.3), 1px 3px 5px rgba(0,0,0,.5), inset 0 0 0 1px rgba(0,0,0,.16);font-family:Georgia, "Times New Roman", serif;overflow:hidden}
+.kc::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(135deg, rgba(255,255,255,.35), transparent 35%, transparent 70%, rgba(110,90,60,.12))}
+.kc.red{color:#c0161c}
+.kc .cr{position:absolute;left:4%;top:3%;display:flex;flex-direction:column;align-items:center;line-height:.9;font-weight:700;letter-spacing:-.06em;font-size:calc(var(--sw) * .24)}
+.kc .cr.t10{letter-spacing:-.14em;font-size:calc(var(--sw) * .21)}
+.kc .cr i{font-style:normal;font-size:.82em;margin-top:1px}
+.kc .cr.b{left:auto;top:auto;right:5%;bottom:3%;transform:rotate(180deg)}
+.kc .pips{position:absolute;inset:14% 29%}
+.kc .pips span{position:absolute;transform:translate(-50%,-50%);font-size:calc(var(--sw) * .25);line-height:1}
+.kc .pips span.d{transform:translate(-50%,-50%) rotate(180deg)}
+.kc .pips span.ace{font-size:calc(var(--sw) * .58)}
+.kc.ace-s .pips span.ace{font-size:calc(var(--sw) * .74);text-shadow:0 0 0 #000}
+.kc .court{position:absolute;inset:12% 17%;border:1px solid rgba(0,0,0,.6);background:#fffaf0;overflow:hidden}
+.kc .court svg{display:block;width:100%;height:100%}
+.kc.jok .art{position:absolute;inset:15% 14% 12%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.kc.jok .art svg{width:88%;height:auto}
+.kc.jok .art b{font-family:Georgia, serif;font-size:calc(var(--sw) * .17);letter-spacing:.08em;margin-top:2%;color:#c0161c}
+.kc.jok .cr{font-size:calc(var(--sw) * .15);letter-spacing:0;line-height:1}
+.kc.xj{background:#111;color:#e7c25a;box-shadow:0 1px 0 rgba(0,0,0,.3), 1px 3px 5px rgba(0,0,0,.5), inset 0 0 0 1px #8a6a24, inset 0 0 0 calc(var(--sw) * .05) #111, inset 0 0 0 calc(var(--sw) * .06) #c99a3a}
+.kc.xj .art{position:absolute;inset:18% 16%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.kc.xj .art img{width:80%;height:auto;filter:sepia(1) saturate(3) brightness(.95) hue-rotate(-8deg)}
+.kc.xj .art b{font-family:Georgia, serif;font-weight:400;font-size:calc(var(--sw) * .13);letter-spacing:.12em;margin-top:6%;text-align:center;line-height:1.2}
+.kc.xj .cr{font-size:calc(var(--sw) * .17);letter-spacing:0}
+.kc.back{background:#fbf9f2}
+.kc.back::before{content:"";position:absolute;inset:6%;border-radius:calc(var(--sw) * .04);background:
+  repeating-linear-gradient(45deg, rgba(200,190,170,.13) 0 1px, transparent 1px 5px), repeating-linear-gradient(-45deg, rgba(200,190,170,.13) 0 1px, transparent 1px 5px), radial-gradient(circle at 50% 50%, #2a1612, #120a08 70%);
+  box-shadow:inset 0 0 0 1px rgba(232,200,150,.35), inset 0 0 0 calc(var(--sw) * .05) #120a08, inset 0 0 0 calc(var(--sw) * .06) rgba(232,200,150,.25)}
+.kc.back b{position:absolute;inset:0;background:url(assets/peli/mark.png) center/52% no-repeat;opacity:.9}
+.kc.back i{position:absolute;left:18%;right:18%;bottom:15%;height:7%;background:url(assets/logo.png) center/contain no-repeat;opacity:.75}
 .kc.old{filter:brightness(.55) saturate(.5)}
 .kc.lap{z-index:1}
 .kc.ref{outline:3px solid #ffb35c;outline-offset:1px;z-index:3;transform:translateY(-6px) scale(1.14);box-shadow:0 0 0 1px #000, 0 0 22px 4px rgba(255,170,70,.75);animation:kref 1s steps(2) infinite}
@@ -2505,6 +2526,7 @@ body.kiropen{overflow:hidden}
 <div class="kir idle" id="kir" role="dialog" aria-label="Peli: Kirilii">
   <div class="kwood" id="kwood"></div>
   <div class="kstage" id="kstage">
+    <div class="ktbl" id="ktbl"></div>
     <div class="kprops" id="kprops"></div>
     <div id="kseats"></div>
     <div class="kphone" id="kphone" role="button" tabindex="0" aria-label="Pistetaulukko, suurenna"><div class="scr" id="kscr"></div>
@@ -2544,7 +2566,7 @@ body.kiropen{overflow:hidden}
     <div class="rules">
       <p><b>Kortit.</b> 55 korttia: tavalliset 2–A, kaksi jokeria (15) ja yksi Ekstrajokka (16). Maat eivät merkitse mitään.</p>
       <p><b>Jako.</b> Jokainen saa kuusi korttia. Kortteja ei nosteta.</p>
-      <p><b>Vuoro.</b> Pelaa kortti omaan eteesi. Kierroksella jokainen pelaa yhden kortin. Kierroksen ensimmäinen kortti on vapaa, sen jälkeen kortin pitää olla vähintään yhtä suuri kuin kierroksen isoin kortti, kuka sen sitten pelasikin. Isoin on korostettu. Käden pienimmän saa aina pelata. Vuoroa ei voi ohittaa. Jakoon kuuluu viisi kierrosta.</p>
+      <p><b>Vuoro.</b> Pelaa kortti omaan eteesi. Kierroksella jokainen pelaa yhden kortin. Kierroksen ensimmäinen kortti on vapaa, sen jälkeen kortin pitää olla vähintään yhtä suuri kuin kierroksen isoin kortti, kuka sen sitten pelasikin. Isoin on korostettu. Kierroksen isoimman kortin pelannut aloittaa seuraavan kierroksen, tasatilanteessa viimeisin. Käden pienimmän saa aina pelata. Vuoroa ei voi ohittaa. Jakoon kuuluu viisi kierrosta.</p>
       <p><b>Loppu.</b> Kun jokaisella on yksi kortti, kortit paljastetaan. Suurimman kortin jättänyt saa sen arvon pisteinä, tasatilanteessa kaikki suurimmat. 21 pistettä ja olet ulkona.</p>
       <p><b>Höylääminen.</b> Säästä iso kortti loppuun ja pelaa se juuri ennen vastustajaa. Hänen on pakko pelata pienin korttinsa ja iso jää käteen. Ekstrajokalla tehtynä se on <b>Höylä McBueno</b>.</p>
       <p><b>Heads Up.</b> Kun kaksi on jäljellä, alkaa finaali. Viimeinen pöydässä voittaa.</p>
@@ -2583,51 +2605,66 @@ body.kiropen{overflow:hidden}
   var st = null, gen = 0, busy = false, selected = null;
 
   // ---------- table texture: worn varnish, grain, rings, scratches ----------
+  // glossy red-brown varnished table, grain running along its length
   function wood(){
-    var c = document.createElement('canvas'); c.width = c.height = 512; var g = c.getContext('2d');
-    g.fillStyle = '#3a2617'; g.fillRect(0, 0, 512, 512);
-    for (var y = 0; y < 512; y++){ var v = Math.sin(y * .09 + Math.sin(y * .013) * 4) * .5 + Math.sin(y * .31) * .2 + Math.sin(y * .021 + 1) * .3;
-      g.fillStyle = v > 0 ? 'rgba(90,58,32,' + (v * .32) + ')' : 'rgba(18,10,5,' + (-v * .36) + ')'; g.fillRect(0, y, 512, 1); }
-    for (var i = 0; i < 2600; i++){ var x = Math.random() * 512, yy = Math.random() * 512, l = 6 + Math.random() * 40;
-      g.fillStyle = Math.random() < .5 ? 'rgba(20,11,5,.12)' : 'rgba(120,85,50,.07)'; g.fillRect(x, yy, l, 1); }
-    for (i = 0; i < 70; i++){ var sx = Math.random() * 512, sy = Math.random() * 512, a = Math.random() * 6.28, L = 10 + Math.random() * 70;
-      g.strokeStyle = 'rgba(205,170,120,' + (.05 + Math.random() * .1) + ')'; g.lineWidth = .7; g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + Math.cos(a) * L, sy + Math.sin(a) * L); g.stroke(); }
-    for (i = 0; i < 9; i++){ var rx = Math.random() * 512, ry = Math.random() * 512, r = 26 + Math.random() * 14;
-      g.strokeStyle = 'rgba(15,8,3,' + (.18 + Math.random() * .2) + ')'; g.lineWidth = 2 + Math.random() * 3; g.beginPath(); g.arc(rx, ry, r, Math.random() * 2, 2 + Math.random() * 4.2); g.stroke(); }
-    for (i = 0; i < 14; i++){ var bx = Math.random() * 512, by = Math.random() * 512, br = 10 + Math.random() * 40, gr = g.createRadialGradient(bx, by, 0, bx, by, br);
-      gr.addColorStop(0, 'rgba(10,5,2,' + (.15 + Math.random() * .25) + ')'); gr.addColorStop(1, 'rgba(10,5,2,0)'); g.fillStyle = gr; g.fillRect(bx - br, by - br, br * 2, br * 2); }
-    for (i = 0; i < 40; i++){ var wx = Math.random() * 512, wy = Math.random() * 512; g.fillStyle = 'rgba(200,180,140,.07)'; g.fillRect(wx, wy, 3 + Math.random() * 30, 2 + Math.random() * 12); }
-    for (i = 0; i < 3000; i++){ g.fillStyle = 'rgba(0,0,0,' + Math.random() * .12 + ')'; g.fillRect(Math.random() * 512, Math.random() * 512, 1, 1); }
-    $('kwood').style.backgroundImage = 'url(' + c.toDataURL('image/jpeg', .82) + ')';
+    var vert = innerHeight > innerWidth, W = vert ? 384 : 1024, H = vert ? 1024 : 384, c = document.createElement('canvas'); c.width = W; c.height = H; var g = c.getContext('2d');
+    var L = vert ? H : W, A = vert ? W : H;
+    function line(a, x0, x1, col, w){ g.fillStyle = col; if (vert) g.fillRect(a, x0, w, x1 - x0); else g.fillRect(x0, a, x1 - x0, w); }
+    g.fillStyle = '#6a2313'; g.fillRect(0, 0, W, H);
+    for (var a = 0; a < A; a++){ var v = Math.sin(a * .21 + Math.sin(a * .043) * 3) * .5 + Math.sin(a * .9) * .15 + Math.sin(a * .017 + 2) * .35;
+      line(a, 0, L, v > 0 ? 'rgba(150,62,34,' + v * .35 + ')' : 'rgba(35,8,2,' + (-v * .45) + ')', 1); }
+    for (var i = 0; i < 900; i++){ var aa = Math.random() * A, x0 = Math.random() * L, len = 40 + Math.random() * 260;
+      line(aa, x0, x0 + len, Math.random() < .55 ? 'rgba(30,6,1,.16)' : 'rgba(190,90,55,.08)', Math.random() < .2 ? 2 : 1); }
+    for (i = 0; i < 6; i++){ var ka = Math.random() * A, kx = Math.random() * L, gr = vert ? g.createRadialGradient(ka, kx, 0, ka, kx, 26) : g.createRadialGradient(kx, ka, 0, kx, ka, 26);
+      gr.addColorStop(0, 'rgba(25,5,0,.55)'); gr.addColorStop(1, 'rgba(25,5,0,0)'); g.fillStyle = gr; if (vert) g.fillRect(ka - 26, kx - 26, 52, 52); else g.fillRect(kx - 26, ka - 26, 52, 52); }
+    for (i = 0; i < 120; i++){ var sx = Math.random() * W, sy = Math.random() * H, an = Math.random() * 6.28, ln = 6 + Math.random() * 50;
+      g.strokeStyle = 'rgba(240,190,160,' + (.04 + Math.random() * .08) + ')'; g.lineWidth = .6; g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + Math.cos(an) * ln, sy + Math.sin(an) * ln); g.stroke(); }
+    for (i = 0; i < 7; i++){ var rx = Math.random() * W, ry = Math.random() * H, rr = 22 + Math.random() * 12;
+      g.strokeStyle = 'rgba(255,225,200,' + (.05 + Math.random() * .06) + ')'; g.lineWidth = 1.5 + Math.random() * 2; g.beginPath(); g.arc(rx, ry, rr, Math.random() * 2, 2.5 + Math.random() * 3.5); g.stroke(); }
+    for (i = 0; i < 2500; i++){ g.fillStyle = 'rgba(0,0,0,' + Math.random() * .1 + ')'; g.fillRect(Math.random() * W, Math.random() * H, 1, 1); }
+    var e = vert ? g.createLinearGradient(0, 0, W, 0) : g.createLinearGradient(0, 0, 0, H);
+    e.addColorStop(0, 'rgba(20,4,0,.45)'); e.addColorStop(.08, 'rgba(20,4,0,0)'); e.addColorStop(.92, 'rgba(20,4,0,0)'); e.addColorStop(1, 'rgba(20,4,0,.45)'); g.fillStyle = e; g.fillRect(0, 0, W, H);
+    $('ktbl').style.backgroundImage = 'url(' + c.toDataURL('image/jpeg', .85) + ')';
   }
 
-  // ---------- props: drawn, not emoji ----------
-  var PROPS = [];
-  function pint(full){ var h = 'rgba(232,224,200,.5)', lvl = full ? 1 : .45;
-    return '<svg width="64" height="64" viewBox="-34 -34 68 68"><ellipse cx="4" cy="6" rx="28" ry="26" fill="rgba(0,0,0,.35)"/><circle r="27" fill="rgba(200,190,170,.12)" stroke="' + h + '" stroke-width="2"/>' +
-      '<circle r="' + (24 * lvl) + '" fill="#b8741c" opacity=".85"/><circle r="' + (21 * lvl) + '" fill="#d99a35" opacity=".6"/>' + (full ? '<circle r="18" fill="#efe3c4" opacity=".85"/><circle cx="-5" cy="-4" r="6" fill="#fff8e6" opacity=".6"/>' : '') +
-      '<path d="M26 -8 Q40 -8 40 4 Q40 16 26 14" fill="none" stroke="' + h + '" stroke-width="4"/><circle cx="-12" cy="-14" r="5" fill="rgba(255,255,255,.18)"/></svg>'; }
-  function glass(){ return '<svg width="48" height="48" viewBox="-24 -24 48 48"><ellipse cx="3" cy="4" rx="20" ry="19" fill="rgba(0,0,0,.35)"/><circle r="19" fill="rgba(200,190,170,.1)" stroke="rgba(232,224,200,.45)" stroke-width="2"/><circle r="11" fill="#a86a1c" opacity=".55"/><circle cx="-7" cy="-8" r="4" fill="rgba(255,255,255,.2)"/></svg>'; }
-  function can(col){ return '<svg width="40" height="40" viewBox="-20 -20 40 40"><ellipse cx="3" cy="4" rx="17" ry="16" fill="rgba(0,0,0,.4)"/><circle r="16" fill="' + col + '"/><circle r="13" fill="#bdbab2"/><circle r="11" fill="#a9a59c"/><rect x="-3" y="-9" width="6" height="9" rx="3" fill="#8a867d"/><ellipse cy="5" rx="5" ry="3" fill="#2a2724"/></svg>'; }
-  function lyingCan(col){ return '<svg width="70" height="34" viewBox="-35 -17 70 34"><rect x="-30" y="-12" width="58" height="26" rx="5" fill="rgba(0,0,0,.35)"/><rect x="-32" y="-14" width="58" height="26" rx="5" fill="' + col + '"/><rect x="-32" y="-14" width="7" height="26" rx="2" fill="#bdbab2"/><rect x="-14" y="-10" width="30" height="4" fill="rgba(255,255,255,.25)"/><text x="2" y="7" font-family="VT323, monospace" font-size="11" fill="rgba(255,255,255,.75)" text-anchor="middle">IV A</text></svg>'; }
-  function receipt(){ var ln = ''; for (var i = 0; i < 9; i++) ln += '<rect x="6" y="' + (12 + i * 7) + '" width="' + (20 + (i * 13) % 22) + '" height="2" fill="#7d776a"/>';
-    return '<svg width="54" height="96" viewBox="0 0 54 96"><path d="M4 6 L50 3 L52 90 L6 94 Z" fill="rgba(0,0,0,.3)" transform="translate(3,3)"/><path d="M2 4 L48 2 L50 88 L4 92 Z" fill="#ece6d6"/>' + ln + '<rect x="6" y="78" width="22" height="3" fill="#3b372f"/><rect x="32" y="78" width="12" height="3" fill="#3b372f"/></svg>'; }
+  // ---------- props: pub glassware seen from above, with reflections on the varnish ----------
+  var PROPS = [], uid = 0;
+  function gid(p){ return p + (uid++); }
+  function refl(col, r){ return '<ellipse cx="' + r * .25 + '" cy="' + r * .9 + '" rx="' + r * .9 + '" ry="' + r * .55 + '" fill="' + col + '" opacity=".35" filter="url(#kblur)"/>'; }
+  function stout(){ var a = gid('s'), b = gid('h');
+    return '<svg width="70" height="70" viewBox="-35 -35 70 70"><defs><radialGradient id="' + a + '" cx="45%" cy="40%"><stop offset="0" stop-color="#3a1d10"/><stop offset=".7" stop-color="#140804"/><stop offset="1" stop-color="#0a0402"/></radialGradient>' +
+      '<radialGradient id="' + b + '" cx="40%" cy="38%"><stop offset="0" stop-color="#fbf0d8"/><stop offset=".8" stop-color="#e6d0a4"/><stop offset="1" stop-color="#bb9a62"/></radialGradient></defs>' + refl('#000', 26) +
+      '<circle r="27" fill="rgba(230,230,220,.08)" stroke="rgba(255,255,255,.45)" stroke-width="1.6"/><circle r="24.5" fill="url(#' + a + ')"/><circle r="20.5" fill="url(#' + b + ')"/>' +
+      '<circle cx="-6" cy="5" r="1.4" fill="rgba(170,140,90,.5)"/><circle cx="7" cy="-3" r="1" fill="rgba(170,140,90,.5)"/><circle cx="3" cy="9" r="1.2" fill="rgba(170,140,90,.4)"/>' +
+      '<path d="M-19 -12 A23 23 0 0 1 -6 -24" stroke="rgba(255,255,255,.75)" stroke-width="2" fill="none" stroke-linecap="round"/></svg>'; }
+  function lager(stem){ var a = gid('l');
+    return '<svg width="64" height="64" viewBox="-32 -32 64 64"><defs><radialGradient id="' + a + '" cx="42%" cy="40%"><stop offset="0" stop-color="#ffe08a"/><stop offset=".65" stop-color="#e3a12c"/><stop offset="1" stop-color="#a8650f"/></radialGradient></defs>' + refl('#f0a030', 24) +
+      (stem ? '<circle r="27" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1"/>' : '') +
+      '<circle r="23" fill="rgba(240,240,230,.08)" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/><circle r="20.5" fill="url(#' + a + ')"/><circle r="20.5" fill="none" stroke="#fff6dc" stroke-width="2.5" opacity=".85"/>' +
+      '<path d="M-16 -10 A19 19 0 0 1 -4 -19" stroke="rgba(255,255,255,.8)" stroke-width="2" fill="none" stroke-linecap="round"/></svg>'; }
+  function shot(){ var a = gid('o');
+    return '<svg width="30" height="30" viewBox="-15 -15 30 30"><defs><radialGradient id="' + a + '" cx="40%" cy="38%"><stop offset="0" stop-color="#4a1010"/><stop offset="1" stop-color="#0d0202"/></radialGradient></defs>' +
+      '<circle r="12" fill="rgba(230,230,220,.12)" stroke="rgba(255,255,255,.55)" stroke-width="2"/><circle r="8.5" fill="url(#' + a + ')"/><path d="M-8 -5 A9.5 9.5 0 0 1 -2 -9.5" stroke="rgba(255,255,255,.75)" stroke-width="1.4" fill="none"/></svg>'; }
+  function tray(){ var a = gid('t'), b = gid('r');
+    return '<svg width="140" height="140" viewBox="-70 -70 140 140"><defs><radialGradient id="' + a + '" cx="45%" cy="40%"><stop offset="0" stop-color="#2a2a2a"/><stop offset=".7" stop-color="#121212"/><stop offset="1" stop-color="#060606"/></radialGradient>' +
+      '<linearGradient id="' + b + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a5a5a"/><stop offset=".5" stop-color="#151515"/><stop offset="1" stop-color="#3a3a3a"/></linearGradient></defs>' +
+      '<circle r="62" fill="url(#' + b + ')"/><circle r="57" fill="url(#' + a + ')"/><ellipse cx="-14" cy="-22" rx="30" ry="9" fill="rgba(255,255,255,.07)" transform="rotate(-25)"/></svg>'; }
   function coins(){ return '<svg width="54" height="34" viewBox="0 0 54 34"><circle cx="12" cy="16" r="9" fill="#b07a3a" stroke="#6d4a20"/><circle cx="26" cy="20" r="10" fill="#c8c2b0" stroke="#7b766a"/><circle cx="42" cy="12" r="7" fill="#b07a3a" stroke="#6d4a20"/><circle cx="26" cy="20" r="6" fill="none" stroke="#9a9484"/></svg>'; }
-  function caps(){ var s = ''; [[8, 8, '#c8321f'], [26, 14, '#d4b23a'], [14, 26, '#4a6a8a']].forEach(function(c){ s += '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="6.5" fill="' + c[2] + '" stroke="#2a2420" stroke-dasharray="2 1.4"/>'; });
-    return '<svg width="36" height="36" viewBox="0 0 36 36">' + s + '</svg>'; }
-  function keys(){ return '<svg width="64" height="40" viewBox="0 0 64 40"><circle cx="12" cy="20" r="9" fill="none" stroke="#b9b4a6" stroke-width="2.5"/><path d="M20 18 L50 12 L52 16 L46 17 L47 20 L42 21 L42 18 L21 23 Z" fill="#c9a24a"/><path d="M18 24 L44 32 L42 36 L18 28 Z" fill="#a8a294"/><rect x="38" y="4" width="16" height="10" rx="3" fill="#2a2a2a" transform="rotate(14 46 9)"/></svg>'; }
-  function napkin(){ return '<svg width="62" height="58" viewBox="0 0 62 58"><path d="M8 14 L22 4 L40 8 L56 2 L52 22 L60 38 L42 52 L24 56 L10 44 L2 28 Z" fill="rgba(0,0,0,.28)" transform="translate(3,3)"/><path d="M8 14 L22 4 L40 8 L56 2 L52 22 L60 38 L42 52 L24 56 L10 44 L2 28 Z" fill="#e9e3d3"/><path d="M14 20 L30 26 L46 18 M20 40 L34 30 L48 40 M26 10 L30 26 L24 48" stroke="#c9c1ad" fill="none"/></svg>'; }
-  function stain(){ return '<svg width="70" height="70" viewBox="0 0 70 70"><circle cx="35" cy="35" r="27" fill="none" stroke="rgba(15,8,3,.35)" stroke-width="3"/><circle cx="37" cy="33" r="25" fill="none" stroke="rgba(15,8,3,.2)" stroke-width="1.5"/></svg>'; }
+  function receipt(){ var ln = ''; for (var i = 0; i < 9; i++) ln += '<rect x="6" y="' + (12 + i * 7) + '" width="' + (20 + (i * 13) % 22) + '" height="2" fill="#7d776a"/>';
+    return '<svg width="54" height="96" viewBox="0 0 54 96"><path d="M2 4 L48 2 L50 88 L4 92 Z" fill="#ece6d6"/>' + ln + '<rect x="6" y="78" width="22" height="3" fill="#3b372f"/><rect x="32" y="78" width="12" height="3" fill="#3b372f"/></svg>'; }
+  function caps(){ var s = ''; [[8, 8, '#c8321f'], [26, 14, '#d4b23a']].forEach(function(c){ s += '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="6.5" fill="' + c[2] + '" stroke="#2a2420" stroke-dasharray="2 1.4"/>'; });
+    return '<svg width="36" height="26" viewBox="0 0 36 26">' + s + '</svg>'; }
   function buildProps(){
-    var land = innerWidth > innerHeight, P = $('kprops'), html = '';
+    var land = innerWidth > innerHeight, P = $('kprops'), html = '<svg width="0" height="0" style="position:absolute"><filter id="kblur"><feGaussianBlur stdDeviation="4"/></filter></svg>';
+    // [kind, x%, y%, rotation, key, extra]
     PROPS = land ? [
-      ['stain', 30, 52, 0], ['stain', 68, 30, 0], ['pint', 13, 34, -10, 'p1'], ['pint', 86, 33, 12, 'p5', 1], ['glass', 37, 22, 0, 'g3'], ['glass', 63, 24, 0], ['can', 24, 72, 0, 'c1', '#7a1e18'],
-      ['lcan', 74, 70, -20, '', '#2a4a6a'], ['receipt', 58, 50, 18], ['coins', 44, 66, 0], ['caps', 64, 62, 0], ['keys', 31, 42, -18], ['napkin', 80, 54, 0], ['pint', 30, 80, 0, 'p3', 1]
+      ['tray', 70, 46, 0], ['shot', 67, 42, 0], ['shot', 73, 44, 0], ['shot', 69, 51, 0], ['stout', 38, 72, 0, 'p1'], ['stout', 62, 28, 0, 'p3'], ['lager', 24, 62, 0, '', 1], ['stout', 80, 66, 0, 'p5'],
+      ['shot', 38, 64, 0], ['shot', 58, 66, 0], ['coins', 44, 70, 0], ['receipt', 84, 38, 18], ['caps', 18, 44, 0]
     ] : [
-      ['stain', 22, 82, 0], ['stain', 66, 44, 0], ['glass', 29, 10, 0, 'g3'], ['glass', 71, 11, 0], ['keys', 50, 24, -16], ['pint', 13, 80, -10, 'p1'], ['pint', 86, 79, 12, 'p5', 1],
-      ['can', 34, 72, 0, 'c1', '#7a1e18'], ['lcan', 72, 90, -24, '', '#2a4a6a'], ['receipt', 62, 78, 16], ['coins', 44, 82, 0], ['caps', 30, 92, 0], ['napkin', 12, 94, 0]
+      ['tray', 50, 71, 0], ['shot', 46, 68, 0], ['shot', 54, 67, 0], ['shot', 51, 75, 0], ['stout', 50, 24, 0, 'p3'], ['lager', 27, 44, 0, 'p1', 1], ['stout', 74, 44, 0, 'p5'],
+      ['shot', 30, 80, 0], ['stout', 72, 84, 0], ['coins', 30, 62, 0], ['receipt', 74, 62, 14], ['caps', 26, 26, 0]
     ];
-    PROPS.forEach(function(p){ var f = {stain:stain, pint:function(){ return pint(p[5]); }, glass:glass, can:function(){ return can(p[5]); }, lcan:function(){ return lyingCan(p[5]); }, receipt:receipt, coins:coins, caps:caps, keys:keys, napkin:napkin}[p[0]];
+    PROPS.forEach(function(p){ var f = {stout:stout, lager:function(){ return lager(p[5]); }, shot:shot, tray:tray, coins:coins, receipt:receipt, caps:caps}[p[0]];
       var s = f(); html += s.replace('<svg ', '<svg data-k="' + (p[4] || '') + '" style="left:' + p[1] + '%;top:' + p[2] + '%;transform:translate(-50%,-50%) rotate(' + p[3] + 'deg)" '); });
     P.innerHTML = html;
   }
@@ -2649,13 +2686,38 @@ body.kiropen{overflow:hidden}
 
   // ---------- cards ----------
   var SUIT = {S:'♠', H:'♥', D:'♦', C:'♣'};
-  var JESTER = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 9 L5 3 L8 7 L10 2 L12 7 L15 3 L17 9 Z" fill="#a3241a"/><circle cx="5" cy="3" r="1.2" fill="#d4a62a"/><circle cx="10" cy="2" r="1.2" fill="#d4a62a"/><circle cx="15" cy="3" r="1.2" fill="#d4a62a"/><circle cx="10" cy="13" r="5" fill="#f2d9b0" stroke="#1d1a16" stroke-width=".8"/><circle cx="8.2" cy="12" r=".8" fill="#1d1a16"/><circle cx="11.8" cy="12" r=".8" fill="#1d1a16"/><path d="M7.3 14.6 Q10 17.4 12.7 14.6" stroke="#a3241a" stroke-width="1" fill="none"/></svg>';
+  // standard pip layouts (x%, y%) on the inner area
+  var PIPS = {2:[[50,0],[50,100]], 3:[[50,0],[50,50],[50,100]], 4:[[0,0],[100,0],[0,100],[100,100]], 5:[[0,0],[100,0],[50,50],[0,100],[100,100]],
+    6:[[0,0],[100,0],[0,50],[100,50],[0,100],[100,100]], 7:[[0,0],[100,0],[50,25],[0,50],[100,50],[0,100],[100,100]], 8:[[0,0],[100,0],[50,25],[0,50],[100,50],[50,75],[0,100],[100,100]],
+    9:[[0,0],[100,0],[0,33],[100,33],[50,50],[0,67],[100,67],[0,100],[100,100]], 10:[[0,0],[100,0],[50,17],[0,33],[100,33],[0,67],[100,67],[50,83],[0,100],[100,100]]};
+  var JESTER = '<svg viewBox="0 0 40 46" aria-hidden="true"><path d="M8 20 L4 6 L14 14 L20 2 L26 14 L36 6 L32 20 Z" fill="#c0161c"/><path d="M8 20 L14 14 L20 20 L26 14 L32 20" fill="#1f3d7a"/>' +
+    '<circle cx="4" cy="6" r="2.4" fill="#d9a521"/><circle cx="20" cy="2.5" r="2.4" fill="#d9a521"/><circle cx="36" cy="6" r="2.4" fill="#d9a521"/><ellipse cx="20" cy="27" rx="9" ry="9.5" fill="#f3d6b4" stroke="#222" stroke-width=".8"/>' +
+    '<circle cx="16.5" cy="25.5" r="1.1" fill="#222"/><circle cx="23.5" cy="25.5" r="1.1" fill="#222"/><path d="M14.5 30 Q20 36 25.5 30" stroke="#c0161c" stroke-width="1.6" fill="none"/>' +
+    '<path d="M6 46 L10 38 L20 42 L30 38 L34 46 Z" fill="#1f3d7a"/><path d="M10 38 L15 46 M30 38 L25 46" stroke="#d9a521" stroke-width="2"/></svg>';
+  // a double-headed court figure, drawn once per card
+  function court(c){
+    var red = c.s === 'H' || c.s === 'D', A = red ? '#c0161c' : '#1f3d7a', B = red ? '#1f3d7a' : '#c0161c', Y = '#d9a521', skin = '#f3d6b4', hair = c.v === 12 ? '#d9a521' : '#3b2a1a';
+    var hat = c.v === 13 ? '<path d="M12 9 L13 3 L16 6 L20 1.5 L24 6 L27 3 L28 9 Z" fill="' + Y + '" stroke="#222" stroke-width=".5"/><rect x="12" y="8.5" width="16" height="2" fill="' + A + '"/>'
+      : c.v === 12 ? '<path d="M13 9 Q20 1 27 9 Z" fill="' + Y + '" stroke="#222" stroke-width=".5"/><circle cx="20" cy="4.5" r="1.4" fill="' + A + '"/>'
+      : '<path d="M11 10 L29 10 L26 4 L15 5 Z" fill="' + A + '" stroke="#222" stroke-width=".5"/><path d="M26 5 Q32 2 33 7" stroke="' + Y + '" stroke-width="1.6" fill="none"/>';
+    var beard = c.v === 13 ? '<path d="M15 16 Q20 23 25 16 L25 19 Q20 25 15 19 Z" fill="#5a3a1e"/>' : '';
+    var half = '<rect x="0" y="0" width="40" height="30" fill="#fffaf0"/>' +
+      '<path d="M2 30 Q4 20 13 19 L27 19 Q36 20 38 30 Z" fill="' + A + '" stroke="#222" stroke-width=".5"/><path d="M13 19 L20 30 L27 19" fill="' + B + '" stroke="#222" stroke-width=".5"/>' +
+      '<path d="M6 30 L9 22 M34 30 L31 22" stroke="' + Y + '" stroke-width="1.6"/><path d="M16 19 L20 24 L24 19" fill="none" stroke="' + Y + '" stroke-width="1.2"/>' +
+      '<path d="M13 13 Q13 7 20 7 Q27 7 27 13 L27 17 Q20 21 13 17 Z" fill="' + hair + '"/><ellipse cx="20" cy="14" rx="5.2" ry="5.8" fill="' + skin + '" stroke="#222" stroke-width=".5"/>' +
+      '<circle cx="18" cy="13.5" r=".7" fill="#222"/><circle cx="22" cy="13.5" r=".7" fill="#222"/><path d="M18.5 16.8 Q20 17.8 21.5 16.8" stroke="#a03030" stroke-width=".6" fill="none"/>' + beard + hat +
+      '<text x="4" y="8" font-size="7" fill="' + (red ? '#c0161c' : '#151515') + '" font-family="Georgia,serif">' + SUIT[c.s] + '</text>';
+    return '<div class="court"><svg viewBox="0 0 40 60" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' + half + '<g transform="rotate(180 20 30)">' + half + '</g><line x1="0" y1="30" x2="40" y2="30" stroke="#222" stroke-width=".4"/></svg></div>';
+  }
   function cardHTML(c, extra){
     if (!c) return '<div class="kc back ' + (extra || '') + '"><b></b><i></i></div>';
-    if (c.v === 16) return '<div class="kc xj ' + (extra || '') + '" data-id="' + c.id + '"><span class="tl">EJ</span><span class="ctr"><img src="assets/peli/mark.png" alt=""><small>EKSTRA</small></span><span class="br">EJ</span></div>';
-    if (c.v === 15) return '<div class="kc jok ' + (extra || '') + '" data-id="' + c.id + '"><span class="tl">JO<br>K</span><span class="ctr">' + JESTER + '</span><span class="br">JO<br>K</span></div>';
-    var red = c.s === 'H' || c.s === 'D', lab = K.label(c), face = c.v >= 11 && c.v <= 13;
-    return '<div class="kc ' + (red ? 'red ' : '') + (face ? 'face ' : '') + (extra || '') + '" data-id="' + c.id + '"><span class="tl">' + lab + '<br>' + SUIT[c.s] + '</span><span class="ctr">' + (face ? lab : SUIT[c.s]) + '</span><span class="br">' + lab + '<br>' + SUIT[c.s] + '</span></div>';
+    if (c.v === 16) return '<div class="kc xj ' + (extra || '') + '" data-id="' + c.id + '"><span class="cr">EJ</span><span class="art"><img src="assets/peli/mark.png" alt=""><b>EKSTRA<br>JOKKA</b></span><span class="cr b">EJ</span></div>';
+    if (c.v === 15) return '<div class="kc jok ' + (extra || '') + '" data-id="' + c.id + '"><span class="cr">J<br>O<br>K</span><span class="art">' + JESTER + '<b>JOKERI</b></span><span class="cr b">J<br>O<br>K</span></div>';
+    var red = c.s === 'H' || c.s === 'D', lab = K.label(c), su = SUIT[c.s], body = '';
+    if (c.v >= 11 && c.v <= 13) body = court(c);
+    else if (c.v === 14) body = '<div class="pips"><span class="ace" style="left:50%;top:50%">' + su + '</span></div>';
+    else body = '<div class="pips">' + PIPS[c.v].map(function(p){ return '<span class="' + (p[1] > 50 ? 'd' : '') + '" style="left:' + p[0] + '%;top:' + p[1] + '%">' + su + '</span>'; }).join('') + '</div>';
+    return '<div class="kc ' + (red ? 'red ' : '') + (c.v === 14 && c.s === 'S' ? 'ace-s ' : '') + (extra || '') + '" data-id="' + c.id + '"><span class="cr' + (c.v === 10 ? ' t10' : '') + '">' + lab + '<i>' + su + '</i></span>' + body + '<span class="cr b' + (c.v === 10 ? ' t10' : '') + '">' + lab + '<i>' + su + '</i></span></div>';
   }
 
   // ---------- sound ----------
@@ -2714,16 +2776,16 @@ body.kiropen{overflow:hidden}
   function hint(){
     var h = '', me = st.players[0];
     if (st.phase === 'play' && st.turn === 0 && !busy){
-      if (st.last == null) h = 'Kierros ' + st.lap + '/5 · pelaa mikä tahansa';
+      if (st.last == null) h = (st.lap > 1 ? 'Isoin oli sinun, aloitat kierroksen ' : 'Kierros ') + st.lap + '/5 · pelaa mikä tahansa';
       else { var m = K.minV(me.hand), any = me.hand.some(function(c){ return c.v >= st.last; }), who = st.players[st.lastBy].name;
         h = any ? 'Kysytty ' + nm(st.last) + ' · ' + who + ' · tai pienin ' + nm(m) : 'Kysytty ' + nm(st.last) + ' · pakko pelata pienin ' + nm(m); }
       if (selected != null) h = 'Napauta uudestaan: pelaa';
       if (me.hand.length === 2 && selected == null) h += ' · toinen jää';
     } else if (st.phase === 'play' && me.out) h = 'Olet ulkona. Katsot loppuun.';
-    else if (st.phase === 'play') h = st.players[st.turn].name + ' miettii…';
+    else if (st.phase === 'play') h = (st.last == null && st.lap > 1 ? st.players[st.turn].name + ' pelasi isoimman ja aloittaa kierroksen ' + st.lap + '/5' : st.players[st.turn].name + ' miettii…');
     $('khint').textContent = h;
   }
-  function nm(v){ return v <= 10 ? String(v) : {11:'J', 12:'Q', 13:'K', 14:'A', 15:'jokeri', 16:'Ekstrajokka'}[v]; }
+  function nm(v){ return v <= 10 ? String(v) : {11:'J', 12:'Q', 13:'K', 14:'A', 15:'JOK', 16:'EJ'}[v]; }
   function renderPhone(flashIds, add){
     var rows = st.players.map(function(p){ var a = add && add[p.id] ? '<span class="add"> +' + add[p.id] + '</span>' : '';
       return '<tr class="' + (p.out ? 'o ' : '') + (p.id === 0 ? 'me ' : '') + (flashIds && flashIds.indexOf(p.id) >= 0 ? 'flash' : '') + '"><td>' + p.name + '<div class="bar"><i style="width:' + Math.min(100, p.pts / 21 * 100) + '%"></i></div></td><td class="p">' + p.pts + a + '</td></tr>'; }).join('');
@@ -2963,13 +3025,12 @@ body.kiropen{overflow:hidden}
   $('kdim').addEventListener('click', function(){ phoneBig(false); });
 
   // ---------- open and close ----------
-  function layout(){ buildSeats(); buildProps(); if (st) render(); }
+  function layout(){ buildSeats(); buildProps(); wood(); if (st) render(); }
   var lastLand = null;
   addEventListener('resize', function(){ if (!root.classList.contains('on')) return; var land = innerWidth > innerHeight; if (land !== lastLand){ lastLand = land; layout(); } });
   function open(){
     window.__gameOpen = true; var ga = document.getElementById('ga'); if (ga) ga.pause();
     root.classList.add('on'); document.body.classList.add('kiropen'); lastLand = innerWidth > innerHeight;
-    if (!$('kwood').style.backgroundImage) wood();
     layout(); syncOpts();
     try { var s = localStorage.getItem(SAVE); if (s && !st){ st = K.load(s); st.players.forEach(function(p){ p._show = p.pts; }); } } catch(e){ st = null; }
     if (st) render();
