@@ -491,7 +491,7 @@ let spin = 0, spinA = null, spinTurns = 0, spinShown = 0;
 function spinTrack(w){ const a = Math.atan2(w.y - GRAB_C.y, w.x - GRAB_C.x), r = Math.hypot(w.x - GRAB_C.x, w.y - GRAB_C.y); if (r < 60){ spinA = null; return; }
   if (spinA != null){ let d = a - spinA; if (d > Math.PI) d -= 2 * Math.PI; if (d < -Math.PI) d += 2 * Math.PI; spin += d; } spinA = a;
   spinTurns = Math.min(4, Math.abs(spin) / (2 * Math.PI) * 1.6); const full = Math.floor(spinTurns);
-  if (full > spinShown){ spinShown = full; sfx('fireball', .25 + full * .1, {force:true, rate:.8 + full * .15, vary:false}); if (full >= 2) sfx('crowd_cheer', .2 + full * .08, {force:true}); pops.push({x:GRAB_C.x, y:GRAB_C.y + 40, t:0, s:full >= 4 ? 'TÄYSI VAUHTI' : 'KIERROS ' + full + ' / 4', col:full >= 4 ? '#ff6a33' : '#ffd28a'}); } }
+  if (full > spinShown){ spinShown = full; sfx('fireball', .25 + full * .1, {force:true, rate:.8 + full * .15, vary:false}); if (full >= 2) sfx('crowd_cheer', .2 + full * .08, {force:true}); } }
 function doGrab(w){ document.body.classList.add('grab'); spin = 0; spinA = null; spinTurns = 0; spinShown = 0; state = 'grab'; $('hint').classList.remove('on'); rag = makeRag(STAGE.x + 10, STAGE.y - 60); rag.face = 'shock';
   const f = rag.fa1, hp = handPos(f); grab = Constraint.create({pointA:{x:hp.x, y:hp.y}, bodyB:f, pointB:{x:hp.x - f.position.x, y:hp.y - f.position.y}, stiffness:.32, damping:.08, length:0}); Composite.add(world, grab);
   const t = clampGrab(w); grab.pointA.x = t.x; grab.pointA.y = t.y; ptrHist = [];
@@ -648,13 +648,6 @@ function draw(t){ g.setTransform(DPR, 0, 0, DPR, 0, 0);
     g.beginPath(); g.moveTo(t.x, y); g.quadraticCurveTo(cx, cy, top.x, top.y); g.strokeStyle = INK; g.lineWidth = 13; g.lineCap = 'round'; g.stroke(); g.strokeStyle = '#e8e4da'; g.lineWidth = 8; g.stroke();
     for (let i = 1; i < 6; i++){ const u = i / 6.5, px2 = (1 - u) * (1 - u) * t.x + 2 * (1 - u) * u * cx + u * u * top.x, py2 = (1 - u) * (1 - u) * y + 2 * (1 - u) * u * cy + u * u * top.y; line(px2 - 3, py2, px2 + 2, py2 + 1, INK, 2.2); }
     [[0, 0, 34], [-26, 14, 24], [24, 12, 26], [-8, -24, 24], [14, -20, 20]].forEach(([dx, dy, r]) => disc(top.x + dx, top.y + dy, r, t.used ? '#7d8a40' : '#6b7a3a', 3)); }
-  if (state === 'grab'){ g.beginPath(); g.arc(GRAB_C.x, GRAB_C.y, GRAB_R, 0, 7); g.setLineDash([10, 14]); g.strokeStyle = 'rgba(236,228,204,.25)'; g.lineWidth = 3; g.stroke(); g.setLineDash([]);
-    const sd = spin >= 0 ? 1 : -1, a0 = sd > 0 ? -2.36 : .79; g.beginPath(); g.arc(GRAB_C.x, GRAB_C.y, GRAB_R + 16, a0 - .45, a0 + .45); g.strokeStyle = 'rgba(207,232,168,' + (spinTurns >= 1 ? .85 : .25) + ')'; g.lineWidth = 12; g.lineCap = 'round'; g.stroke(); if (spinTurns >= 1){ g.fillStyle = '#cfe8a8'; g.font = '22px VT323'; g.textAlign = 'center'; g.fillText('PÄÄSTÄ TÄSSÄ', GRAB_C.x + Math.cos(a0) * (GRAB_R + 46), GRAB_C.y + Math.sin(a0) * (GRAB_R + 46)); }
-    g.beginPath(); g.arc(GRAB_C.x, GRAB_C.y, GRAB_R, -Math.PI / 2, -Math.PI / 2 + spinTurns / 4 * Math.PI * 2); g.strokeStyle = spinTurns >= 4 ? '#ff6a33' : '#ffb35c'; g.lineWidth = 9; g.lineCap = 'round'; g.stroke(); }
-  for (const b of BALLOONS){ if (b.popped || b.x < x0 - 200 || b.x > x1 + 200) continue; const by = gy(b.x) - b.h + Math.sin(t * 1.3 + b.ph) * 10;
-    line(b.x - 14, by + 30, b.x - 9, by + 52, INK, 2); line(b.x + 14, by + 30, b.x + 9, by + 52, INK, 2); rr(b.x - 12, by + 50, 24, 16, 3); ink(C.wood, 2.5); if (b.gas){ rr(b.x - 4, by + 40, 8, 12, 3); ink(C.red, 2); }
-    g.beginPath(); g.ellipse(b.x, by - 20, 40, 48, 0, 0, 7); ink(b.col); g.save(); g.clip(); for (let i = -2; i <= 2; i++){ g.beginPath(); g.ellipse(b.x + i * 16, by - 20, 6, 50, 0, 0, 7); g.fillStyle = 'rgba(236,228,204,.28)'; g.fill(); } g.restore();
-    if (Math.sin(t * 9 + b.ph) > .3) disc(b.x, by + 34, 4, '#ffb347', 0); }
   drawStains();
   drawBigRockets();
   drawStage();
