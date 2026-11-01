@@ -455,7 +455,7 @@ export default {
 
 // CH 09 Kirilii online. One room per table, the whole state lives in D1 (binding KDB).
 // The server runs the same engine as the browser, deals, checks every move and plays the bots.
-// Players can only send a card number, one of four fixed shouts (each once per lap), or bang the table (a rhythm of knocks, no limit). Anyone may join a running table to watch.
+// Players can only send a card number, one of six fixed shouts (each once per lap), or bang the table (a rhythm of knocks, no limit). Anyone may join a running table to watch.
 // There is no chat and no free text: names are three letters.
 // A player never receives anyone else's hidden cards or the shuffle seed.
 
@@ -542,7 +542,7 @@ function koView(room, seat) {
   base.at = room.at;
   base.shouts = (room.shouts || []).filter(x => now - x.at < KO.SHOUT_MS).map(x => ({ id: x.id, seat: x.seat, k: x.k }));
   const lk = koLapKey(room.st), used = (room.shouts || []).filter(x => x.seat === seat && x.lap === lk).map(x => x.k);
-  base.canShout = seat >= 0 ? [0, 1, 2, 3].map(k => used.indexOf(k) < 0) : [false, false, false, false];
+  base.canShout = seat >= 0 ? [0, 1, 2, 3, 4, 5].map(k => used.indexOf(k) < 0) : [false, false, false, false, false, false];
   base.watchers = (room.watch || []).length;
   base.bangs = (room.bangs || []).filter(x => now - x.at < 6000).map(x => ({ id: x.id, seat: x.seat, p: x.p }));
   base.st = {
@@ -651,7 +651,7 @@ async function kiriliiOnline(req, env, url) {
 
     if (op === 'shout') {
       const k = b.k;
-      if (k !== 0 && k !== 1 && k !== 2 && k !== 3) return json(req, { error: 'shout' }, 400);
+      if (!Number.isInteger(k) || k < 0 || k > 5) return json(req, { error: 'shout' }, 400);
       if (room.phase !== 'game' || room.st.phase === 'over') return json(req, { error: 'shout' }, 409);
       const key = koLapKey(room.st);
       room.shouts = (room.shouts || []).filter(x => now - x.at < 60000);

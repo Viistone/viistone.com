@@ -2854,7 +2854,7 @@ body.kiropen{overflow:hidden}
     <div class="myhand" id="kmyhand" role="group" aria-label="Kätesi"></div>
   </div>
   <button class="knext" id="knext" type="button">SEURAAVA JAKO ▶</button>
-  <div class="kshout" id="kshout"><button type="button" data-k="1" class="mcb">HÖYLÄ McBUENO!!!</button><button type="button" data-k="0">HÖYLÄ!</button><button type="button" data-k="2">TÄÄ ON MUN PIENIN!</button><button type="button" data-k="3">EIIIIHHH!!!</button></div>
+  <div class="kshout" id="kshout"><button type="button" data-k="1" class="mcb">HÖYLÄ McBUENO!!!</button><button type="button" data-k="0">HÖYLÄ!</button><button type="button" data-k="2">TÄÄ ON MUN PIENIN!</button><button type="button" data-k="3">EIIIIHHH!!!</button><button type="button" data-k="4">HÖLÖMÖ</button><button type="button" data-k="5">HEHE</button></div>
   <button class="kbangb" id="kbang" type="button" aria-label="Paukuta pöytää">PAUKUTA</button>
   <div class="kmatch" id="kmatch" aria-hidden="true"><svg viewBox="0 0 58 10"><defs><linearGradient id="kmw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8c48c"/><stop offset=".55" stop-color="#c99a5c"/><stop offset="1" stop-color="#9c7140"/></linearGradient><radialGradient id="kmh" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#d4483a"/><stop offset=".6" stop-color="#8f1f17"/><stop offset="1" stop-color="#4a0f0b"/></radialGradient></defs><rect x="1" y="3.2" width="48" height="3.6" rx=".6" fill="url(#kmw)"/><path d="M6 4.2h30M14 5.8h26" stroke="rgba(120,80,40,.35)" stroke-width=".4"/><ellipse cx="51.5" cy="5" rx="5.6" ry="3.9" fill="url(#kmh)"/></svg></div>
   <div class="kvig" aria-hidden="true"></div>
@@ -3078,6 +3078,7 @@ body.kiropen{overflow:hidden}
     bar1:'kirilii/sfx/bar1.mp3', bar2:'kirilii/sfx/bar2.mp3', deal:'kirilii/sfx/deal.mp3', flip:'kirilii/sfx/flip.mp3', cards:'kirilii/sfx/cards.mp3', over:'kirilii/sfx/over.mp3',
     impossible:'kirilii/sfx/impossible.mp3', laughr:'kirilii/sfx/laughr.mp3', laughe:'kirilii/sfx/laughe.mp3', aboard:'kirilii/sfx/aboard.mp3',
     nouhh:'kirilii/sfx/nouhh.mp3', no1:'kirilii/sfx/no1.mp3', no2:'kirilii/sfx/no2.mp3', yes:'kirilii/sfx/yes.mp3', idiots:'kirilii/sfx/idiots.mp3', sonofa:'kirilii/sfx/sonofa.mp3',
+    hehe1:'kirilii/sfx/hehe1.mp3', hehe2:'kirilii/sfx/hehe2.mp3', hehe3:'kirilii/sfx/hehe3.mp3', holomo:'kirilii/sfx/holomo.mp3',
     bang1:'kirilii/sfx/bang1.mp3', bang2:'kirilii/sfx/bang2.mp3',
     put1:'kirilii/sfx/put1.mp3', put2:'kirilii/sfx/put2.mp3', put3:'kirilii/sfx/put3.mp3', put4:'kirilii/sfx/put4.mp3'};
   function ac(){ if (!AC){ try { AC = new (window.AudioContext || window.webkitAudioContext)(); Object.keys(FILES).forEach(function(k){ fetch('assets/' + FILES[k]).then(function(r){ return r.arrayBuffer(); }).then(function(a){ return new Promise(function(ok, no){ AC.decodeAudioData(a, ok, no); }); }).then(function(b){ bufs[k] = b; }).catch(function(){}); }); } catch(e){} }
@@ -3662,7 +3663,7 @@ body.kiropen{overflow:hidden}
     opost('play', {room:online.room, t:online.token, c:id}).then(function(d){ if (d.st) applyView(d); busy = false; if (d._s !== 200) render(); }).catch(function(){ busy = false; render(); $('khint').textContent = 'Ei yhteyttä, yritä uudelleen.'; });
   }
   // the only thing anyone can send besides a card: four fixed shouts, each once per lap
-  var SHOUTS = ['HÖYLÄ!', 'HÖYLÄ McBUENO!!!', 'TÄÄ ON MUN PIENIN!', 'EIIIIHHH!!!'];
+  var SHOUTS = ['HÖYLÄ!', 'HÖYLÄ McBUENO!!!', 'TÄÄ ON MUN PIENIN!', 'EIIIIHHH!!!', 'HÖLÖMÖ', 'HEHE'];
   Array.prototype.forEach.call($('kshout').querySelectorAll('button'), function(b){
     b.addEventListener('click', function(){ if (!online) return; ac(); if (b.disabled) return; b.disabled = true;
       opost('shout', {room:online.room, t:online.token, k:+b.dataset.k}).then(function(d){ if (d.st) applyView(d); }).catch(function(){}); });
@@ -3720,7 +3721,9 @@ body.kiropen{overflow:hidden}
       var x0 = Math.min(sr.width - 230, Math.max(8, r.left - sr.left + r.width / 2 - 90)), y0 = pid === 0 ? r.top - sr.top - 70 : r.bottom - sr.top + 6;
       b.style.left = x0 + 'px'; b.style.top = y0 + 'px'; requestAnimationFrame(function(){ b.classList.add('on'); });
       setTimeout(function(){ b.classList.remove('on'); setTimeout(function(){ b.remove(); }, 300); }, 2800);
-      if (x.k === 1){ mcbBlast(pid, name); } else if (x.k === 0){ shake(false); SFX.hoyla(); } else if (x.k === 2){ SFX.clink(); tone(220, .3, 'triangle', .05, 330); } else { if (bufs.nouhh) vox(['nouhh'], .6, true); else tone(880, 1.1, 'sawtooth', .05, 110); wobble(false); }
+      if (x.k === 1){ mcbBlast(pid, name); } else if (x.k === 0){ shake(false); SFX.hoyla(); } else if (x.k === 2){ SFX.clink(); tone(220, .3, 'triangle', .05, 330); } else if (x.k === 4){ if (bufs.holomo) vox(['holomo'], .6, true); else tone(300, .5, 'square', .04, 600); wobble(false); }
+      else if (x.k === 5){ if (bufs.hehe1) vox(['hehe1', 'hehe2', 'hehe3'], .55, true); else tone(700, .3, 'triangle', .04, 900); }
+      else { if (bufs.nouhh) vox(['nouhh'], .6, true); else tone(880, 1.1, 'sawtooth', .05, 110); wobble(false); }
     });
   }
 
