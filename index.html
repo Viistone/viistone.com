@@ -1509,7 +1509,8 @@ body.postiopen{overflow:hidden}
   var SFX_FILES = {burp:['burp1.mp3', 'burp2.mp3'], yell:['yell1.mp3', 'yell2.mp3', 'yell3.mp3', 'yell4.mp3'], jet:['jet.mp3'], open:['open.mp3'], crash:['crash.mp3'], cry:['cry.mp3'],
     wind:['wind.mp3'], bell:['bell1.mp3', 'bell2.mp3', 'bell3.mp3'], rat:['rat.mp3'], smash:['smash.mp3'], amb:['amb.mp3'], pedal:['pedal.mp3'],
     horn:['horn1.mp3', 'horn2.mp3', 'horn3.mp3'], squeal:['squeal.mp3'], driveby:['driveby.mp3'], driveaway:['driveaway.mp3'], fart:['fart1.mp3', 'fart2.mp3', 'fart3.mp3', 'fart4.mp3', 'fart5.mp3'], slow:['slow.mp3'], laugh:['laugh1.mp3', 'laugh2.mp3', 'laugh3.mp3', 'laugh4.mp3'],
-    boom:['boom1.mp3', 'boom2.mp3', 'boom3.mp3', 'boom4.mp3'], carboom:['carboom.mp3'], alarm:['alarm1.mp3', 'alarm2.mp3']};
+    boom:['boom1.mp3', 'boom2.mp3', 'boom3.mp3', 'boom4.mp3'], carboom:['carboom.mp3'], alarm:['alarm1.mp3', 'alarm2.mp3'],
+    gull:['gull1.mp3', 'gull2.mp3', 'gull3.mp3'], gullamb:['gullamb.mp3'], chirp:['chirp1.mp3', 'chirp2.mp3'], crow:['crow1.mp3', 'crow2.mp3', 'crow3.mp3'], capeloop:['capeloop.mp3'], flap:['flap.mp3']};
   var lpf = null, AC = null, fxOn = true, musicOn = true, audio = document.getElementById('paudio'), bufs = {}, master = null, loops = {};
   try { fxOn = localStorage.getItem('posti_fx') !== '0'; musicOn = localStorage.getItem('posti_mus') !== '0'; } catch(e){}
   function acInit(){
@@ -1855,7 +1856,7 @@ body.postiopen{overflow:hidden}
   // ---------- life around: birds, bats, leaves, plastic bags, snow, dust. None of it is in the way. ----------
   var fauna = [], snow = [], nextFauna = 3, nextBoom = 12;
   var FAUNA = {city:['crow', 'crow', 'bag', 'bat'], park:['crow', 'bat', 'leaves', 'leaves'], ice:['gull', 'gull', 'crow'], tori:['gull', 'gull', 'crow', 'bag'], site:['crow', 'dust', 'dust', 'bat']};
-  function caw(kind){ if (!fxOn || !AC) return;
+  function caw(kind){ if (!fxOn || !AC) return; if (playBuf(kind === 'gull' ? 'gull' : 'crow', kind === 'gull' ? .45 : .4, false, .92 + Math.random() * .16)) return;
     if (kind === 'gull'){ [0, .2, .38].forEach(function(d){ setTimeout(function(){ tone(1500 + Math.random() * 200, .16, 'triangle', .025, 900); }, d * 1000); }); return; }
     [0, .26].forEach(function(d){ setTimeout(function(){ tone(700 + Math.random() * 80, .13, 'sawtooth', .02, 420); noise(.08, .03); }, d * 1000); }); }
   function spawnFauna(bio){
@@ -1901,7 +1902,7 @@ body.postiopen{overflow:hidden}
   function drawSnow(){ if (!snow.length) return; ctx.fillStyle = 'rgba(235,242,246,.75)'; snow.forEach(function(sn){ ctx.fillRect(Math.round(sn.x), Math.round(sn.y), sn.s, sn.s); }); }
 
   // ---------- dying is a moment, not a cut back to the menu ----------
-  var dieT = 0, dieWhy = '', emptyK = 0, nextHeart = 0;
+  var dieT = 0, dieWhy = '', emptyK = 0, nextHeart = 0, nextChirp = 4, nextFlap = 0;
   function dieStep(dt){
     dieT += dt; var sl = dieT < .3 ? .15 : .3;
     stepParts(dt * sl); capeStep(dt * sl); faunaStep(dt * sl, P.bio);
@@ -1983,8 +1984,8 @@ body.postiopen{overflow:hidden}
       var floatH = (o.h || 16), reach = Math.abs(hNow - floatH) < 30 || (floatH <= 16 && hNow < 40);
       if (o.type === 'can' && Math.abs(dx) < 20 && Math.abs(dy) < 22 && reach){ o.done = true; P.cans++; energy(CAN * (1 - .3 * dfn)); sfx.can(); parts.push({k:'spark', x:o.x, y:o.y - floatH, t:0}); continue; }
       if (o.type === 'coffee' && Math.abs(dx) < 20 && Math.abs(dy) < 20 && reach){ o.done = true; P.boost = 4.5; energy(8); sfx.coffee(); say('KAHVIPÄISSÄ', true, 1400); if (!reduce) shake = .2; continue; }
-      if ((o.type === 'ramp' || o.type === 'sandpile') && P.air <= 0 && Math.abs(dx) < 20 && dy > -26 && dy < 6 && P.down <= 0){ P.air = P.airT = .8; P.airH = 22; P.jumps++; sfx.jump(); continue; }
-      if (o.type === 'bigramp' && P.air <= 0 && Math.abs(dx) < 32 && dy > -44 && dy < 8 && P.down <= 0){ o.done = true; P.air = P.airT = 2.5; P.airH = 82; P.high = true; P.bigs++; P.v = Math.max(P.v, vmax);
+      if ((o.type === 'ramp' || o.type === 'sandpile') && P.air <= 0 && Math.abs(dx) < 20 && dy > -26 && dy < 6 && P.down <= 0){ P.air = P.airT = .8; P.airH = 22; P.jumps++; sfx.jump(); playBuf('flap', .35, false, 1.05); continue; }
+      if (o.type === 'bigramp' && P.air <= 0 && Math.abs(dx) < 32 && dy > -44 && dy < 8 && P.down <= 0){ o.done = true; P.air = P.airT = 2.5; P.airH = 82; P.high = true; P.bigs++; P.v = Math.max(P.v, vmax); playBuf('flap', .5, false, .9);
         sfx.big(); say('KIPINÖIKSI ME TAIVAALLE LENNETTIIN', false, 2000); continue; }
       var hb = HIT[o.type]; if (!hb || P.air > 0 || P.inv > 0 || P.down > 0) continue;
       if (P.boost > 0 && SMASH[o.type] && Math.abs(dx) < hb[0] + 8 && Math.abs(dy) < hb[1] + 6){ smash(o); continue; }
@@ -2010,6 +2011,10 @@ body.postiopen{overflow:hidden}
     var wk = Math.abs(gust.v); if (wk > .05 && Math.random() < dt * 95 * wk) streaks.push({x:gust.v > 0 ? -60 : W + 60, y:Math.random() * H, l:30 + Math.random() * 90, sp:(900 + Math.random() * 700) * Math.sign(gust.v), t:0, leaf:Math.random() < .25});
     for (k = streaks.length - 1; k >= 0; k--){ var st = streaks[k]; st.t += dt; st.x += st.sp * dt; st.y += 40 * dt; if (st.x < -200 || st.x > W + 200) streaks.splice(k, 1); }
     capeStep(dt); faunaStep(dt, bio0);
+    loopOn('gullamb', 0); loopSet('gullamb', bio0 === 'tori' ? .22 : bio0 === 'ice' ? .1 : 0);
+    if (bio0 === 'park' && tsec > nextChirp){ nextChirp = tsec + 5 + Math.random() * 9; playBuf('chirp', .22 + Math.random() * .12, false, .95 + Math.random() * .1); }
+    loopOn('capeloop', 0); loopSet('capeloop', P.down > 0 ? 0 : Math.min(.32, P.v / 1300 + (P.air > 0 ? .1 : 0) + (P.boost > 0 ? .06 : 0) + Math.abs(gust.v) * .15), .85 + Math.min(.4, P.v / 900));
+    var turnK = Math.abs(P.a - (P.pa || 0)) / Math.max(dt, .001); P.pa = P.a; if (turnK > 3.2 && tsec > nextFlap && P.v > 150){ nextFlap = tsec + 1.2; playBuf('flap', .3, false, .95 + Math.random() * .15); }
     if (P.empty){ emptyK = Math.min(1, 1 - (P.empty - tsec) / EMPTY); if (tsec > nextHeart){ nextHeart = tsec + .9 - .5 * emptyK; tone(62, .13, 'sine', .32, 40); setTimeout(function(){ tone(52, .1, 'sine', .22, 38); }, 130); } } else emptyK = Math.max(0, emptyK - dt * 2);
     stepPaws(dt); if (state !== 'run') return;
     stepParts(dt);
@@ -2459,7 +2464,7 @@ body.postiopen{overflow:hidden}
   saveBtn.addEventListener('click', save);
 
   function gameOver(why){
-    if (state !== 'run') return; btOff(); state = 'dying'; dieT = 0; dieWhy = why; releasePtr(); clock.classList.remove('on'); loopOff('wind'); loopOff('pedal'); hud();
+    if (state !== 'run') return; btOff(); state = 'dying'; dieT = 0; dieWhy = why; releasePtr(); clock.classList.remove('on'); loopOff('wind'); loopOff('pedal'); loopOff('capeloop'); loopOff('gullamb'); hud();
     P.down = 99; P.v = 0; P.inv = 0; blood(P.x, P.y, 110, 2.4); blood(P.x, P.y - 6, 40, 3); if (!reduce){ shake = .7; flash = 1.3; } glitch = 1;
     if (why === 'energy') playBuf('cry', .9); else sfx.hit(); tone(90, .9, 'sine', .4, 30);
     setTimeout(function(){ if (state === 'dying') tone(988, 2.3, 'sine', .045); }, 650);
