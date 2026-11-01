@@ -47,10 +47,10 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 <div class="hud" id="tl"><b>HEITÄ VIISTONE</b><span id="song">CH 02</span></div>
 <div class="hud" id="tr"><div id="score">0</div><div id="dist">0 M</div></div>
 <div class="hud" id="mid"><div id="combo"></div></div>
-<div id="viisi">VIISI</div>
+<div id="viisi">VIISI<small style="display:block;font-size:.22em;color:#ece4cc">VIISI OSUMAA PUTKEEN</small></div>
 <div id="hint">TARTU VIISTOSEEN<br>PYÖRITÄ JA PÄÄSTÄ IRTI</div>
 <div id="btns"><button id="bmus" aria-label="Musiikki">♪</button><button id="bfx" aria-label="Äänet">FX</button><a href="/" aria-label="Kotisivulle">⏏</a></div>
-<div class="panel on" id="start"><h1>HEITÄ<br>VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Mitä enemmän rytisee, sitä enemmän pisteitä.</p><div class="act" style="margin-top:18px"><button class="go" id="bgo">ALOITA</button></div><div class="note">testiversio</div></div>
+<div class="panel on" id="start"><h1>HEITÄ<br>VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Viisi osumaa putkeen: VIISI.</p><div class="act" style="margin-top:18px"><button class="go" id="bgo">ALOITA</button></div><div class="note">testiversio</div></div>
 <div class="panel" id="over"><h1>VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div class="act"><button class="go" id="bagain">UUDESTAAN</button><a class="alt" href="/">KOTISIVULLE</a></div></div>
 <script src="assets/lib/matter.min.js"></script>
 <script>
@@ -78,7 +78,7 @@ function disc(x, y, r, fill, lw){ g.beginPath(); g.arc(x, y, r, 0, 7); if (lw ==
 
 // ---------- sound ----------
 const SFX_LIST = ['boom_bright','boom_rocky','boom_tan','crowd_aww','crowd_cheer','crowd_murmur','crowd_shout','dumpster','electric','fireball','fireball_glitch','fireworks','fireworks_crackle','fireworks_red','flame_burst','fuse','gas_hiss','gas_release','glass_break','glass_debris','glass_heavy','grab','groan1','groan2','groan3','groan4','groan5','groan6','groan7','metal_slam','metal_strike','metal_table1','metal_table2','plywood_crumble','thud_heavy','thud_soft','victory1','victory2','wind_loop','wood_creak','wood_explode','wood_metal_smash','wood_pile','yell_strained'];
-const EXTRA = {ouch1:'assets/kirilii/sfx/ouch.mp3', ouch2:'assets/kirilii/sfx/ouch2.mp3', ouch3:'assets/kirilii/sfx/ouch3.mp3', ouch4:'assets/kirilii/sfx/ouch4.mp3', ouch5:'assets/kirilii/sfx/ouch5.mp3', ouch6:'assets/kirilii/sfx/ouch6.mp3', slow:'assets/posti/sfx/slow.mp3', sonofa:'assets/kirilii/sfx/sonofa.mp3', alarm:'assets/posti/sfx/alarm1.mp3'};
+const EXTRA = {rat:'assets/posti/sfx/rat.mp3', crow1:'assets/posti/sfx/crow1.mp3', crow2:'assets/posti/sfx/crow2.mp3', crow3:'assets/posti/sfx/crow3.mp3', static:'assets/posti/sfx/static.mp3', ouch1:'assets/kirilii/sfx/ouch.mp3', ouch2:'assets/kirilii/sfx/ouch2.mp3', ouch3:'assets/kirilii/sfx/ouch3.mp3', ouch4:'assets/kirilii/sfx/ouch4.mp3', ouch5:'assets/kirilii/sfx/ouch5.mp3', ouch6:'assets/kirilii/sfx/ouch6.mp3', slow:'assets/posti/sfx/slow.mp3', sonofa:'assets/kirilii/sfx/sonofa.mp3', alarm:'assets/posti/sfx/alarm1.mp3'};
 const SONGS = [['02','KYMMENEN TIKKUU','kymmenentikkuu'],['03','PITKÄSILTA','pitkasilta'],['04','SYMMETRISII UNII','symmetrisiiunii'],['05','VÄLII VUODELLA','valiivuodella'],['06','POSTINKANTAJA','postinkantaja'],['07','HYMYTYTTÖ','hymytytto'],['08','KOTIINPALUU KAI JOTENKI JÄRJESTYY','kotiinpaluu'],['09','VIKA SELKÄ','vikaselka']];
 let AC = null, master, fxBus, musBus, buf = {}, voices = 0, lastPlay = {};
 let musOn = true, fxOn = true;
@@ -168,6 +168,31 @@ function car(x, y){ const b = Bodies.rectangle(x, y, 150, 42, {density:.0016, fr
 // a slab of concrete dug into the hill so things stand level
 function pad(x0, x1){ const top = gy(x0), bot = gy(x1) + 12, h = bot - top; const b = Bodies.rectangle((x0 + x1) / 2, top + h / 2, x1 - x0, h, {isStatic:true, friction:.6}); b.plugin = {kind:'pad', w:x1 - x0, h}; Composite.add(world, b); bodies.push(b); return top; }
 const SPAN = {tynnyrit:[-20, 120], kaasut:[-20, 130], trampoliini:[-20, 150], roskakatos:[-20, 150], mokki:[-70, 200], halkopino:[-20, 160], bussi:[-20, 200], kioski:[-80, 140], telineet:[-20, 210], muuri:[-20, 290], auto:[-30, 240], sauna:[-30, 180], kerrostalo:[-20, 290], kaljat:[-20, 180]};
+let TREES = [], ICE = [], CROWS = [], bestD = 0;
+try { bestD = +localStorage.getItem('viistone-heita-bestd') || 0; } catch(e){}
+const hymyImg = new Image(); hymyImg.src = 'assets/hymy/hymy.png';
+function gaps(){ const out = []; for (let i = 0; i < FLATS.length - 1; i++){ const a = FLATS[i].b + 110, b = FLATS[i + 1].a - 70; if (b - a > 70) out.push([a, b]); } return out; }
+function makeExtras(){ seed = 4242; TREES = []; ICE = []; CROWS = []; const G = gaps();
+  G.forEach(([a, b], i) => { const r = i === 2 ? .5 : R(); if (r < .42) TREES.push({x:(a + b) / 2, h:190 + R() * 70, b:0, used:false, ph:null, t:0}); else if (r < .66 && b - a > 160) ICE.push([a - 60, b]); });
+  // the surprises change every time
+  const pick = () => G[2 + Math.floor(rnd() * (G.length - 2))]; const RATS = [];
+  for (let i = 0; i < 2; i++){ const g2 = i === 0 ? G[2 + Math.floor(rnd() * Math.min(6, G.length - 2))] : pick(); if (!g2) continue; const x = g2[0] + 30 + rnd() * Math.max(10, g2[1] - g2[0] - 160); if (TREES.some(t => Math.abs(t.x - x) < 200)) continue; RATS.push(x); }
+  RATS.forEach(x => { const y = gy(x + 80), b = Bodies.rectangle(x + 80, y - 33, 180, 66, {isStatic:true, restitution:.9, friction:.2, chamfer:{radius:26}}); b.plugin = {kind:'rat', w:180, h:66, t:-9}; Composite.add(world, b); bodies.push(b); });
+  if (rnd() < .3){ const g2 = pick(); if (g2){ const x = (g2[0] + g2[1]) / 2 + 40; if (!TREES.some(t => Math.abs(t.x - x) < 120)){ const y = gy(x), b = Bodies.rectangle(x, y - 46, 28, 92, {isStatic:true, friction:.4}); b.plugin = {kind:'hymy', w:28, h:92}; Composite.add(world, b); bodies.push(b); } } }
+  for (let i = 0; i < 5; i++){ const g2 = G[1 + Math.floor(rnd() * (G.length - 1))]; if (!g2) continue; const x = g2[0] + rnd() * (g2[1] - g2[0]); const n = 3 + Math.floor(rnd() * 4); CROWS.push({x, birds:Array.from({length:n}, (_, k) => ({x:x + (k - n / 2) * 16 + (rnd() - .5) * 8, y:0, vx:0, vy:0, fly:false, ph:rnd() * 6}))}); } }
+function onIce(x){ return ICE.some(r => x > r[0] && x < r[1]); }
+function treeTop(t, u){ const y = gy(t.x); return {x:t.x + Math.sin(t.b) * t.h * u, y:y - Math.cos(t.b) * t.h * u}; }
+function treesStep(dt){ for (const t of TREES){
+    if (t.ph === 'load'){ t.t += dt; const k = Math.min(1, t.t / .32); t.b = t.dir * 1.15 * Math.pow(k, .7); const pt = treeTop(t, t.u); if (t.c){ t.c.pointA.x = pt.x; t.c.pointA.y = pt.y; }
+      if (k >= 1){ if (t.c) Composite.remove(world, t.c); t.c = null; t.ph = 'whip'; t.t = 0; rag.all.forEach(q => Body.setVelocity(q, {x:t.dir * (16 + rnd() * 6) + q.velocity.x * .2, y:-30 - rnd() * 6}));
+        sfx('fireball', .45, {x:t.x, y:gy(t.x), force:true}); sfx('wood_pile', .5, {x:t.x, y:gy(t.x)}); award(900, pt.x, pt.y - 80, 'KOIVU LINKOAA', '#cfe8a8'); shake = 10;
+        for (let i = 0; i < 26; i++){ const a = rnd() * 6.28, v = 2 + rnd() * 6; parts.push({x:pt.x, y:pt.y, vx:Math.cos(a) * v, vy:Math.sin(a) * v - 2, life:2 + rnd() * 1.5, t:0, k:'leaf', s:3 + rnd() * 2.5, r:rnd() * 6, vr:(rnd() - .5) * .3, c:rnd() < .5 ? '#c9a243' : '#8a9a48'}); } } }
+    else if (t.ph === 'whip'){ t.t += dt; t.b = t.dir * 1.15 * Math.cos(t.t * 13) * Math.exp(-t.t * 3.2); if (t.t > 2){ t.ph = 'done'; t.b = 0; } }
+    else if (!t.used && rag && state === 'fly'){ const p = rag.torso.position, base = gy(t.x), sp = Math.hypot(rag.torso.velocity.x, rag.torso.velocity.y);
+      if (sp > 4 && p.y < base - 40 && p.y > base - t.h - 30 && Math.abs(p.x - t.x) < 34){ t.used = true; t.ph = 'load'; t.t = 0; t.dir = rag.torso.velocity.x >= -2 ? 1 : -1; t.u = clamp((base - p.y) / t.h, .5, 1);
+        const pt = treeTop(t, t.u); t.c = Constraint.create({pointA:{x:pt.x, y:pt.y}, bodyB:rag.torso, pointB:{x:0, y:0}, stiffness:.5, damping:.1, length:0}); Composite.add(world, t.c); sfx('wood_creak', .8, {x:t.x, y:base, force:true}); } } } }
+function crowsStep(dt){ if (!rag) return; const p = rag.torso.position; for (const g2 of CROWS){ if (!g2.gone && Math.abs(p.x - g2.x) < 420 && state === 'fly'){ g2.gone = true; sfx('crow' + (1 + Math.floor(rnd() * 3)), .55, {x:g2.x, y:gy(g2.x), force:true}); g2.birds.forEach(b => { b.fly = true; b.vx = (rnd() - .3) * 5; b.vy = -4 - rnd() * 3; }); }
+    for (const b of g2.birds){ if (b.fly){ b.x += b.vx; b.y += b.vy; b.vy *= .985; b.vy -= .02; b.ph += .45; } } } }
 function makeFlats(){ FLATS = []; for (const s of structs){ const sp = SPAN[s.t], a = s.x + sp[0] - 30, b = s.x + sp[1] + 30; FLATS.push({a, b, y:gyRaw(a)}); } }
 
 // ---------- structures: each one a little pile of blocks with a name ----------
@@ -213,7 +238,7 @@ const T = {
 // the course layout: the same every time, so the street can be learned
 const ORDER = ['kaasut', 'roskakatos', 'mokki', 'tynnyrit', 'halkopino', 'trampoliini', 'bussi', 'kioski', 'telineet', 'tynnyrit', 'muuri', 'auto', 'trampoliini', 'sauna', 'kerrostalo', 'kaljat', 'kaasut'];
 function planCourse(){ seed = 777; structs = []; let x = 640, i = 0;
-  while (x < 29000){ const t = i < ORDER.length ? ORDER[i] : ORDER[Math.floor(R() * ORDER.length)]; structs.push({t, x, spawned:false, done:false}); x += 380 + R() * 260 + (t === 'kerrostalo' || t === 'muuri' ? 160 : 0); i++; } }
+  while (x < 29000){ const t = i < ORDER.length ? ORDER[i] : ORDER[Math.floor(R() * ORDER.length)]; structs.push({t, x, spawned:false, done:false}); x += 460 + R() * 300 + (t === 'kerrostalo' || t === 'muuri' ? 160 : 0); i++; } }
 function spawnAhead(){ const edge = cam.x + viewW() * .5 + 2600; for (const s of structs){ if (!s.spawned && s.x < edge){ s.spawned = true; const r = T[s.t](s.x); s.name = r[0]; s.list = r[1]; s.bonus = r[2]; s.list.forEach(b => Sleeping.set(b, true)); } } }
 
 // ramps: a couple of wooden kickers along the way
@@ -223,11 +248,11 @@ function ramp(x){ const y = gy(x), y2 = gy(x + 140); const v = [{x:x, y:y + 4}, 
 
 // ---------- terrain bodies ----------
 function terrain(){ const step = 60, th = 160; for (let x = -1700; x < 30200; x += step){ const x1 = x, x2 = x + step, y1 = gy(x1), y2 = gy(x2), dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L;
-    const b = Bodies.rectangle((x1 + x2) / 2 + nx * th / 2, (y1 + y2) / 2 + ny * th / 2, L + 4, th, {isStatic:true, angle:Math.atan2(dy, dx), friction:.3, restitution:.15}); b.plugin = {kind:'ground'}; Composite.add(world, b); } }
+    const ice = onIce((x1 + x2) / 2); const b = Bodies.rectangle((x1 + x2) / 2 + nx * th / 2, (y1 + y2) / 2 + ny * th / 2, L + 4, th, {isStatic:true, angle:Math.atan2(dy, dx), friction:ice ? .005 : .3, restitution:ice ? .05 : .15}); b.plugin = {kind:'ground'}; Composite.add(world, b); } }
 
 // the stage itself: a platform with two speakers
 function stage(){ const b = Bodies.rectangle(STAGE.x, STAGE.y - 15, STAGE.w, 30, {isStatic:true, friction:.9}); b.plugin = {kind:'stage'}; Composite.add(world, b); bodies.push(b);
-  const wall = Bodies.rectangle(STAGE.x - 190, STAGE.y - 260, 40, 560, {isStatic:true, friction:.3, restitution:.5}); wall.plugin = {kind:'backdrop'}; Composite.add(world, wall); bodies.push(wall);
+  const wall = Bodies.rectangle(STAGE.x - 190, STAGE.y - 1090, 40, 2220, {isStatic:true, friction:.3, restitution:.5}); wall.plugin = {kind:'backdrop'}; Composite.add(world, wall); bodies.push(wall);
   addBody(Bodies.rectangle(STAGE.x - 125, STAGE.y - 70, 40, 80, {density:.002, friction:.8, chamfer:{radius:4}}), 'speaker', null, 40, 80, {hp:999});
   addBody(Bodies.rectangle(STAGE.x + 125, STAGE.y - 70, 40, 80, {density:.002, friction:.8, chamfer:{radius:4}}), 'speaker', null, 40, 80, {hp:999}); }
 
@@ -265,9 +290,8 @@ function award(pts, x, y, label, col){ if (ended) return 0; const now = simT; if
   const mult = 1 + (Math.min(Math.max(combo, 1), 9) - 1) * .25, p = Math.round(pts * mult / 10) * 10; score += p;
   if (label) pops.push({x, y, t:0, s:label + ' +' + p.toLocaleString('fi-FI'), col:col || '#ffd28a'});
   if (combo > 1 && combo !== comboShown){ comboShown = combo; const el = $('combo'); el.innerHTML = 'COMBO x' + combo; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 1300); }
-  if ((combo === 5 || (combo > 5 && combo % 10 === 5)) && combo !== viisiCount){ viisiCount = combo; viisi(); }
   return p; }
-function viisi(){ slowT = 1.3; $('viisi').classList.add('on'); setTimeout(() => $('viisi').classList.remove('on'), 1250); sfx('slow', .7, {force:true, vary:false}); sfx(rnd() < .5 ? 'victory1' : 'victory2', .7, {delay:.9, force:true}); }
+function viisi(){ slowT = .9; $('viisi').classList.add('on'); setTimeout(() => $('viisi').classList.remove('on'), 1100); award(2500, rag.torso.position.x, rag.torso.position.y - 120, 'VIISI OSUMAA', '#ff2e2e'); sfx('slow', .7, {force:true, vary:false}); sfx(rnd() < .5 ? 'victory1' : 'victory2', .7, {delay:.9, force:true}); }
 
 // ---------- damage and breaking ----------
 function hurt(b, amount, x, y){ const p = b.plugin; if (!p || p.gone || amount <= 0) return;
@@ -355,11 +379,16 @@ function bleed(x, y, n, sp){ for (let i = 0; i < n; i++){ const a = rnd() * 6.28
 function ragHit(part, other, imp, rv, x, y){ if (state !== 'fly' || (rag.torso.position.x < STAGE.x + 190 && rag.torso.position.y < STAGE.y + 40)) return; const big = imp > 7;
   if (big){ const pts = Math.min(1500, imp * 9); tally.self += award(pts, x, y - 40, imp > 22 ? 'AUTS' : null);
     sfx(rv > 14 ? 'thud_heavy' : 'thud_soft', clamp(imp / 30, .2, .9), {x, y, gap:.07}); shake = Math.max(shake, Math.min(10, imp * .25));
-    if (imp > 16) ouch(); if (rag.hat && (part === rag.head) && imp > 12) loseHat();
+    if (imp > 24) ouch(); if (rag.hat && (part === rag.head) && imp > 12) loseHat();
     if (imp > 11){ bleed(x, y, Math.min(34, imp * .9), 2 + imp * .12); rag.bleedT = Math.max(rag.bleedT || 0, 1.6); } if (imp > 30 && simT - (rag.splatT || -9) > 4){ rag.splatT = simT; splatScreen(); } }
   if (other.plugin && other.plugin.kind === 'tramp' && simT - other.plugin.t > .4){ other.plugin.t = simT; rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 6) + 5, y:Math.min(q.velocity.y, 0) - 26})); sfx('thud_soft', .9, {x, y, force:true}); sfx('wood_creak', .5, {x, y}); pops.push({x, y:y - 60, t:0, s:'BOING', col:'#ece4cc'}); award(300, x, y - 40); shake = 12; }
+  const op = other.plugin || {}; if (imp > 8 && !other.isStatic && op.kind && op.kind !== 'rag'){ if (simT - (rag.stT || -9) < 1.6) rag.streak = (rag.streak || 0) + 1; else rag.streak = 1; rag.stT = simT;
+    if (rag.streak >= 2 && rag.streak < 5) pops.push({x, y:y - 90, t:.3, s:rag.streak + ' / 5', col:'#ff8a5c'}); if (rag.streak === 5) viisi(); }
+  if (op.kind === 'rat' && simT - op.t > .5){ op.t = simT; rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 8) + 8, y:Math.min(q.velocity.y, 0) - 34})); sfx('rat', .9, {x, y, force:true}); sfx('thud_soft', .8, {x, y, force:true}); award(1000, x, y - 80, 'JÄTTIROTTA', '#ece4cc'); shake = 16; }
+  if (op.kind === 'hymy' && !op.seen){ op.seen = true; sfx('static', .5, {force:true}); hymySeen('c02'); award(1500, x, y - 120, 'HYMYTYTTÖ', '#cfe0e8'); }
   if (rag.micC && imp > 18 && rnd() < .5) loseMic(); }
-function ouch(force){ const t = simT; if (!force && t - lastOuch < 1.4) return; lastOuch = t; rag.face = 'ouch'; rag.faceT = t;
+function hymySeen(k){ try { const h = JSON.parse(localStorage.getItem('viistone-hymy') || '{}'); if (!h[k]){ h[k] = Date.now(); localStorage.setItem('viistone-hymy', JSON.stringify(h)); } } catch(e){} }
+function ouch(force){ const t = simT; if (t - lastOuch < (force ? 2 : 3.4)) return; lastOuch = t; rag.face = 'ouch'; rag.faceT = t;
   const k = rnd() < .65 ? 'groan' + (1 + Math.floor(rnd() * 7)) : 'ouch' + (1 + Math.floor(rnd() * 6)); sfx(k, .75, {x:rag.torso.position.x, y:rag.torso.position.y, force:true, gap:0}); lastGroan = t; }
 function loseHat(){ rag.hat = false; const h = rag.head, b = Bodies.rectangle(h.position.x, h.position.y - 14, 30, 14, {density:.0006, friction:.5, chamfer:{radius:6}, angle:h.angle}); b.plugin = {kind:'hat', pv:{x:0, y:0}}; Composite.add(world, b);
   Body.setVelocity(b, {x:h.velocity.x * 1.1 + (rnd() - .5) * 4, y:h.velocity.y - 5}); Body.setAngularVelocity(b, (rnd() - .5) * .5); bodies.push(b); }
@@ -392,19 +421,20 @@ function newGame(){ if (engine){ Composite.clear(engine.world, false); Engine.cl
   engine = Engine.create({enableSleeping:true}); engine.gravity.scale = .00085; engine.positionIterations = 10; engine.velocityIterations = 8; engine.constraintIterations = 4; world = engine.world;
   bodies = []; parts = []; rockets = []; timers = []; pops = []; booms = []; arcs = []; fires = []; stains = []; splats = []; flashT = 0; rag = null; grab = null;
   score = 0; combo = 0; maxCombo = 0; comboShown = 0; viisiCount = 0; lastHit = -9; tally = {self:0, env:0, boom:0}; simT = 0; flyT = 0; restT = 0; slowT = 0; shake = 0; maxDist = 0; ended = false;
-  buildCurve(); planCourse(); makeFlats(); terrain(); stage(); RAMPS.forEach(x => { if (!FLATS.some(f => x > f.a - 260 && x < f.b + 240)) ramp(x); });
+  buildCurve(); planCourse(); makeFlats(); makeExtras(); terrain(); stage(); RAMPS.forEach(x => { if (!FLATS.some(f => x > f.a - 260 && x < f.b + 240)) ramp(x); });
   Events.on(engine, 'collisionStart', onCollide);
   Events.on(engine, 'afterUpdate', () => { for (const b of world.bodies){ if (b.plugin && b.plugin.pv){ b.plugin.pv.x = b.velocity.x; b.plugin.pv.y = b.velocity.y; } } });
   cam.x = cam.tx = STAGE.x + 60; cam.y = cam.ty = STAGE.y - 130; cam.z = cam.tz = 1.35; spawnAhead();
   state = 'stage'; $('over').classList.remove('on'); $('hint').classList.add('on'); $('score').textContent = '0'; $('dist').textContent = '0 M'; }
 function finish(){ if (ended) return; ended = true; state = 'over';
-  const d = Math.round(maxDist), tot = total(), rec = tot > best; if (rec){ best = tot; try { localStorage.setItem('viistone-heita-best', String(best)); } catch(e){} }
+  const d = Math.round(maxDist), tot = total(), rec = tot > best, recD = d > bestD + .5, missD = Math.round(bestD) - d; if (rec){ best = tot; try { localStorage.setItem('viistone-heita-best', String(best)); } catch(e){} } if (recD){ bestD = d; try { localStorage.setItem('viistone-heita-bestd', String(d)); } catch(e){} }
   sfx('groan' + (1 + Math.floor(rnd() * 7)), .7, {force:true, x:rag.torso.position.x, y:rag.torso.position.y}); sfx('crowd_aww', .45, {force:true, delay:.9});
   if (rec && tot > 0) sfx(rnd() < .5 ? 'victory1' : 'victory2', .6, {force:true, delay:2.4});
   tally.env = Math.max(0, score - tally.self - tally.boom);
   $('opts').textContent = tot.toLocaleString('fi-FI') + ' PTS';
-  $('orows').innerHTML = d + ' M · COMBO x' + Math.max(1, maxCombo) + '<br>MATKA ' + (Math.max(0, d) * 100).toLocaleString('fi-FI') + ' · VIISTONE ITSE ' + tally.self.toLocaleString('fi-FI') + ' · YMPÄRISTÖ ' + tally.env.toLocaleString('fi-FI') + ' · RÄJÄHDYKSET ' + tally.boom.toLocaleString('fi-FI') + '<br>' + (rec && tot > 0 ? '<span class="rec">UUSI ENNÄTYS</span>' : 'ENNÄTYS ' + best.toLocaleString('fi-FI'));
-  setTimeout(() => $('over').classList.add('on'), 1400); }
+  $('orows').innerHTML = d + ' M · COMBO x' + Math.max(1, maxCombo) + '<br>MATKA ' + (Math.max(0, d) * 100).toLocaleString('fi-FI') + ' · VIISTONE ITSE ' + tally.self.toLocaleString('fi-FI') + ' · YMPÄRISTÖ ' + tally.env.toLocaleString('fi-FI') + ' · RÄJÄHDYKSET ' + tally.boom.toLocaleString('fi-FI') + '<br>' + (rec && tot > 0 ? '<span class="rec">UUSI ENNÄTYS</span>' : 'ENNÄTYS ' + best.toLocaleString('fi-FI')) + '<br>' + (recD ? '<span class="rec">PISIN MATKA TÄHÄN ASTI</span>' : missD > 0 && missD <= 40 ? '<span class="rec">' + missD + ' M PUUTTUI MATKAENNÄTYKSESTÄ</span>' : '');
+  setTimeout(() => { if (state === 'over') $('over').classList.add('on'); }, 1000); }
+addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && state === 'over'){ e.preventDefault(); newGame(); } });
 $('bgo').onclick = () => { audioInit(); $('start').classList.remove('on'); startSong(); newGame(); };
 $('bagain').onclick = () => { audioInit(); newGame(); };
 
@@ -427,9 +457,15 @@ function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= d
   // the mic lets go if it gets yanked
   if (rag && rag.micC){ const c = rag.micC, A = c.bodyA, B = c.bodyB; const ax = A.position.x + c.pointA.x, ay = A.position.y + c.pointA.y, bx = B.position.x + c.pointB.x, by = B.position.y + c.pointB.y; if (Math.hypot(ax - bx, ay - by) > 14) loseMic(); }
   if (state === 'fly' && rag){ const t0 = rag.torso, gx = t0.position.x, sl = (gy(gx + 30) - gy(gx - 30)) / 60; if (t0.position.y > gy(gx) - 50 && sl > .04){ const f = .00045 * Math.min(sl, 1.2), nrm = Math.hypot(1, sl); rag.all.forEach(q => { if (q !== rag.mic) Body.applyForce(q, q.position, {x:q.mass * f / nrm, y:q.mass * f * sl / nrm}); }); } }
+  treesStep(sdt); crowsStep(dt);
+  if (rag && state === 'fly' && onIce(rag.torso.position.x) && !rag.iceSaid && rag.torso.position.y > gy(rag.torso.position.x) - 50){ rag.iceSaid = true; pops.push({x:rag.torso.position.x, y:rag.torso.position.y - 90, t:0, s:'JÄÄTÄ', col:'#cfe9ff'}); }
+  if (state === 'fly' && rag.torso.position.x < STAGE.x - 240){ backOnStage('VÄÄRÄ SUUNTA'); return; }
+  // keep him from going so fast he slips through the ground, and pull him back up if he ever does
+  if (rag && (state === 'fly' || state === 'over')){ for (const q of rag.all){ const v = q.velocity, sp = Math.hypot(v.x, v.y); if (sp > 52) Body.setVelocity(q, {x:v.x * 52 / sp, y:v.y * 52 / sp}); }
+    const tp = rag.torso.position, under = tp.y - gy(tp.x); if (under > 30){ const lift = under + 40; rag.all.forEach(q => { Body.setPosition(q, {x:q.position.x, y:q.position.y - lift}); Body.setVelocity(q, {x:q.velocity.x, y:-Math.abs(q.velocity.y) * .4}); }); } }
   if (state === 'fly'){ flyT += dt; const t = rag.torso, d = (t.position.x - STAGE.x) / PXM; maxDist = Math.max(maxDist, d);
     let mv = 0; rag.all.forEach(b => { if (b !== rag.mic) mv = Math.max(mv, Math.hypot(b.velocity.x, b.velocity.y)); });
-    const near = o => Math.abs(o.position.x - t.position.x) < 1400; const busy = timers.length > 0 || rockets.some(near) || bodies.some(b => b.plugin && b.plugin.armed && !b.plugin.boomed && !b.plugin.zapped && near(b));
+    const near = o => Math.abs(o.position.x - t.position.x) < 1400; const busy = TREES.some(tr => tr.ph === 'load') || timers.length > 0 || rockets.some(near) || bodies.some(b => b.plugin && b.plugin.armed && !b.plugin.boomed && !b.plugin.zapped && near(b));
     const tv = Math.hypot(t.velocity.x, t.velocity.y); const quiet = !busy && simT - lastHit > 1.2; restT = tv < .7 && mv < 2 && quiet ? restT + dt : 0; rag.slowT = tv < .8 && quiet ? (rag.slowT || 0) + dt : 0; if (rag.slowT > 3.5) restT = 99;
     rag.stillT = tv < .9 ? (rag.stillT || 0) + dt : 0; if (rag.stillT > 7) restT = 99;
     if (rag.face === 'ouch' && simT - (rag.faceT || 0) > 1.2) rag.face = 'shock';
@@ -439,7 +475,7 @@ function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= d
   for (const b of bodies){ if (!b.isStatic && b.position.y > gy(b.position.x) + 600) removeBody(b); }
   if (rag && rag.bleedT > 0 && state === 'fly'){ rag.bleedT -= sdt; if (rnd() < .5) bleed(rag.head.position.x, rag.head.position.y, 1, 1.5); }
   parts.forEach(p => { if (p.k === 'blood' && !p.dead){ const gyb = gy(p.x); if (p.y >= gyb - 1){ stains.push({x:p.x, y:gyb + 1, s:p.s * (1.4 + rnd()), r:rnd()}); if (stains.length > 260) stains.shift(); p.dead = true; p.t = p.life; } }
-    p.t += sdt; p.x += p.vx * ts; p.y += p.vy * ts; if (p.k === 'smoke' || p.k === 'flame'){ p.vx *= .98; p.vy *= .98; } else { p.vy += .35 * ts; const gyx = gy(p.x); if (p.y > gyx){ p.y = gyx; p.vy *= -.3; p.vx *= .6; } } if (p.r != null) p.r += (p.vr || 0) * ts; });
+    p.t += sdt; p.x += p.vx * ts; p.y += p.vy * ts; if (p.k === 'smoke' || p.k === 'flame'){ p.vx *= .98; p.vy *= .98; } else if (p.k === 'leaf'){ p.vx *= .97; p.vy = p.vy * .96 + .06 * ts; p.vx += Math.sin(p.t * 5 + p.r) * .05; } else { p.vy += .35 * ts; const gyx = gy(p.x); if (p.y > gyx){ p.y = gyx; p.vy *= -.3; p.vx *= .6; } } if (p.r != null) p.r += (p.vr || 0) * ts; });
   parts = parts.filter(p => p.t < p.life); if (parts.length > 700) parts.splice(0, parts.length - 700);
   pops.forEach(p => p.t += dt); pops = pops.filter(p => p.t < 1.6);
   booms.forEach(b => b.t += sdt); booms = booms.filter(b => b.t < .7); arcs.forEach(a => a.t += dt); arcs = arcs.filter(a => a.t < .35);
@@ -448,9 +484,9 @@ function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= d
   // structure bonus once most of it has gone over
   for (const s of structs){ if (!s.spawned || s.done || !s.list) continue; let moved = 0; for (const b of s.list){ const p = b.plugin; if (p.gone || p.boomed || Math.hypot(b.position.x - p.x0, b.position.y - p.y0) > 50 || Math.abs(b.angle - p.a0) > .6) moved++; }
     if (moved >= s.list.length * .6){ s.done = true; tally.env += 0; award(s.bonus, s.x + 60, gy(s.x) - 170, s.name, '#ffd28a'); sfx('wood_metal_smash', .4, {x:s.x, y:gy(s.x), gap:.4}); } } }
-function backOnStage(){ // a weak throw: he gets back up and you can try again
+function backOnStage(msg){ // a weak or backwards throw: he gets back up and you can try again
   rag.all.forEach(b => Composite.remove(world, b)); rag.cons.forEach(c => Composite.remove(world, c)); if (rag.micC) Composite.remove(world, rag.micC); rag = null; state = 'stage'; $('hint').classList.add('on');
-  score = 0; tally = {self:0, env:0, boom:0}; combo = 0; maxCombo = 0; maxDist = 0; pops.push({x:STAGE.x, y:STAGE.y - 200, t:0, s:'HEITÄ KUNNOLLA', col:'#ece4cc'}); }
+  score = 0; tally = {self:0, env:0, boom:0}; combo = 0; maxCombo = 0; maxDist = 0; pops.push({x:STAGE.x, y:STAGE.y - 200, t:0, s:msg || 'HEITÄ KUNNOLLA', col:'#ece4cc'}); }
 
 // ---------- camera ----------
 function camStep(dt){ if (rag && state !== 'stage'){ const t = rag.torso, v = t.velocity, sp = Math.hypot(v.x, v.y);
@@ -497,6 +533,15 @@ function draw(t){ g.setTransform(DPR, 0, 0, DPR, 0, 0);
   g.beginPath(); g.moveTo(x0, yb + 400); for (let x = x0; x <= x1; x += 16) g.lineTo(x, gy(x)); g.lineTo(x1, yb + 400); g.closePath(); g.fillStyle = C.grass; g.fill(); g.lineWidth = LW * 1.4; g.strokeStyle = INK; g.stroke();
   g.beginPath(); g.moveTo(x0, yb + 400); for (let x = x0; x <= x1; x += 24) g.lineTo(x, gy(x) + 70); g.lineTo(x1, yb + 400); g.closePath(); g.fillStyle = C.grassD; g.fill();
   for (let x = Math.floor(x0 / 23) * 23; x < x1; x += 23){ const h = 5 + ((x * 7919) % 9); line(x, gy(x) + 2, x + 3, gy(x) - h, '#55663f', 2.5); }
+  for (const r of ICE){ if (r[1] < x0 || r[0] > x1) continue; g.beginPath(); for (let x = Math.max(r[0], x0); x <= Math.min(r[1], x1); x += 12) x === Math.max(r[0], x0) ? g.moveTo(x, gy(x) + 2) : g.lineTo(x, gy(x) + 2); g.strokeStyle = INK; g.lineWidth = 11; g.stroke(); g.strokeStyle = '#bfe3ee'; g.lineWidth = 7; g.stroke(); }
+  for (let m = 50; m < 600; m += 50){ const x = STAGE.x + m * PXM; if (x < x0 || x > x1) continue; const y = gy(x); line(x, y, x, y - 46, INK, 6); line(x, y, x, y - 46, C.woodD, 3); rr(x - 26, y - 66, 52, 22, 3); ink('#d8cfb4', 2.5); g.fillStyle = INK; g.font = '20px VT323'; g.textAlign = 'center'; g.fillText(m + ' M', x, y - 49); }
+  if (bestD > 3){ const x = STAGE.x + bestD * PXM; if (x > x0 && x < x1){ const y = gy(x); line(x, y, x, y - 110, INK, 6); line(x, y, x, y - 110, '#ece4cc', 3); path([[x, y - 110], [x + 58, y - 98], [x, y - 84]]); ink('#ff6a33', 2.5); g.fillStyle = '#ece4cc'; g.font = '18px VT323'; g.textAlign = 'left'; g.fillText('ENNÄTYS ' + Math.round(bestD) + ' M', x + 6, y - 118); } }
+  for (const c2 of CROWS) for (const b of c2.birds){ const bx = b.x, by = b.fly ? gy(c2.x) - 6 + b.y : gy(bx) - 6; if (bx < x0 || bx > x1) continue; if (!b.fly){ g.beginPath(); g.ellipse(bx, by, 7, 5, 0, 0, 7); ink('#141414', 2); disc(bx + 6, by - 5, 3.5, '#141414', 1.5); line(bx + 9, by - 5, bx + 13, by - 4, '#d8b04a', 2); }
+    else { const f = Math.sin(b.ph) * 7; g.beginPath(); g.moveTo(bx - 12, by - f); g.quadraticCurveTo(bx - 5, by - 3, bx, by); g.quadraticCurveTo(bx + 5, by - 3, bx + 12, by - f); g.strokeStyle = '#141414'; g.lineWidth = 3.5; g.stroke(); } }
+  for (const t of TREES){ if (t.x < x0 - 300 || t.x > x1 + 300) continue; const y = gy(t.x), top = treeTop(t, 1), mid = treeTop(t, .55), cx = t.x + (mid.x - t.x) * .5, cy = y + (mid.y - y) * .9;
+    g.beginPath(); g.moveTo(t.x, y); g.quadraticCurveTo(cx, cy, top.x, top.y); g.strokeStyle = INK; g.lineWidth = 13; g.lineCap = 'round'; g.stroke(); g.strokeStyle = '#e8e4da'; g.lineWidth = 8; g.stroke();
+    for (let i = 1; i < 6; i++){ const u = i / 6.5, px2 = (1 - u) * (1 - u) * t.x + 2 * (1 - u) * u * cx + u * u * top.x, py2 = (1 - u) * (1 - u) * y + 2 * (1 - u) * u * cy + u * u * top.y; line(px2 - 3, py2, px2 + 2, py2 + 1, INK, 2.2); }
+    [[0, 0, 34], [-26, 14, 24], [24, 12, 26], [-8, -24, 24], [14, -20, 20]].forEach(([dx, dy, r]) => disc(top.x + dx, top.y + dy, r, t.used ? '#7d8a40' : '#6b7a3a', 3)); }
   drawStains();
   drawStage();
   for (const b of bodies) drawBody(b);
@@ -534,7 +579,12 @@ function drawBody(b){ const p = b.plugin; if (!p || p.gone) return; const x = b.
   case 'pad': at(x, y, 0, () => { path([[-w / 2, -h / 2], [w / 2, -h / 2], [w / 2, h / 2], [-w / 2, -h / 2 + 12]]); ink('#5f5a52'); g.fillStyle = '#6e6960'; g.fillRect(-w / 2 + 4, -h / 2 + 3, w - 8, 4); }); return;
   case 'ramp': path(p.v.map(v => [v.x, v.y])); ink(C.wood); for (let i = 1; i < 5; i++){ const u = i / 5; line(p.v[0].x + (p.v[1].x - p.v[0].x) * u, p.v[0].y + (p.v[1].y - p.v[0].y) * u, p.v[0].x + (p.v[2].x - p.v[0].x) * u, p.v[0].y + (p.v[2].y - p.v[0].y) * u, C.woodD, 2); } return;
   case 'stage': return;
-  case 'backdrop': at(x, y, 0, () => { rr(-20, -280, 40, 560, 3); ink('#3a302a'); for (let i = -260; i < 270; i += 40) line(-16, i, 16, i + 10, '#2a221d', 2); }); return;
+  case 'rat': at(x, y, 0, () => { g.scale(1.5, 1.5); const sq = Math.max(0, 1 - (simT - p.t) * 3), s2 = 1 - Math.sin(sq * 9) * .18 * sq; g.scale(1 + (1 - s2) * .6, s2);
+      g.beginPath(); g.moveTo(-58, 8); g.quadraticCurveTo(-110, 10, -120, -20); g.strokeStyle = INK; g.lineWidth = 9; g.stroke(); g.strokeStyle = '#c99a8e'; g.lineWidth = 5; g.stroke();
+      g.beginPath(); g.ellipse(-6, 0, 60, 24, 0, 0, 7); ink('#6e655c'); g.beginPath(); g.ellipse(48, -8, 22, 17, -.2, 0, 7); ink('#7a7066'); disc(38, -26, 9, '#d9a0a0', 2.5); disc(58, -10, 3, INK, 0); disc(70, -4, 4, '#2a1b1b', 2);
+      line(68, 0, 88, -4, INK, 1.5); line(68, 2, 88, 6, INK, 1.5); line(-30, 22, -34, 26, INK, 4); line(20, 22, 24, 26, INK, 4); }); return;
+  case 'hymy': at(x, y, 0, () => { rr(-16, 40, 32, 8, 2); ink('#8d8a82', 2); if (hymyImg.complete && hymyImg.naturalWidth) g.drawImage(hymyImg, -28, -50, 56, 90); }); return;
+  case 'backdrop': at(x, y, 0, () => { rr(-20, -1110, 40, 2220, 3); ink('#3a302a'); for (let i = -1090; i < 1100; i += 40) line(-16, i, 16, i + 10, '#2a221d', 2); }); return;
   case 'speaker': at(x, y, a, () => { rr(-20, -40, 40, 80, 4); ink('#1f1f22'); disc(0, -18, 11, '#2c2c30', 2.5); disc(0, -18, 4, '#111', 0); disc(0, 16, 14, '#2c2c30', 2.5); disc(0, 16, 5, '#111', 0); }); return;
   case 'hat': at(x, y, a, () => { g.beginPath(); g.arc(0, 4, 15, Math.PI, 0); ink(C.beanie); rr(-16, 0, 32, 7, 3); ink('#555a52', 2.5); disc(3, -12, 3.5, C.beanie, 2); }); return;
   case 'car': at(x, y, a, () => { path([[-75, 10], [-72, -8], [-48, -10], [-30, -36], [36, -36], [52, -12], [75, -8], [75, 14], [-75, 14]]); ink(p.st === 2 ? '#5a1a14' : '#7a2c22');
@@ -605,6 +655,7 @@ function drawSplats(dt){ for (const s of splats){ s.t += dt; const k = s.t < .1 
     for (let i = 0; i < 4; i++){ const xx = s.x + (R() - .5) * s.r, len = s.r * (.3 + R()) * Math.min(1, s.t * 1.5); g.fillRect(xx, s.y, s.r * .1, len); } g.globalAlpha = 1; } splats = splats.filter(s => s.t < 2); }
 function drawParts(){ for (const p of parts){ const k = 1 - p.t / p.life;
   if (p.k === 'blood'){ if (!p.dead) disc(p.x, p.y, p.s, '#a3201a', 0); continue; }
+  if (p.k === 'leaf'){ at(p.x, p.y, p.r, () => { g.globalAlpha = Math.min(1, k * 2); g.beginPath(); g.ellipse(0, 0, p.s, p.s * .55, 0, 0, 7); g.fillStyle = p.c; g.fill(); g.globalAlpha = 1; }); continue; }
   if (p.k === 'ember'){ g.globalAlpha = k; disc(p.x, p.y, p.s * (.5 + k * .5), k > .5 ? '#ffb347' : '#e8572a', 0); g.globalAlpha = 1; continue; }
   if (p.k === 'smoke'){ g.globalAlpha = .55 * k; disc(p.x, p.y, p.s * (1.4 - k * .4), p.c, 2); g.globalAlpha = 1; }
   else if (p.k === 'flame'){ g.globalAlpha = k; disc(p.x, p.y, p.s * k, k > .5 ? '#ffb347' : '#e8572a', 0); g.globalAlpha = 1; }
@@ -635,7 +686,7 @@ requestAnimationFrame(frame);
 window.__heita = { get state(){ return state; }, get score(){ return score; }, get dist(){ return maxDist; }, get bodies(){ return bodies.length; }, get rag(){ return rag; }, tally:() => tally, combo:() => maxCombo,
   start(){ $('bgo').click(); },
   throwNow(vx, vy){ if (state !== 'stage') return; doGrab({x:STAGE.x + 30, y:STAGE.y - 150}); rag.all.forEach(b => Body.setVelocity(b, {x:vx, y:vy})); release(); rag.all.forEach(b => Body.setVelocity(b, {x:vx, y:vy})); },
-  total:() => total(), cam, dbg:() => ({mv: rag ? Math.max(...rag.all.filter(b => b !== rag.mic).map(b => Math.hypot(b.velocity.x, b.velocity.y))) : 0, timers: timers.length, rockets: rockets.length, restT, flyT, tv: rag && rag.throwV, parts: rag ? rag.all.map(b => Math.hypot(b.velocity.x, b.velocity.y).toFixed(2)) : []}) };
+  total:() => total(), extras:() => ({trees:TREES.map(t => [Math.round(t.x / PXM), t.ph]), ice:ICE.map(r => Math.round(r[0] / PXM)), rats:bodies.filter(b => b.plugin && b.plugin.kind === "rat").map(b => Math.round(b.position.x / PXM))}), cam, dbg:() => ({mv: rag ? Math.max(...rag.all.filter(b => b !== rag.mic).map(b => Math.hypot(b.velocity.x, b.velocity.y))) : 0, timers: timers.length, rockets: rockets.length, restT, flyT, tv: rag && rag.throwV, parts: rag ? rag.all.map(b => Math.hypot(b.velocity.x, b.velocity.y).toFixed(2)) : []}) };
 })();
 </script>
 </body></html>
