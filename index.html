@@ -624,6 +624,7 @@ window.VIISTONE_EMBED = true;
 .game .eject{right:max(14px, env(safe-area-inset-right,0px))}
 .game .ghomeb{position:absolute;left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:6;font-family:var(--f-osd);font-size:20px;letter-spacing:.06em;color:var(--cream);background:rgba(14,15,13,.5);border:1px solid rgba(209,194,176,.45);padding:1px 14px;cursor:pointer;white-space:nowrap}
 .game .ghomeb:hover{border-color:#fff;color:#fff}
+.game:has(.over.on) .ghomeb,.game .ghomeb.hide{display:none}
 .game:has(.over.on) .ghomeb,.game.overon .ghomeb{display:none}
 .game .gmusic{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:4}
 .game .gmusic .gbtn{position:static}
@@ -1284,6 +1285,7 @@ body.gameopen{overflow:hidden}
     if (location.hash === '#peli') history.replaceState(null, '', location.pathname + location.search);
   }
   document.getElementById('eject').addEventListener('click', close);
+  (function(){ var hb = document.getElementById('ghomeb'); try { new MutationObserver(function(){ hb.classList.toggle('hide', over.classList.contains('on')); }).observe(over, {attributes:true, attributeFilter:['class']}); } catch(e){} })();
   document.getElementById('ghomeb').addEventListener('click', function(){ close(); if (window.__showGames) setTimeout(window.__showGames, 360); });
   document.getElementById('ghome').addEventListener('click', function(){ close(); if (window.__showGames) setTimeout(window.__showGames, 360); });
   document.getElementById('gagain').addEventListener('click', function(){ reset(); if (musicOn) drawSong(); });
