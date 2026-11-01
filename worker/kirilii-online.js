@@ -116,7 +116,7 @@ async function kiriliiOnline(req, env, url) {
       if (seat < 0) return json(req, { error: 'seat' }, 403);
       const stale = now - (room.seen[seat] || 0) > KO.SEEN_WRITE_MS;
       room.seen[seat] = now;
-      const changed = koTick(room, now, env.KO_FAST ? 0.01 : 1);
+      const changed = koTick(room, now, env.KO_FAST ? (Number(env.KO_FAST) || 0.01) : 1);
       if (changed || stale) { if (!(await koUpdate(db, room, got.v))) continue; }
       return json(req, koView(room, seat));
     }

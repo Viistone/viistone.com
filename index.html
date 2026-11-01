@@ -2329,7 +2329,7 @@ body.postiopen{overflow:hidden}
 <style>
 /* CH 09: KIRILII. A card game on a worn Finnish bar table. Six at the table, the last one left wins. */
 .kir{position:fixed;inset:0;z-index:74;display:none;overflow:hidden;background:#120d09;color:#e8e0c8;user-select:none;-webkit-user-select:none;
-  --cw:60px;--ch:88px;--sw:34px;--sh:49px;--hand:158px;font-family:var(--f-mono)}
+  --cw:57px;--ch:84px;--sw:34px;--sh:49px;--hand:158px;font-family:var(--f-mono)}
 .kir.on{display:block}
 body.kiropen{overflow:hidden}
 .kir .kwood{position:absolute;inset:0;background:radial-gradient(ellipse 70% 45% at 50% 30%, rgba(255,170,90,.16), transparent 70%), radial-gradient(ellipse at 50% 120%, #1a0f0a, #080504 70%), #070504}
@@ -2361,6 +2361,9 @@ body.kiropen{overflow:hidden}
 .kir .ktop{position:absolute;top:calc(8px + env(safe-area-inset-top,0px));right:max(10px, env(safe-area-inset-right,0px));z-index:9;display:flex;gap:6px}
 .kir .kbtn{font-family:var(--f-osd);font-size:22px;letter-spacing:.04em;color:#e9e4d8;background:rgba(14,10,7,.62);border:1px solid rgba(232,224,200,.3);padding:0 9px;cursor:pointer;line-height:1.3}
 .kir .kbtn:hover{border-color:#e8e0c8}
+.kir .ksong{position:absolute;top:calc(42px + env(safe-area-inset-top,0px));left:max(14px, env(safe-area-inset-left,0px));z-index:9;font-family:var(--f-osd);font-size:15px;letter-spacing:.05em;color:rgba(233,228,216,.7);white-space:nowrap;max-width:33vw;overflow:hidden;text-overflow:ellipsis}
+@media (min-aspect-ratio: 1/1){ .kir .ksong{max-width:40vw;font-size:17px} }
+.kir.idle .ksong{visibility:hidden}
 .kir .kbtn.off{opacity:.45;text-decoration:line-through}
 /* seats */
 .kir .seat{position:absolute;z-index:3;display:flex;flex-direction:column;align-items:center;gap:4px;width:120px;transition:opacity .8s, filter .8s}
@@ -2430,7 +2433,7 @@ body.kiropen{overflow:hidden}
 .kir .myrow{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .kir .myrow .plate{transform:rotate(-1deg)}
 .kir .hint{max-width:96vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--f-osd);font-size:18px;letter-spacing:.05em;color:#ffd28a;text-shadow:0 1px 0 #000;min-height:20px}
-.kir .myhand{display:flex;gap:6px;justify-content:center;align-items:flex-end;height:calc(var(--ch) + 14px)}
+.kir .myhand{display:flex;gap:4px;justify-content:center;align-items:flex-end;height:calc(var(--ch) + 14px)}
 .kir .myhand .kc{--sw:var(--cw);--sh:var(--ch);cursor:pointer;transition:transform .15s, filter .2s, opacity .2s;touch-action:none}
 .kir .myhand .kc.no{filter:brightness(.45) saturate(.4);cursor:not-allowed}
 .kir .myhand .kc.ok{box-shadow:1px 2px 0 rgba(0,0,0,.45), 0 0 0 2px rgba(255,179,92,.7), 0 0 14px rgba(255,179,92,.35)}
@@ -2516,6 +2519,28 @@ body.kiropen{overflow:hidden}
 .kir .knext{white-space:nowrap;position:absolute;z-index:9;left:50%;bottom:calc(var(--hand) + 60px);transform:translateX(-50%) rotate(-1deg);display:none;font-family:var(--f-osd);font-size:26px;letter-spacing:.06em;color:#14130f;background:#ffb35c;border:0;padding:4px 18px;cursor:pointer;box-shadow:3px 4px 0 rgba(0,0,0,.5)}
 .kir .knext.on{display:block;animation:kturn .9s steps(2) infinite}
 .kir .kfly{position:fixed;z-index:15;pointer-events:none}
+.kir .plate .tag{position:absolute;right:-6px;top:-11px;font-family:var(--f-mono);font-size:9px;letter-spacing:.14em;font-style:normal;padding:1px 4px;background:#1c1f1c;color:#9fe0a8;border:1px solid #3a4a3a;transform:rotate(3deg)}
+.kir .plate .tag:empty{display:none}
+.kir .plate .tag.away{color:#ffb35c;border-color:#6a4a2a}
+.kir .kshout{position:absolute;right:max(10px, env(safe-area-inset-right,0px));bottom:calc(var(--hand) + 10px);z-index:8;display:none;flex-direction:column;gap:6px;align-items:flex-end}
+.kir.online .kshout{display:flex}
+.kir.idle .kshout{display:none}
+.kir .kshout button{font-family:var(--f-osd);font-size:19px;letter-spacing:.05em;color:#14130f;background:#ffb35c;border:0;padding:3px 10px;cursor:pointer;box-shadow:2px 3px 0 rgba(0,0,0,.55);transform:rotate(-2deg)}
+.kir .kshout button + button{background:#ffd23a;transform:rotate(1.5deg)}
+.kir .kshout button:disabled{opacity:.3;cursor:default}
+.kir .bub.shout{font-family:var(--f-osd);font-size:22px;letter-spacing:.04em;color:#c8321f;background:#fff4d8;border:2px solid #c8321f;transform:translateY(6px) rotate(-3deg)}
+.kir .bub.shout.on{transform:translateY(0) rotate(-3deg) scale(1.08)}
+.kir .bub.shout b{color:#17120c;font-size:14px}
+.kir .kseats{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-family:var(--f-osd);font-size:22px;letter-spacing:.05em;min-width:260px;text-align:left}
+.kir .kseats span{padding:2px 8px;border:1px solid rgba(232,224,200,.3)}
+.kir .kseats span.bot{color:rgba(232,224,200,.4);border-style:dashed}
+.kir .kseats span.me{border-color:#ffb35c;color:#ffd28a}
+.kir .kcode{font-family:var(--f-osd);font-size:64px;letter-spacing:.3em;color:#ffd28a;line-height:1;margin:0 0 0 .3em}
+.kir .kin{font-family:var(--f-osd);font-size:44px;line-height:1;letter-spacing:.25em;text-transform:uppercase;text-align:center;width:5.4ch;padding:2px 0 4px .25em;box-sizing:border-box;background:transparent;color:#e9e4d8;border:0;border-bottom:2px solid #ff6a33;border-radius:0;outline:none;-webkit-appearance:none;appearance:none}
+.kir .kin.code{width:6.6ch}
+.kir .kin::placeholder{color:rgba(232,224,200,.3)}
+.kir .krow{display:flex;gap:12px;align-items:flex-end;justify-content:center;flex-wrap:wrap}
+.kir .kerr{font-family:var(--f-osd);font-size:20px;color:#ff8a6a;min-height:22px;margin:0}
 .kir.idle .seat,.kir.idle .kphone,.kir.idle .mine,.kir.idle .myplayed{visibility:hidden}
 /* landscape and desktop: roomier */
 @media (min-aspect-ratio: 1/1){ .kir{--cw:84px;--ch:120px;--sw:46px;--sh:66px;--hand:198px} .kir .seat{width:196px} .kir .kphone{width:136px;height:230px} .kir .scr table{font-size:17px} .kir .myplayed .kc{--sw:52px;--sh:74px;margin-left:-18px} .kir .bub{font-size:12px;max-width:190px} }
@@ -2539,19 +2564,24 @@ body.kiropen{overflow:hidden}
     <div class="myhand" id="kmyhand" role="group" aria-label="Kätesi"></div>
   </div>
   <button class="knext" id="knext" type="button">SEURAAVA JAKO ▶</button>
+  <div class="kshout" id="kshout"><button type="button" data-k="0">HÖYLÄ!</button><button type="button" data-k="1">HÖYLÄ McBUENO!!!</button></div>
   <div class="kvig" aria-hidden="true"></div>
   <div class="kscan" aria-hidden="true"></div>
   <div class="kvhs" id="kvhs" aria-hidden="true"></div>
   <div class="kbig" id="kbig" aria-live="assertive"></div>
   <div class="kosd">CH 09</div>
-  <div class="ktop"><button class="kbtn" id="kfx" type="button" aria-pressed="true">FX</button><button class="kbtn" id="kmenub" type="button" aria-label="Valikko">≡</button><button class="kbtn" id="keject" type="button" aria-label="Kotisivulle">⏏</button></div>
+  <div class="ksong" id="ksong" aria-live="polite"></div>
+  <audio id="kaudio" preload="none"></audio>
+  <div class="ktop"><button class="kbtn" id="kmus" type="button" aria-pressed="true">♪</button><button class="kbtn" id="knextsong" type="button" aria-label="Seuraava kappale">⏭</button><button class="kbtn" id="kfx" type="button" aria-pressed="true">FX</button><button class="kbtn" id="kmenub" type="button" aria-label="Valikko">≡</button><button class="kbtn" id="keject" type="button" aria-label="Kotisivulle">⏏</button></div>
   <div class="kdim" id="kdim"></div>
   <div class="kpanel on" id="kmenu">
     <h2>KIRILII</h2>
     <p class="sub">Viimeinen pöydässä voittaa.</p>
     <p>Kuusi pelaajaa, kuusi korttia. Pelaa viisi, viimeinen jää käteen. Isoin jäljelle jäänyt kortti tuo pisteet, 21 pistettä ja olet ulkona.</p>
     <button class="go" id="kcont" type="button" hidden>JATKA PELIÄ ▶</button>
-    <button class="go" id="knew" type="button">UUSI PELI ▶</button>
+    <button class="go" id="knew" type="button">UUSI PELI BOTTEJA VASTAAN ▶</button>
+    <button class="go" id="konline" type="button" style="background:#ffb35c">PELAA KAVEREIDEN KANSSA ▶</button>
+    <button class="go" id="kocont" type="button" hidden style="background:#ffd28a">JATKA NETTIPÖYTÄÄ ▶</button>
     <div class="opts">
       <span>VASTUSTAJAT</span><button type="button" id="kdiff"></button>
       <span>HERJAT</span><button type="button" id="kherja"></button>
@@ -2577,6 +2607,25 @@ body.kiropen{overflow:hidden}
     <h2 style="font-size:52px">TILASTOT</h2>
     <div class="stats" id="kstatlist"></div>
     <button class="ln" data-back type="button">TAKAISIN</button>
+  </div>
+  <div class="kpanel" id="klobby">
+    <h2 style="font-size:52px">PÖYTÄ</h2>
+    <div id="kentry" style="display:flex;flex-direction:column;align-items:center;gap:14px">
+      <p>Nimikirjaimet, kolme kirjainta. Muut eivät voi lähettää viestejä, vain pelata kortteja ja huutaa kerran kierroksessa.</p>
+      <input class="kin" id="koname" type="text" maxlength="3" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" aria-label="Nimikirjaimet" placeholder="___">
+      <button class="go" id="kocreate" type="button">LUO PÖYTÄ ▶</button>
+      <div class="krow"><input class="kin code" id="kocode" type="text" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" aria-label="Pöydän koodi" placeholder="____"><button class="ln" id="kojoin" type="button">LIITY</button></div>
+    </div>
+    <div id="kroom" style="display:none;flex-direction:column;align-items:center;gap:14px">
+      <p>Pöydän koodi</p>
+      <p class="kcode" id="kocodeview"></p>
+      <button class="ln" id="koshare" type="button">JAA LINKKI</button>
+      <div class="kseats" id="koseats"></div>
+      <p id="kowait">Tyhjät paikat täytetään boteilla. Enintään kuusi pelaajaa.</p>
+      <button class="go" id="kostart" type="button">ALOITA PELI ▶</button>
+    </div>
+    <p class="kerr" id="koerr" aria-live="polite"></p>
+    <button class="ln" id="koleave" type="button">TAKAISIN</button>
   </div>
   <div class="kpanel" id="kover">
     <h2 id="kovh">VIIMEINEN PÖYDÄSSÄ</h2>
@@ -2674,12 +2723,12 @@ body.kiropen{overflow:hidden}
     setTimeout(function(){ g.style.transform = base; g.classList.remove('tip'); }, 4200); }
 
   // ---------- seats: clockwise from me at the bottom ----------
-  var POS_P = [null, {l:'6px', t:'49%'}, {l:'6px', t:'17%'}, {l:'50%', t:'3%', c:1}, {r:'6px', t:'17%'}, {r:'6px', t:'49%'}];
+  var POS_P = [null, {l:'6px', t:'49%'}, {l:'6px', t:'19%'}, {l:'50%', t:'7.5%', c:1}, {r:'6px', t:'19%'}, {r:'6px', t:'49%'}];
   var POS_L = [null, {l:'3%', t:'40%'}, {l:'17%', t:'6%'}, {l:'50%', t:'3%', c:1}, {r:'17%', t:'6%'}, {r:'3%', t:'40%'}];
   function buildSeats(){
     var land = innerWidth > innerHeight, P = land ? POS_L : POS_P, h = '';
     for (var i = 1; i <= 5; i++){ var p = P[i], s = 'top:' + p.t + ';' + (p.l != null ? 'left:' + p.l + ';' : '') + (p.r != null ? 'right:' + p.r + ';' : '') + (p.c ? 'transform:translateX(-50%);' : '');
-      h += '<div class="seat" id="kseat' + i + '" style="' + s + '"><div class="plate" id="kplate' + i + '"><b></b><small></small></div><div class="backs" id="kbacks' + i + '"></div><div class="final" id="kfinal' + i + '"></div><div class="played" id="kplayed' + i + '"></div></div>'; }
+      h += '<div class="seat" id="kseat' + i + '" style="' + s + '"><div class="plate" id="kplate' + i + '"><b></b><small></small><em class="tag"></em></div><div class="backs" id="kbacks' + i + '"></div><div class="final" id="kfinal' + i + '"></div><div class="played" id="kplayed' + i + '"></div></div>'; }
     $('kseats').innerHTML = h;
     var ph = $('kphone'); if (land){ ph.style.left = 'calc(50% - 68px)'; ph.style.top = '33%'; } else { ph.style.left = 'calc(50% - 61px)'; ph.style.top = '29%'; }
   }
@@ -2743,6 +2792,26 @@ body.kiropen{overflow:hidden}
     headsup: function(){ tone(110, 1.2, 'sawtooth', .06, 220); setTimeout(function(){ tone(220, .9, 'square', .04); }, 400); setTimeout(SFX.thud, 900); }
   };
 
+  // ---------- music: same as the other games; the menu loops the start of one song, a game draws songs at random ----------
+  var SONGS = [['01','PROLOGI','prologi'],['02','KYMMENEN TIKKUU','kymmenentikkuu'],['03','PITKÄSILTA','pitkasilta'],['04','SYMMETRISII UNII','symmetrisiiunii'],['05','VÄLII VUODELLA','valiivuodella'],
+    ['06','POSTINKANTAJA','postinkantaja'],['07','HYMYTYTTÖ','hymytytto'],['08','KOTIINPALUU KAI JOTENKI JÄRJESTYY','kotiinpaluu'],['09','VIKA SELKÄ','vikaselka'],['10','EPILOGI','epilogi']];
+  var audio = $('kaudio'), song = 7, mode = 'menu', INTRO_END = 26, musicOn = true;
+  try { musicOn = localStorage.getItem('kirilii_mus') !== '0'; } catch(e){}
+  function setSong(i){ song = (i + SONGS.length) % SONGS.length; audio.src = 'assets/' + SONGS[song][2] + '.m4a'; $('ksong').textContent = '▶ ' + SONGS[song][0] + ' ' + SONGS[song][1]; }
+  function drawSong(){ var i; do { i = Math.floor(Math.random() * SONGS.length); } while (i === song && SONGS.length > 1); setSong(i); }
+  audio.addEventListener('ended', function(){ if (mode === 'game'){ drawSong(); syncMusic(); } });
+  audio.addEventListener('timeupdate', function(){ if (mode === 'menu' && audio.currentTime > INTRO_END) audio.currentTime = 0; });
+  function syncMusic(){
+    $('kmus').classList.toggle('off', !musicOn); $('kmus').setAttribute('aria-pressed', musicOn);
+    if (!audio.src) setSong(7);
+    if (musicOn && root.classList.contains('on') && !document.hidden){ audio.volume = .45; var p = audio.play(); if (p && p.catch) p.catch(function(){}); } else audio.pause();
+  }
+  function gameMusic(){ if (mode !== 'game'){ mode = 'game'; drawSong(); } syncMusic(); }
+  function menuMusic(){ if (mode !== 'menu'){ mode = 'menu'; setSong(7); try { audio.currentTime = 0; } catch(e){} } syncMusic(); }
+  $('kmus').addEventListener('click', function(){ ac(); musicOn = !musicOn; try { localStorage.setItem('kirilii_mus', musicOn ? '1' : '0'); } catch(_){} syncMusic(); this.blur(); });
+  $('knextsong').addEventListener('click', function(){ ac(); mode = 'game'; drawSong(); if (!musicOn){ musicOn = true; try { localStorage.setItem('kirilii_mus', '1'); } catch(_){} } syncMusic(); this.blur(); });
+  document.addEventListener('visibilitychange', function(){ if (root.classList.contains('on')) syncMusic(); });
+
   // ---------- rendering ----------
   // which played cards belong to this lap, and which one is being asked for
   var lapIds = {};
@@ -2755,6 +2824,7 @@ body.kiropen{overflow:hidden}
       var p = st.players[i], seat = $('kseat' + i), plate = $('kplate' + i);
       seat.classList.toggle('out', p.out);
       plate.querySelector('b').textContent = p.name; plate.querySelector('small').textContent = p.pts;
+      var tg = plate.querySelector('.tag'), away = online && online.away && online.away[i]; tg.textContent = p.human ? (away ? 'POISSA' : '') : 'BOT'; tg.classList.toggle('away', !!away);
       plate.classList.toggle('turn', st.phase === 'play' && st.turn === i);
       var stamp = plate.querySelector('.stamp'); if (p.out && !stamp){ plate.insertAdjacentHTML('beforeend', '<span class="stamp">' + (p.outRound === st.round && st.phase !== 'play' ? 'ULOS' : 'ULKONA') + '</span>'); }
       if (!p.out && stamp) stamp.remove();
@@ -2763,7 +2833,7 @@ body.kiropen{overflow:hidden}
       $('kfinal' + i).innerHTML = reveal && p.hand[0] ? cardHTML(p.hand[0], (st.result.losers.indexOf(i) >= 0 ? 'lose' : '')) : '';
       $('kplayed' + i).innerHTML = p.played.map(function(c){ return cardHTML(c, cls(c)); }).join('');
     }
-    $('kmypts').textContent = me.pts; $('kmyplate').classList.toggle('turn', st.phase === 'play' && st.turn === 0);
+    $('kmyplate').querySelector('b').textContent = online ? me.name : 'SINÄ'; $('kmypts').textContent = me.pts; $('kmyplate').classList.toggle('turn', st.phase === 'play' && st.turn === 0);
     $('kmyplayed').innerHTML = me.played.map(function(c){ return cardHTML(c, cls(c)); }).join('');
     renderHand(); renderPhone(); hint();
   }
@@ -2806,7 +2876,7 @@ body.kiropen{overflow:hidden}
   function lastPlayedEl(pid){ var box = pid === 0 ? $('kmyplayed') : $('kplayed' + pid); return box.lastElementChild; }
 
   // ---------- turn loop ----------
-  function persist(){ try { localStorage.setItem(SAVE, K.save(st)); } catch(e){} }
+  function persist(){ if (online) return; try { localStorage.setItem(SAVE, K.save(st)); } catch(e){} }
   function doPlay(pid, cardId, fromRect){
     var p = st.players[pid], card = null; p.hand.forEach(function(c){ if (c.id === cardId) card = c; });
     var ev = K.play(st, pid, cardId); selected = null; persist();
@@ -2818,6 +2888,7 @@ body.kiropen{overflow:hidden}
   }
   function schedule(){
     var my = gen;
+    if (online){ busy = false; render(); return; }
     if (st.phase !== 'play') return;
     if (st.turn === 0){ busy = false; render(); return; }
     busy = true; render(); showThinking(st.turn, true);
@@ -2847,7 +2918,7 @@ body.kiropen{overflow:hidden}
   }
   $('kmyhand').addEventListener('pointerup', function(e){ endDrag(e); });
   $('kmyhand').addEventListener('pointercancel', function(e){ endDrag(e, true); });
-  function play(id, el){ if (st.turn !== 0 || busy) return; var r = el.getBoundingClientRect(); busy = true; try { doPlay(0, id, r); } catch(err){ busy = false; render(); } }
+  function play(id, el){ if (st.turn !== 0 || busy) return; var r = el.getBoundingClientRect(); busy = true; if (online){ onPlay(id, r); return; } try { doPlay(0, id, r); } catch(err){ busy = false; render(); } }
   addEventListener('keydown', function(e){
     if (!root.classList.contains('on')) return;
     if (e.key === 'Escape'){ if ($('kphone').classList.contains('big')) phoneBig(false); else close(); return; }
@@ -2866,8 +2937,8 @@ body.kiropen{overflow:hidden}
     mc: ['McBueno. Hyvää kotimatkaa.']
   };
   function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
-  function speakerFor(target, prefer){ var c = st.players.filter(function(p){ return !p.out && p.id !== target && p.id !== 0; }); if (prefer != null && prefer !== 0 && prefer !== target && !st.players[prefer].out) return prefer;
-    if (!c.length) c = st.players.filter(function(p){ return p.id !== target && p.id !== 0; }); return c.length ? pick(c).id : null; }
+  function speakerFor(target, prefer){ var c = st.players.filter(function(p){ return !p.out && p.id !== target && p.id !== 0 && !p.human; }); if (prefer != null && prefer !== 0 && prefer !== target && !st.players[prefer].out && !st.players[prefer].human) return prefer;
+    if (!c.length) c = st.players.filter(function(p){ return p.id !== target && p.id !== 0 && !p.human; }); return c.length ? pick(c).id : null; }
   function say(pid, text, title, ms){
     if (pid == null) return; var anchor = pid === 0 ? $('kmyplate') : $('kplate' + pid); if (!anchor) return;
     var r = anchor.getBoundingClientRect(), sr = root.getBoundingClientRect(), b = document.createElement('div'); b.className = 'bub';
@@ -2882,7 +2953,8 @@ body.kiropen{overflow:hidden}
   function shake(q){ var s = $('kstage'); s.classList.remove('shake', 'quake'); void s.offsetWidth; s.classList.add(q ? 'quake' : 'shake'); }
 
   function roundEnd(my){
-    if (my !== gen) return; var R = st.result, T = 0, me = st.players[0];
+    if (my !== gen) return;
+    revealing = true; var R = st.result, T = 0, me = st.players[0];
     busy = true; render(); persist(); noise(.25, .2, 900);
     var seq = [];
     function at(ms, fn){ seq.push(setTimeout(function(){ if (my === gen) fn(); }, ms * 1.4)); }
@@ -2933,8 +3005,9 @@ body.kiropen{overflow:hidden}
     }
     at(T, function(){
       $('kscr').classList.remove('wake'); renderPhone();
-      if (st.phase === 'over'){ gameOver(); return; }
+      if (st.phase === 'over'){ revealing = false; gameOver(); return; }
       busy = false;
+      if (online){ revealing = false; $('khint').textContent = 'Seuraava jako alkaa…'; flushPending(); return; }
       var nb = $('knext'); nb.textContent = me.out ? 'JATKA (ULKONA) ▶' : 'SEURAAVA JAKO ▶'; nb.classList.add('on');
       autoNext = setTimeout(function(){ if (my === gen && $('knext').classList.contains('on') && me.out) next(); }, 2600);
     });
@@ -2954,7 +3027,7 @@ body.kiropen{overflow:hidden}
   function gameOver(){
     var w = st.players[st.winner], won = st.winner === 0;
     stats.games++; if (won){ stats.wins++; if (st.headsUp) stats.headsUpWins++; } lsSet(STATS, stats);
-    try { localStorage.removeItem(SAVE); } catch(e){}
+    if (online) leaveOnline(true); else try { localStorage.removeItem(SAVE); } catch(e){}
     big(won ? 'VIIMEINEN PÖYDÄSSÄ' : w.name + ' VEI', won ? 'Sinä voitit.' : 'Viimeinen pöydässä.'); if (won){ SFX.clink(); playS('bell', .4); } else playS('laugh', .4);
     setTimeout(function(){
       $('kovh').textContent = won ? 'VIIMEINEN PÖYDÄSSÄ' : w.name + ' VOITTI';
@@ -2995,10 +3068,10 @@ body.kiropen{overflow:hidden}
   $('kherja').addEventListener('click', function(){ cycle('herja', ['paljon', 'vahan', 'pois']); });
   $('ktie').addEventListener('click', function(){ cycle('tie', ['lowest', 'replay']); });
   $('kfx').addEventListener('click', function(){ ac(); settings.fx = !settings.fx; syncOpts(); this.blur(); });
-  function showPanel(id){ ['kmenu', 'krules', 'kstats', 'kover'].forEach(function(p){ $(p).classList.toggle('on', p === id); }); }
-  function hidePanels(){ ['kmenu', 'krules', 'kstats', 'kover'].forEach(function(p){ $(p).classList.remove('on'); }); }
-  function menu(){ var has = !!lsGet(SAVE, null); $('kcont').hidden = !has || !st || st.phase === 'over'; showPanel('kmenu'); root.classList.add('idle'); }
-  $('kmenub').addEventListener('click', function(){ if ($('kmenu').classList.contains('on')){ if (st && st.phase !== 'over'){ hidePanels(); root.classList.remove('idle'); } } else menu(); });
+  function showPanel(id){ ['kmenu', 'krules', 'kstats', 'kover', 'klobby'].forEach(function(p){ $(p).classList.toggle('on', p === id); }); }
+  function hidePanels(){ ['kmenu', 'krules', 'kstats', 'kover', 'klobby'].forEach(function(p){ $(p).classList.remove('on'); }); }
+  function menu(){ var has = !!lsGet(SAVE, null); $('kcont').hidden = online || !has || !st || st.phase === 'over'; $('kocont').hidden = !lsGet(OSAVE, null); showPanel('kmenu'); root.classList.add('idle'); }
+  $('kmenub').addEventListener('click', function(){ if ($('kmenu').classList.contains('on')){ if (st && st.phase !== 'over' && (!online || online.view && online.view.phase === 'game')){ hidePanels(); root.classList.remove('idle'); } } else menu(); });
   $('krulesb').addEventListener('click', function(){ showPanel('krules'); });
   $('kstatsb').addEventListener('click', function(){
     var L = [['Pelejä', stats.games], ['Voittoja', stats.wins], ['Heads Up -voittoja', stats.headsUpWins], ['Hävityt jaot', stats.roundsLost], ['Rangaistuspisteet', stats.penalty], ['Suurin rangaistus', stats.biggest],
@@ -3006,13 +3079,14 @@ body.kiropen{overflow:hidden}
     $('kstatlist').innerHTML = L.map(function(r){ return '<span>' + r[0] + '</span><em>' + r[1] + '</em>'; }).join(''); showPanel('kstats'); });
   root.querySelectorAll('[data-back]').forEach(function(b){ b.addEventListener('click', menu); });
   function startNew(){
+    if (online) leaveOnline(false);
     ac(); gen++; clearTimeout(autoNext); busy = false; selected = null; root.classList.remove('hu');
-    st = K.newGame({difficulty:settings.difficulty, tieRule:settings.tie}); persist();
+    st = K.newGame({difficulty:settings.difficulty, tieRule:settings.tie}); persist(); gameMusic();
     hidePanels(); root.classList.remove('idle'); $('knext').classList.remove('on'); render(); SFX.shuffle(); dealAnim();
     big('JAKO', st.players[st.starter].name === 'SINÄ' ? 'Sinä aloitat' : st.players[st.starter].name + ' aloittaa'); schedule();
   }
   function resume(){
-    ac(); gen++; hidePanels(); root.classList.remove('idle'); root.classList.toggle('hu', !!st.headsUp); render();
+    ac(); gen++; hidePanels(); root.classList.remove('idle'); root.classList.toggle('hu', !!st.headsUp); render(); gameMusic();
     if (st.phase === 'reveal'){ $('knext').classList.add('on'); busy = false; } else schedule();
   }
   $('knew').addEventListener('click', startNew); $('kagain').addEventListener('click', startNew);
@@ -3024,6 +3098,121 @@ body.kiropen{overflow:hidden}
   $('kphone').addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); phoneBig(!this.classList.contains('big')); } });
   $('kdim').addEventListener('click', function(){ phoneBig(false); });
 
+  // ---------- online: a table with friends; the server deals, checks and plays the bots ----------
+  var OAPI = 'https://api.viistone.com/api/kirilii/', OSAVE = 'kirilii-online', online = null, pollT = 0, revealing = false, pending = null, seenShouts = {}, myRect = null;
+  function oerr(t){ $('koerr').textContent = t || ''; }
+  var OERR = {name:'Kolme kirjainta, kiitos.', room:'Pöytää ei löytynyt.', started:'Peli on jo alkanut.', full:'Pöytä on täynnä.', taken:'Nimikirjaimet on jo käytössä tässä pöydässä.', seat:'Paikkaa ei löytynyt.', offline:'Pöydät eivät ole nyt auki.', busy:'Ruuhkaa, yritä uudelleen.'};
+  function opost(op, body){ return fetch(OAPI + op, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)}).then(function(r){ return r.json().then(function(d){ d._s = r.status; return d; }); }); }
+  function oget(){ return fetch(OAPI + 'state?room=' + online.room + '&t=' + online.token, {cache:'no-store'}).then(function(r){ return r.json().then(function(d){ d._s = r.status; return d; }); }); }
+  function clean3(el){ el.addEventListener('input', function(){ var v = this.value.toUpperCase().replace(/[^A-ZÅÄÖ]/g, '').slice(0, +this.maxLength); if (v !== this.value) this.value = v; }); el.addEventListener('keydown', function(e){ e.stopPropagation(); }, true); }
+  clean3($('koname')); clean3($('kocode'));
+  function showLobby(code){
+    oerr(''); $('koname').value = savedName(); if (code) $('kocode').value = code;
+    $('kentry').style.display = 'flex'; $('kroom').style.display = 'none'; showPanel('klobby'); root.classList.add('idle');
+  }
+  function enter(d, name){
+    online = {room:d.room, token:d.token, seat:d.seat, name:name, view:null, away:{}}; lsSet(OSAVE, {room:d.room, token:d.token, seat:d.seat, name:name});
+    try { localStorage.setItem('viistone-2048-name', name); } catch(e){}
+    root.classList.add('online'); seenShouts = {}; (d.shouts || []).forEach(function(x){ seenShouts[x.id] = 1; });
+    history.replaceState(null, '', '#kirilii-' + d.room); applyView(d); poll();
+  }
+  $('konline').addEventListener('click', function(){ ac(); showLobby(''); });
+  $('kocreate').addEventListener('click', function(){ ac(); var n = $('koname').value; if (!/^[A-ZÅÄÖ]{3}$/.test(n)){ oerr(OERR.name); return; }
+    oerr(''); opost('new', {n:n}).then(function(d){ if (d._s !== 200){ oerr(OERR[d.error] || 'Ei onnistunut.'); return; } enter(d, n); }).catch(function(){ oerr('Ei yhteyttä.'); }); });
+  $('kojoin').addEventListener('click', function(){ ac(); var n = $('koname').value, c = $('kocode').value; if (!/^[A-ZÅÄÖ]{3}$/.test(n)){ oerr(OERR.name); return; } if (!/^[A-Z]{4}$/.test(c)){ oerr('Koodissa on neljä kirjainta.'); return; }
+    oerr(''); opost('join', {room:c, n:n}).then(function(d){ if (d._s !== 200){ oerr(OERR[d.error] || 'Ei onnistunut.'); return; } enter(d, n); }).catch(function(){ oerr('Ei yhteyttä.'); }); });
+  $('kostart').addEventListener('click', function(){ ac(); if (!online) return; this.disabled = true; var b = this;
+    opost('start', {room:online.room, t:online.token}).then(function(d){ b.disabled = false; if (d._s === 200) applyView(d); else oerr(OERR[d.error] || 'Ei onnistunut.'); }).catch(function(){ b.disabled = false; oerr('Ei yhteyttä.'); }); });
+  $('koshare').addEventListener('click', function(){ if (!online) return; var url = location.origin + '/#kirilii-' + online.room, b = this;
+    if (navigator.share) navigator.share({title:'Kirilii', text:'Kirilii-pöytä ' + online.room, url:url}).catch(function(){});
+    else if (navigator.clipboard) navigator.clipboard.writeText(url).then(function(){ b.textContent = 'LINKKI KOPIOITU'; setTimeout(function(){ b.textContent = 'JAA LINKKI'; }, 1600); }); });
+  $('koleave').addEventListener('click', function(){ if (online && online.view && online.view.phase === 'game' && st && st.phase !== 'over'){ menu(); return; } leaveOnline(false); menu(); });
+  $('kocont').addEventListener('click', function(){ var o = lsGet(OSAVE, null); if (!o) return; ac(); online = {room:o.room, token:o.token, seat:o.seat, name:o.name, view:null, away:{}}; root.classList.add('online'); seenShouts = {};
+    oget().then(function(d){ if (d._s !== 200){ leaveOnline(false); menu(); return; } (d.shouts || []).forEach(function(x){ seenShouts[x.id] = 1; }); st = null; applyView(d); poll(); }).catch(function(){ oerr('Ei yhteyttä.'); }); });
+  function leaveOnline(keepTable){ stopPoll(); if (!keepTable){ try { localStorage.removeItem(OSAVE); } catch(e){} } else { try { localStorage.removeItem(OSAVE); } catch(e){} }
+    online = null; root.classList.remove('online'); pending = null; revealing = false; if (/^#kirilii-/.test(location.hash)) history.replaceState(null, '', '#kirilii'); }
+  function stopPoll(){ clearTimeout(pollT); pollT = 0; }
+  function poll(){ stopPoll(); if (!online || !root.classList.contains('on')) return;
+    oget().then(function(d){ if (!online) return; if (d._s === 200) applyView(d); else if (d._s === 404 || d._s === 403){ leaveOnline(false); $('khint').textContent = 'Pöytä on suljettu.'; menu(); return; } })
+      .catch(function(){ $('khint').textContent = 'Yhteys pätkii…'; })
+      .then(function(){ if (online) pollT = setTimeout(poll, document.hidden ? 4000 : 800); }); }
+  // the server sends every view from its own seat; turn it so I sit at the bottom
+  function fromView(v){
+    var S = v.st, me = v.me, R = function(i){ return i == null ? i : (i - me + 6) % 6; }, players = [];
+    S.players.forEach(function(p){ var q = Object.assign({}, p); q.id = R(p.id); players[q.id] = q; });
+    function H(x){ return {by:R(x.by), victim:R(x.victim), mcbueno:x.mcbueno}; }
+    return Object.assign({}, S, {players:players, turn:R(S.turn), starter:R(S.starter), lastBy:R(S.lastBy), winner:R(S.winner),
+      roundLog:S.roundLog.map(function(e){ return {pid:R(e.pid), card:e.card, n:e.n}; }),
+      history:(S.history || []).map(function(h){ return Object.assign({}, h, {losers:h.losers.map(R), out:h.out.map(R), hoyla:h.hoyla.map(H)}); }),
+      result:S.result ? Object.assign({}, S.result, {reveal:S.result.reveal.map(function(r){ return {pid:R(r.pid), card:r.card}; }), losers:S.result.losers.map(R), out:S.result.out.map(R), winner:R(S.result.winner), hoyla:S.result.hoyla.map(H)}) : null});
+  }
+  function renderLobby(v){
+    $('kentry').style.display = 'none'; $('kroom').style.display = 'flex'; $('kocodeview').textContent = v.room;
+    var h = ''; for (var i = 0; i < 6; i++){ var s0 = v.seats[i]; h += s0 ? '<span class="' + (i === v.me ? 'me' : '') + '">' + s0.name + (i === 0 ? ' ★' : '') + '</span>' : '<span class="bot">BOTTI</span>'; }
+    $('koseats').innerHTML = h; $('kostart').style.display = v.host ? '' : 'none';
+    $('kowait').textContent = v.host ? 'Tyhjät paikat täytetään boteilla. Aloita kun porukka on paikalla.' : v.seats[0].name + ' aloittaa pelin. Tyhjät paikat täytetään boteilla.';
+    if (!$('klobby').classList.contains('on')) showPanel('klobby');
+  }
+  function applyView(v){
+    if (!online) return;
+    online.view = v; online.away = {};
+    if (v.phase === 'lobby'){ renderLobby(v); return; }
+    v.seats.forEach(function(s0, i){ if (s0.away) online.away[(i - v.me + 6) % 6] = 1; });
+    showShouts(v);
+    var ns = fromView(v);
+    if (revealing){ pending = ns; return; }
+    applyState(ns);
+    var sh = $('kshout').querySelectorAll('button'); for (var i = 0; i < sh.length; i++) sh[i].disabled = !v.canShout || ns.phase === 'over';
+  }
+  function flushPending(){ if (pending){ var p = pending; pending = null; applyState(p); } }
+  function applyState(ns){
+    var old = st, first = !old || !old.players || $('klobby').classList.contains('on') || $('kmenu').classList.contains('on') && !old.roundLog;
+    if (first || !old || old.round !== ns.round){
+      var newRound = old && old.round !== ns.round;
+      st = ns; busy = false; selected = null; hidePanels(); root.classList.remove('idle'); gameMusic(); root.classList.toggle('hu', !!st.headsUp);
+      document.querySelectorAll('#kir .plate').forEach(function(p){ p.classList.remove('lose', 'hit'); });
+      $('knext').classList.remove('on'); render();
+      if (newRound || first && ns.roundLog.length === 0){ SFX.shuffle(); dealAnim(); }
+      if (first && ns.phase === 'over'){ gameOver(); }
+      else if (ns.phase === 'reveal') $('khint').textContent = 'Seuraava jako alkaa…';
+      return;
+    }
+    // same deal: animate the new cards, then the reveal if the deal just ended
+    var newEvs = ns.roundLog.slice(old.roundLog.length), wasPlay = old.phase === 'play';
+    st = ns; if (st.turn !== 0) selected = null;
+    if (newEvs.length){
+      var from = {}; newEvs.forEach(function(e){ from[e.pid] = e.pid === 0 ? myRect : $('kbacks' + e.pid).getBoundingClientRect(); });
+      busy = false; render();
+      newEvs.forEach(function(e, k){ var box = e.pid === 0 ? $('kmyplayed') : $('kplayed' + e.pid), el = null;
+        for (var j = 0; j < box.children.length; j++) if (+box.children[j].dataset.id === e.card.id) el = box.children[j];
+        setTimeout(function(){ SFX.slap(); fly(from[e.pid], e.card, el); }, k * 260); });
+      if (Math.random() < .25) wobble(false);
+    } else { busy = false; render(); }
+    if (wasPlay && st.phase !== 'play') setTimeout(function(){ roundEnd(gen); }, 1300);
+  }
+  function onPlay(id, rect){
+    myRect = rect; selected = null;
+    opost('play', {room:online.room, t:online.token, c:id}).then(function(d){ if (d.st) applyView(d); busy = false; if (d._s !== 200) render(); }).catch(function(){ busy = false; render(); $('khint').textContent = 'Ei yhteyttä, yritä uudelleen.'; });
+  }
+  // the only thing anyone can send besides a card: one of two shouts, once per lap
+  var SHOUTS = ['HÖYLÄ!', 'HÖYLÄ McBUENO!!!'];
+  Array.prototype.forEach.call($('kshout').querySelectorAll('button'), function(b){
+    b.addEventListener('click', function(){ if (!online) return; ac(); var bs = $('kshout').querySelectorAll('button'); for (var i = 0; i < bs.length; i++) bs[i].disabled = true;
+      opost('shout', {room:online.room, t:online.token, k:+b.dataset.k}).then(function(d){ if (d.st) applyView(d); }).catch(function(){}); });
+  });
+  function showShouts(v){
+    (v.shouts || []).forEach(function(x){ if (seenShouts[x.id]) return; seenShouts[x.id] = 1;
+      var pid = (x.seat - v.me + 6) % 6, name = v.seats[x.seat] ? v.seats[x.seat].name : '';
+      var anchor = pid === 0 ? $('kmyplate') : $('kplate' + pid); if (!anchor) return;
+      var r = anchor.getBoundingClientRect(), sr = root.getBoundingClientRect(), b = document.createElement('div'); b.className = 'bub shout';
+      b.innerHTML = '<b>' + name + '</b>' + SHOUTS[x.k]; root.appendChild(b);
+      var x0 = Math.min(sr.width - 230, Math.max(8, r.left - sr.left + r.width / 2 - 90)), y0 = pid === 0 ? r.top - sr.top - 70 : r.bottom - sr.top + 6;
+      b.style.left = x0 + 'px'; b.style.top = y0 + 'px'; requestAnimationFrame(function(){ b.classList.add('on'); });
+      setTimeout(function(){ b.classList.remove('on'); setTimeout(function(){ b.remove(); }, 300); }, 2800);
+      if (x.k) { shake(true); SFX.mcbueno(); } else { shake(false); SFX.hoyla(); }
+    });
+  }
+
   // ---------- open and close ----------
   function layout(){ buildSeats(); buildProps(); wood(); if (st) render(); }
   var lastLand = null;
@@ -3031,21 +3220,23 @@ body.kiropen{overflow:hidden}
   function open(){
     window.__gameOpen = true; var ga = document.getElementById('ga'); if (ga) ga.pause();
     root.classList.add('on'); document.body.classList.add('kiropen'); lastLand = innerWidth > innerHeight;
-    layout(); syncOpts();
+    layout(); syncOpts(); mode = ''; menuMusic();
     try { var s = localStorage.getItem(SAVE); if (s && !st){ st = K.load(s); st.players.forEach(function(p){ p._show = p.pts; }); } } catch(e){ st = null; }
     if (st) render();
     menu();
+    var hm = /^#kirilii-([A-Za-z]{4})$/.exec(location.hash); if (hm){ showLobby(hm[1].toUpperCase()); return; }
     if (location.hash !== '#kirilii') history.replaceState(null, '', '#kirilii');
   }
   function close(){
-    gen++; clearTimeout(autoNext); root.classList.remove('on'); document.body.classList.remove('kiropen'); window.__gameOpen = false; phoneBig(false);
-    if (location.hash === '#kirilii') history.replaceState(null, '', location.pathname + location.search);
+    gen++; clearTimeout(autoNext); audio.pause(); root.classList.remove('on'); document.body.classList.remove('kiropen'); window.__gameOpen = false; phoneBig(false);
+    if (/^#kirilii/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
     if (st && st.phase === 'play') busy = false;
+    stopPoll();
   }
   function home(){ close(); if (window.__showGames) setTimeout(window.__showGames, 200); }
   $('keject').addEventListener('click', home); $('khome').addEventListener('click', home); $('khome2').addEventListener('click', home);
   var pb = document.getElementById('pick09'); if (pb) pb.addEventListener('click', open);
-  if (location.hash === '#kirilii') open();
+  if (/^#kirilii(-[A-Za-z]{4})?$/.test(location.hash)) open();
   window.__kirilii = {open:open, close:close, state:function(){ return st; }, newGame:startNew, next:next, settings:settings};
 })();
 </script>
