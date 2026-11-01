@@ -121,6 +121,24 @@ main{max-width:980px;margin:0 auto;position:relative;z-index:1}
 @media (prefers-reduced-motion:reduce){.tapebtn:hover .reel{animation:none}}
 .gamepick{display:grid;grid-template-columns:repeat(3,minmax(0,170px));gap:16px;justify-content:center;margin:30px auto 0}
 .gamepick[hidden]{display:none}
+.pick{position:relative}
+.pick .hm{position:absolute;right:6px;top:6px;width:13px;height:21px;background:url(assets/hymy/hymy.png) center/contain no-repeat;opacity:.55;filter:drop-shadow(0 0 3px rgba(230,235,240,.4))}
+.pick.ch00[hidden]{display:none}
+.pick.ch00{grid-column:1/-1;flex-direction:row;align-items:center;gap:14px;justify-self:center;width:min(100%,360px);background:#0c0c0b;border-color:rgba(230,235,240,.35)}
+.pick.ch00 .img{width:52px;height:72px !important;flex:none;background-size:contain;background-color:#0b0b0a}
+.pick.ch00 .ch{font-size:26px}
+.ch00x{position:fixed;inset:0;z-index:90;background:#050505;display:none;overflow:hidden;color:#e9e4d8;font-family:var(--f-osd)}
+.ch00x.on{display:block}
+.ch00x .st{position:absolute;inset:-20%;opacity:.16;background:repeating-radial-gradient(circle at 17% 32%, #fff 0 1px, transparent 1px 3px),repeating-radial-gradient(circle at 73% 61%, #aaa 0 1px, transparent 1px 2px);animation:ch00st .18s steps(3) infinite}
+@keyframes ch00st{33%{transform:translate(-11px,7px)}66%{transform:translate(9px,-5px)}}
+.ch00x .sl{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(to bottom, rgba(0,0,0,.35) 0 2px, transparent 2px 5px)}
+.ch00x img{position:absolute;left:50%;top:44%;height:min(62vh,600px);transform:translate(-50%,-50%);opacity:0;transition:opacity 4s;filter:contrast(1.1);mix-blend-mode:screen;animation:ch00j 7s steps(1) infinite}
+.ch00x.lit img{opacity:.92}
+@keyframes ch00j{0%,100%{translate:0 0}62%{translate:3px 0}63%{translate:-2px 1px}64%{translate:0 0}}
+.ch00x .osd{position:absolute;left:max(18px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));font-size:30px;letter-spacing:.05em;line-height:1.1}
+.ch00x .osd small{display:block;font-size:20px;opacity:.75}
+.ch00x .ln{position:absolute;left:0;right:0;bottom:calc(9vh + env(safe-area-inset-bottom,0px));text-align:center;font-size:clamp(22px,5.4vw,34px);letter-spacing:.04em;min-height:2.6em;padding:0 18px;text-shadow:-2px 0 rgba(255,40,40,.45),2px 0 rgba(40,220,255,.4)}
+.ch00x .cx{position:absolute;right:max(14px,env(safe-area-inset-right,0px));top:calc(12px + env(safe-area-inset-top,0px));font:inherit;font-size:24px;color:#e9e4d8;background:transparent;border:1px solid rgba(233,228,216,.4);padding:4px 12px;cursor:pointer}
 .gamepick .pnote{grid-column:1/-1;margin:2px 0 0;text-align:center;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
 .gamepick.in{animation:pickin .45s steps(4) both}
 @keyframes pickin{0%{opacity:0;transform:translateY(8px) skewX(4deg);filter:brightness(2)}60%{opacity:1;filter:brightness(1.4)}100%{opacity:1;transform:none;filter:none}}
@@ -345,6 +363,7 @@ body.paused main{animation:hold .12s steps(2) infinite}
         <button class="pick" id="pick03" type="button"><span class="img" style="background-image:url(assets/peli/thumb.jpg)" aria-hidden="true"></span><span class="ch">CH 03</span><span class="nm">Tulitikusta maailmankaikkeuteen</span></button>
         <button class="pick" id="ch06b" type="button"><span class="img rat" style="background-image:url(assets/posti/rat.webp)" aria-hidden="true"></span><span class="ch">CH 06</span><span class="nm">Postinkantaja</span></button>
         <button class="pick" id="pick09" type="button"><span class="img kthumb" style="background-image:url(assets/kirilii/thumb.jpg)" aria-hidden="true"></span><span class="ch">CH 09</span><span class="nm">Kirilii</span></button>
+        <button class="pick ch00" id="pick00" type="button" hidden><span class="img" style="background-image:url(assets/hymy/hymy.png)" aria-hidden="true"></span><span class="ch">CH 00</span><span class="nm">Hymytyttö</span></button>
         <p class="pnote">Peleissä on verta, kiroilua ja alkoholia. Suositus 16+.</p>
       </div>
       <div class="hiscores" id="hiscores" aria-live="polite" hidden><div class="hg" id="hs03" hidden><p class="hgn">CH 03 · TULITIKUSTA</p><div><span class="hl">TÄNÄÄN</span><span class="ht"></span></div><div><span class="hl">ENNÄTYS</span><span class="ha"></span></div></div><div class="hg" id="hs06" hidden><p class="hgn">CH 06 · POSTINKANTAJA</p><div><span class="hl">TÄNÄÄN</span><span class="ht"></span></div><div><span class="hl">ENNÄTYS</span><span class="ha"></span></div></div><div class="hg" id="hs09" hidden><p class="hgn">CH 09 · KIRILII</p><div><span class="hl">TÄNÄÄN</span><span class="ht"></span></div><div><span class="hl">ENITEN</span><span class="ha"></span></div></div></div>
@@ -737,6 +756,9 @@ body.gameopen{overflow:hidden}
 .tile.ash{background:#141312 url(assets/peli/mark.png) center/95% no-repeat !important;filter:none !important;opacity:calc(.45 + .55 * var(--life,1));box-shadow:inset 0 0 0 1px rgba(168,122,80,.35), inset 0 0 18px rgba(0,0,0,.9)}
 .tile.ash::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%, rgba(168,122,80,.14), transparent 65%),repeating-linear-gradient(to bottom, rgba(0,0,0,.25) 0 1px, transparent 1px 3px)}
 .tile.crumble{animation:crumble .6s ease-in forwards}
+.board.kicked{clip-path:none !important;z-index:6}
+.tile.ash.hymy{background:#0d0d0c url(assets/hymy/hymy.png) center 60%/auto 86% no-repeat !important;opacity:1}
+.tile.ash.hymy::before{background:radial-gradient(ellipse at 50% 40%, rgba(230,235,240,.12), transparent 70%),repeating-linear-gradient(to bottom, rgba(0,0,0,.2) 0 1px, transparent 1px 3px)}
 @keyframes crumble{to{opacity:0}}
 /* the eye watches where you push the tape */
 .eyewrap{position:relative;transform:rotate(-.6deg);clip-path:polygon(0.4% 2%, 41% 0%, 99.6% 1.5%, 100% 52%, 99.2% 98.5%, 58% 100%, 0% 98%, 0.6% 46%)}
@@ -862,6 +884,8 @@ body.gameopen{overflow:hidden}
     return t;
   }
   // ash: a burnt-out block that sits still, can't merge, and crumbles after a while
+  var hymyDone = false, kicked = false;
+  function hymySeen(k){ try { var h = JSON.parse(localStorage.getItem('viistone-hymy') || '{}'); if (!h[k]){ h[k] = Date.now(); localStorage.setItem('viistone-hymy', JSON.stringify(h)); } } catch(e){} }
   var moves = 0, ASH_START = 18, ASH_EVERY = 11, ASH_LIFE = 10, ASH_MAX = 2;
   function ashMaybe(){
     moves++;
@@ -870,14 +894,15 @@ body.gameopen{overflow:hidden}
     var free = [];
     for (var r = 0; r < N; r++) for (var c = 0; c < N; c++) if (!grid[r][c]) free.push([r, c]);
     if (free.length < 2) return;
-    var p = free[Math.floor(Math.random() * free.length)];
-    var el = document.createElement('div'); el.className = 'tile ash new';
+    var p = free[Math.floor(Math.random() * free.length)], isH = !hymyDone && Math.random() < .07; if (isH) hymyDone = true;
+    var el = document.createElement('div'); el.className = 'tile ash new' + (isH ? ' hymy' : '');
     var w = wear(); el._w = w; el.style.width = el.style.height = cell + 'px';
     el.style.clipPath = w.clip; el.setAttribute('aria-label', 'Viistone-este'); el.setAttribute('role', 'img');
     place(el, p[0], p[1]); board.appendChild(el);
-    var a = {id: ++uid, l: -1, r: p[0], c: p[1], el: el, life: ASH_LIFE}; tiles.push(a); grid[p[0]][p[1]] = a;
+    var a = {id: ++uid, l: -1, r: p[0], c: p[1], el: el, life: isH ? ASH_LIFE + 6 : ASH_LIFE}; tiles.push(a); grid[p[0]][p[1]] = a;
     el.style.setProperty('--life', 1);
-    if (typeof strike === 'function') strike(0);
+    if (isH){ el.setAttribute('aria-label', 'Hymytyttö'); hymySeen('c03'); playFile('static', .35); flash(); setTimeout(function(){ look(0, -1); }, 200); }
+    else if (typeof strike === 'function') strike(0);
   }
   function ashTick(){
     tiles.filter(function(x){ return x.l < 0; }).forEach(function(a){
@@ -896,7 +921,7 @@ body.gameopen{overflow:hidden}
     makeTile(Math.random() < 0.9 ? 0 : 1, p[0], p[1], 'new');
   }
   function reset(){
-    board.innerHTML = ''; tiles = []; grid = []; score = 0; top = -1; busy = false; moves = 0;
+    board.innerHTML = ''; tiles = []; grid = []; score = 0; top = -1; busy = false; moves = 0; hymyDone = false; kicked = false;
     for (var r = 0; r < N; r++){ grid.push([null,null,null,null]);
       for (var c = 0; c < N; c++){ var d = document.createElement('div'); d.className = 'cell'; d.dataset.r = r; d.dataset.c = c; d._w = wear(); d._w.sc = rr(.95, 1); d.style.clipPath = d._w.clip; d.style.opacity = rr(.5, 1).toFixed(2); board.appendChild(d); } }
     [].forEach.call(chain.children, function(i){ i.classList.remove('got'); });
@@ -942,8 +967,19 @@ body.gameopen{overflow:hidden}
       if (merges.length >= 2){ track(); }
       if (maxL >= 6 && maxL < NAMES.length){ flash(); track(); wow(); }
       setScore(); checkRecord(); ashTick(); spawn(); ashMaybe(); busy = false;
+      if (!kicked && moves > 25 && Math.random() < 1 / 260) kick();
       if (!canMove()) end();
     }, reduce ? 0 : 125);
+  }
+  function kick(){
+    kicked = true; busy = true; playFile('kick', .9); flash(); startle(true); board.classList.add('kicked'); setTimeout(function(){ board.classList.remove('kicked'); }, 1500);
+    board.classList.remove('jolt'); void board.offsetWidth; board.classList.add('jolt');
+    if (reduce){ busy = false; return; }
+    tiles.forEach(function(t, i){ var up = -(110 + Math.random() * 180), dx = (Math.random() - .5) * 90, rot = (Math.random() - .5) * 140;
+      t.el.animate([{translate:'0 0', rotate:'0deg'}, {translate:(dx * .6) + 'px ' + up + 'px', rotate:(rot * .7) + 'deg', offset:.38}, {translate:dx + 'px ' + (up * .55) + 'px', rotate:rot + 'deg', offset:.6}, {translate:'0 4px', rotate:(rot * .05) + 'deg', offset:.88}, {translate:'0 0', rotate:'0deg'}],
+        {duration:1150 + Math.random() * 200, delay:i * 12, easing:'cubic-bezier(.3,.6,.4,1)'}); });
+    setTimeout(function(){ if (sfxOn()) thump(); }, 1050);
+    setTimeout(function(){ busy = false; }, 1400);
   }
   function canMove(){
     for (var r = 0; r < N; r++) for (var c = 0; c < N; c++){
@@ -1020,6 +1056,8 @@ body.gameopen{overflow:hidden}
 
   // ---- sound: struck matches, a stretching tape, a VCR that stops ----
   var AC = null, mGain, mFilt, sfxBus, mediaSrc;
+  var fileBufs = {}, FILES = {kick:'assets/peli/kick.mp3', static:'assets/posti/sfx/static.mp3'};
+  function playFile(k, vol){ if (!sfxOn() || !fileBufs[k]) return; var s = AC.createBufferSource(), g = AC.createGain(); s.buffer = fileBufs[k]; g.gain.value = vol; s.connect(g).connect(sfxBus); s.start(); }
   function audioInit(){
     if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
     try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ return; }
@@ -1027,6 +1065,7 @@ body.gameopen{overflow:hidden}
     mGain = AC.createGain(); sfxBus = AC.createGain(); sfxBus.gain.value = .55;
     try { mediaSrc = AC.createMediaElementSource(audio); mediaSrc.connect(mFilt); } catch(e){}
     mFilt.connect(mGain); mGain.connect(AC.destination); sfxBus.connect(AC.destination);
+    Object.keys(FILES).forEach(function(k){ fetch(FILES[k]).then(function(r){ return r.arrayBuffer(); }).then(function(a){ return new Promise(function(ok, no){ AC.decodeAudioData(a, ok, no); }); }).then(function(b){ fileBufs[k] = b; }).catch(function(){}); });
   }
   function fxPref(v){ try { if (v != null) localStorage.setItem('viistone-2048-fx', v ? '1' : '0'); var s = localStorage.getItem('viistone-2048-fx'); return s == null ? true : s === '1'; } catch(e){ return true; } }
   var fxOn = fxPref(), fxBtn = document.getElementById('gfx');
@@ -1354,6 +1393,34 @@ body.gameopen{overflow:hidden}
   window.__showGames = function(){ show(true); g.scrollIntoView({block:'center'}); };
 })();
 </script>
+<div class="ch00x" id="ch00" role="dialog" aria-label="CH 00"><div class="st"></div><img src="assets/hymy/hymy_big.jpg" alt="Hymytyttö"><div class="sl"></div>
+  <div class="osd">CH 00<small>▶ HYMYTYTTÖ</small></div><button class="cx" id="ch00x" type="button" aria-label="Sulje">⏏</button><p class="ln" id="ch00l"></p>
+  <audio id="ch00a" preload="none"></audio><audio id="ch00s" preload="none" loop src="assets/posti/sfx/static.mp3"></audio></div>
+<script>
+(function(){
+  // CH 00: opens only for those who have met Hymytyttö in all three games
+  var pick = document.getElementById('pick00'), box = document.getElementById('ch00'), line = document.getElementById('ch00l'), song = document.getElementById('ch00a'), stc = document.getElementById('ch00s'), T = [];
+  if (!pick || !box) return;
+  function seen(){ try { return JSON.parse(localStorage.getItem('viistone-hymy') || '{}'); } catch(e){ return {}; } }
+  function marks(){ var h = seen(), ids = {c03:'pick03', c06:'ch06b', c09:'pick09'};
+    Object.keys(ids).forEach(function(k){ var b = document.getElementById(ids[k]); if (b && h[k] && !b.querySelector('.hm')){ var m = document.createElement('span'); m.className = 'hm'; m.setAttribute('aria-hidden', 'true'); b.appendChild(m); } });
+    pick.hidden = !(h.c03 && h.c06 && h.c09); }
+  marks(); document.getElementById('ch03b').addEventListener('click', marks); window.addEventListener('focus', marks);
+  var LINES = ['Hymytyttö, hyvää yötä', 'muista käyttää turvavyötä', 'jos vastaisit, oisin kysyny viel', 'onks tuuli yhtään hellittäny siel?'];
+  function type(txt, done){ var i = 0; line.textContent = ''; (function step(){ line.textContent = txt.slice(0, ++i); if (i < txt.length) T.push(setTimeout(step, 70)); else if (done) T.push(setTimeout(done, 2600)); })(); }
+  function open(){
+    window.__gameOpen = true; var ga = document.getElementById('ga'); if (ga) ga.pause();
+    box.classList.add('on'); box.classList.remove('lit'); line.textContent = '';
+    stc.volume = .35; stc.play().catch(function(){});
+    song.src = 'assets/hymytytto.m4a'; song.volume = 0;
+    T.push(setTimeout(function(){ box.classList.add('lit'); song.play().catch(function(){}); var v = 0, iv = setInterval(function(){ v = Math.min(.8, v + .04); song.volume = v; stc.volume = Math.max(.06, .35 - v * .4); if (v >= .8) clearInterval(iv); }, 200); T.push(iv); }, 2200));
+    var k = 0; T.push(setTimeout(function next(){ type(LINES[k], function(){ k = (k + 1) % LINES.length; next(); }); }, 6000));
+  }
+  function close(){ T.forEach(function(t){ clearTimeout(t); clearInterval(t); }); T = []; song.pause(); stc.pause(); box.classList.remove('on', 'lit'); window.__gameOpen = false; }
+  pick.addEventListener('click', open); document.getElementById('ch00x').addEventListener('click', close);
+  addEventListener('keydown', function(e){ if (e.key === 'Escape' && box.classList.contains('on')) close(); });
+})();
+</script>
 <!--POSTI-->
 <style>
 /* CH 06: Postinkantaja. A night ride down an endless city, pixel sharp, a big rat on a pile of letters behind you. */
@@ -1508,6 +1575,8 @@ body.postiopen{overflow:hidden}
   var pStart = document.getElementById('pstart'), pOver = document.getElementById('pover');
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var RAT_SRC = 'assets/posti/rat.webp';
+  var hymyImg = new Image(); hymyImg.src = 'assets/hymy/hymy.png', hymyAt = 1e9, hymyPlaced = false;
+  function hymySeen(k){ try { var h = JSON.parse(localStorage.getItem('viistone-hymy') || '{}'); if (!h[k]){ h[k] = Date.now(); localStorage.setItem('viistone-hymy', JSON.stringify(h)); } } catch(e){} }
   var ratImg = new Image(); ratImg.src = RAT_SRC; document.getElementById('pratimg').src = RAT_SRC;
 
   var OL = '#14130f', CREAM = '#e8e0c8', NAVY = '#4b5b8c', RUST = '#b4532a', BOX = '#b38a5a', BROWN = '#7a5a3c', GREY = '#8d8a82';
@@ -1534,7 +1603,7 @@ body.postiopen{overflow:hidden}
   var SFX_FILES = {burp:['burp1.mp3', 'burp2.mp3'], yell:['yell1.mp3', 'yell2.mp3', 'yell3.mp3', 'yell4.mp3'], jet:['jet.mp3'], open:['open.mp3'], crash:['crash.mp3'], cry:['cry.mp3'],
     wind:['wind.mp3'], bell:['bell1.mp3', 'bell2.mp3', 'bell3.mp3'], rat:['rat.mp3'], smash:['smash.mp3'], amb:['amb.mp3'], pedal:['pedal.mp3'],
     horn:['horn1.mp3', 'horn2.mp3', 'horn3.mp3'], squeal:['squeal.mp3'], driveby:['driveby.mp3'], driveaway:['driveaway.mp3'], fart:['fart1.mp3', 'fart2.mp3', 'fart3.mp3', 'fart4.mp3', 'fart5.mp3'], slow:['slow.mp3'], laugh:['laugh1.mp3', 'laugh2.mp3', 'laugh3.mp3', 'laugh4.mp3'],
-    boom:['boom1.mp3', 'boom2.mp3', 'boom3.mp3', 'boom4.mp3'], carboom:['carboom.mp3'], alarm:['alarm1.mp3', 'alarm2.mp3'],
+    boom:['boom1.mp3', 'boom2.mp3', 'boom3.mp3', 'boom4.mp3'], carboom:['carboom.mp3'], alarm:['alarm1.mp3', 'alarm2.mp3'], fireroar:['fireroar.mp3'], fireburn:['fireburn.mp3'], destiny:['destiny.mp3'], static:['static.mp3'],
     gull:['gull1.mp3', 'gull2.mp3', 'gull3.mp3'], gullamb:['gullamb.mp3'], chirp:['chirp1.mp3', 'chirp2.mp3'], crow:['crow1.mp3', 'crow2.mp3', 'crow3.mp3'], capeloop:['capeloop.mp3'], flap:['flap.mp3']};
   var lpf = null, AC = null, fxOn = true, musicOn = true, audio = document.getElementById('paudio'), bufs = {}, master = null, loops = {};
   try { fxOn = localStorage.getItem('posti_fx') !== '0'; musicOn = localStorage.getItem('posti_mus') !== '0'; } catch(e){}
@@ -1607,12 +1676,12 @@ body.postiopen{overflow:hidden}
   function roadC(x){ return Math.round(x / PER) * PER; }
   // the street runs out now and then: a park with grass, trees and a winding gravel path, then back to the city
   var bnds = [];
-  var LANDS = ['park', 'ice', 'tori', 'site'], LANDLEN = {park:[3200, 2200], ice:[3000, 2000], tori:[2800, 1800], site:[3000, 1800], city:[3500, 3000]}, lastLand = 'park';
+  var LANDS = ['park', 'ice', 'tori', 'site'], siltaUsed = false, LANDLEN = {silta:[1700, 500], park:[3200, 2200], ice:[3000, 2000], tori:[2800, 1800], site:[3000, 1800], city:[3500, 3000]}, lastLand = 'park';
   function biome(y){
     if (y < 5000) return 'city';
     if (!bnds.length){ lastLand = 'park'; bnds.push([5000, 5000 + 1800 + Math.random() * 1400, 'park']); }
     while (bnds[bnds.length - 1][1] <= y){ var l = bnds[bnds.length - 1], t;
-      if (l[2] !== 'city') t = 'city'; else { do { t = LANDS[Math.floor(Math.random() * LANDS.length)]; } while (t === lastLand); lastLand = t; }
+      if (l[2] !== 'city') t = 'city'; else if (!siltaUsed && l[1] > 8000 && Math.random() < .4){ t = 'silta'; siltaUsed = true; } else { do { t = LANDS[Math.floor(Math.random() * LANDS.length)]; } while (t === lastLand); lastLand = t; }
       bnds.push([l[1], l[1] + LANDLEN[t][0] + Math.random() * LANDLEN[t][1], t]); }
     for (var i = bnds.length - 1; i >= 0; i--) if (y >= bnds[i][0]) return bnds[i][2];
     return 'city';
@@ -1641,6 +1710,7 @@ body.postiopen{overflow:hidden}
     park:[['tree', 16], ['jogger', 5], ['bench', 5], ['mailbox', 11], ['plamp', 4], ['can', 4], ['coffee', 2], ['ramp', 4], ['flowers', 8], ['tuft', 14], ['paper', 4]],
     ice:[['hole', 6], ['fisher', 6], ['snowpile', 9], ['sled', 4], ['can', 4], ['coffee', 2], ['ramp', 3], ['icecrack', 14], ['snowdrift', 10], ['mailbox', 3]],
     tori:[['stall', 8], ['walker', 12], ['pigeons', 9], ['box', 6], ['bin', 3], ['can', 4], ['coffee', 3], ['cone', 3], ['mailbox', 6], ['paper', 6], ['crack', 3]],
+    silta:[['can', 4], ['paper', 7], ['crack', 5], ['coffee', 1]],
     site:[['digger', 4], ['pipes', 5], ['barrier', 8], ['cone', 8], ['mud', 10], ['sandpile', 5], ['box', 3], ['can', 4], ['coffee', 2], ['tuft', 4], ['stone', 6]]
   };
   function pick(r, zone, df){ var w = TABLE[zone], tot = 0, ws = w.map(function(x){ var m = Math.max(.2, 1 + (DIFW[x[0]] || 0) * (df || 0)); tot += x[1] * m; return x[1] * m; }); var v = r() * tot;
@@ -1655,7 +1725,9 @@ body.postiopen{overflow:hidden}
     for (var k = 0; k < n; k++){
       var x = i * CELL + 12 + r() * (CELL - 24), y = j * CELL + 12 + r() * (CELL - 24);
       if (y < 380 && Math.abs(x) < 200) continue;
-      var bio = biome(y), park = bio === 'park', zone = bio === 'city' ? zoneOf(x) : bio, type = pick(r, zone, df), c = roadC(x), side = x >= c ? 1 : -1, o = {type:type, x:x, y:y, v:r(), done:false, h:0};
+      var bio = biome(y), park = bio === 'park', zone = bio === 'city' ? zoneOf(x) : bio, type = pick(r, zone, df);
+      if (bio === 'silta') x = roadC(x) + (r() - .5) * 170;
+      var  c = roadC(x), side = x >= c ? 1 : -1, o = {type:type, x:x, y:y, v:r(), done:false, h:0};
       if ((OBST[type] && ((d < 200 && r() < .45) || (chaseGen && r() < .65))) || (chaseGen && type === 'ramp')){ o.type = 'crack'; }
       else if (type === 'ramp'){ add({type:'can', x:x, y:y + 95, v:r(), done:false, h:34}, list); add({type:'can', x:x, y:y + 150, v:r(), done:false, h:30}, list); }
       else if (type === 'walker' && bio === 'tori'){ o.c = x; o.rng = 50 + r() * 70; o.vx = (r() < .5 ? -1 : 1) * (30 + r() * 40); }
@@ -1712,6 +1784,7 @@ body.postiopen{overflow:hidden}
     seed = (Math.random() * 1e9) | 0; cells.clear(); objs = []; blds = []; trail = []; parts = []; streaks = []; decals = []; chaseGen = false;
     P = {x:0, y:0, a:0, ma:0, v:0, air:0, airT:1, airH:0, down:0, inv:0, boost:0, dist:0, letters:0, cans:0, jumps:0, bigs:0, crashes:0, pedal:0, e:100, empty:0, escapes:0, bonus:0, high:false, caught:0, hits:0, dodges:0, missed:0, combo:0, perfect:0, near:0, passedBest:false};
     cape = null; fauna = []; snow = []; nextFauna = 3; nextBoom = 12; dieT = 0; emptyK = 0; nextHeart = 0;
+    siltaUsed = false; hymyAt = Math.random() < .45 ? 300 + Math.random() * 1800 : 1e9; hymyPlaced = false;
     rat = null; nextRat = 380 + Math.random() * 320; setTimeout(hitsUi, 0); nextBig = 380 + Math.random() * 200; cam.x = 0; cam.y = 0; glitch = 0; paws = []; gust.v = 0; lowWarn = 0; nextHelp = 0; nextHonk = 4; bnds = []; P.bio = 'city'; hud();
   }
   function mult(){ return Math.min(5, 1 + Math.floor(P.combo / 3)); }
@@ -1969,7 +2042,8 @@ body.postiopen{overflow:hidden}
     S = S0 * (1 - .2 * Math.min(1, hNow / 80));
     // loops: city murmur, pedalling that follows speed, wind in a chase
     var bio = biome(P.y); loopOn('amb', .32); loopSet('amb', bio === 'city' ? .32 : .1); loopOn('pedal', 0);
-    if (bio !== P.bio){ P.bio = bio; if (!chasing){ var BN = {park:['OIKOTIE PUISTON LÄPI'], ice:['JÄÄTIE', 'Liukasta. Käänny ajoissa.'], tori:['TORIN POIKKI', 'Varo kojuja'], site:['TYÖMAA', 'Muta hidastaa'], city:['TAKAISIN KADULLE']}[bio]; say(BN[0], false, 1700, BN[1]); } }
+    if (bio !== P.bio){ if (bio === 'silta'){ playBuf('destiny', .8); if (!reduce) shake = Math.max(shake, .35); flash = Math.max(flash, .6); }
+      P.bio = bio; if (!chasing){ var BN = {silta:['PITKÄSILTA PALAA', 'Ihmiset katsoo vaan'], park:['OIKOTIE PUISTON LÄPI'], ice:['JÄÄTIE', 'Liukasta. Käänny ajoissa.'], tori:['TORIN POIKKI', 'Varo kojuja'], site:['TYÖMAA', 'Muta hidastaa'], city:['TAKAISIN KADULLE']}[bio]; say(BN[0], false, 1700, BN[1]); } }
     if (bio === 'city' && tsec > nextHonk){ nextHonk = tsec + 7 + Math.random() * 14; playBuf(Math.random() < .75 ? 'horn' : 'driveaway', .15 + Math.random() * .15, false, .9 + Math.random() * .2); } loopSet('pedal', P.down > 0 || P.air > 0 ? 0 : Math.min(.5, P.v / 900), .8 + Math.min(.6, P.v / 700));
     if (chasing){ loopOn('wind', 0); loopSet('wind', .15 + Math.abs(gust.v) * .6); }
     if (P.down <= 0 && P.v > 20 && (!trail.length || Math.hypot(trail[trail.length - 1][0] - P.x, trail[trail.length - 1][1] - P.y) > 6)){ trail.push([P.x, P.y + 10, P.air > 0]); if (trail.length > 260) trail.shift(); }
@@ -2003,6 +2077,7 @@ body.postiopen{overflow:hidden}
       if (o.type === 'mud' && P.air <= 0 && P.down <= 0 && Math.abs(dx) < 30 && Math.abs(dy) < 16){ P.v *= Math.max(0, 1 - dt * 2.6);
         if (Math.random() < dt * 30) parts.push({k:'blood', x:P.x + (Math.random() - .5) * 8, y:P.y + 6, z:4, vx:(Math.random() - .5) * 60, vy:(Math.random() - .5) * 30, vz:40 + Math.random() * 50, c:['#4a3a22', '#5c4a2c', '#3a2e1a'][Math.floor(Math.random() * 3)], s:2});
         if (!o.hit){ o.hit = 1; playBuf('splat', .35) || noise(.2, .08); } }
+      if (o.type === 'hymy' && !o.seen && Math.abs(o.y - P.y) < 170){ o.seen = 1; hymySeen('c06'); playBuf('static', .22); glitch = Math.max(glitch, .35); }
       if (o.type === 'pigeons' && !o.flown && Math.abs(dx) < 90 && dy > -40 && dy < 120){ o.flown = 1; noise(.35, .06);
         for (var pg = 0; pg < 5; pg++){ var pa = Math.random() * 6.28; parts.push({k:'bird', x:o.x + (pg - 2) * 5, y:o.y, z:2, vx:Math.cos(pa) * 70, vy:-30 - Math.random() * 50, vz:70 + Math.random() * 70, t:0}); } }
       if (o.done || DECOR[o.type]) continue;
@@ -2036,6 +2111,11 @@ body.postiopen{overflow:hidden}
     var wk = Math.abs(gust.v); if (wk > .05 && Math.random() < dt * 95 * wk) streaks.push({x:gust.v > 0 ? -60 : W + 60, y:Math.random() * H, l:30 + Math.random() * 90, sp:(900 + Math.random() * 700) * Math.sign(gust.v), t:0, leaf:Math.random() < .25});
     for (k = streaks.length - 1; k >= 0; k--){ var st = streaks[k]; st.t += dt; st.x += st.sp * dt; st.y += 40 * dt; if (st.x < -200 || st.x > W + 200) streaks.splice(k, 1); }
     capeStep(dt); faunaStep(dt, bio0);
+    loopOn('fireroar', 0); loopSet('fireroar', bio0 === 'silta' ? .3 : 0); loopOn('fireburn', 0); loopSet('fireburn', bio0 === 'silta' ? .28 : 0);
+    if (bio0 === 'silta'){ if (Math.random() < dt * 26){ var ec = roadC(P.x) + (Math.random() < .5 ? -1 : 1) * (112 + Math.random() * 10); parts.push({k:'ember', x:ec, y:P.y + (Math.random() - .25) * 700, z:8 + Math.random() * 20, vx:(Math.random() - .5) * 30 + gust.v * 80, vz:40 + Math.random() * 70, t:0}); }
+      if (P.air <= 0 && P.down <= 0 && P.inv <= 0 && Math.abs(P.x - roadC(P.x)) > 114){ blood(P.x, P.y, 30, 1, ['#6f9fc4', '#a9cbe0', '#3d6f96', '#ff8a2a']); crash(.8, false); say('SPLÄSH', true, 1000); P.x = roadC(P.x) + (P.x > roadC(P.x) ? 60 : -60); if (state !== 'run') return; } }
+    if (!hymyPlaced && P.dist > hymyAt && (bio0 === 'city' || bio0 === 'park')){ hymyPlaced = true; var hc = roadC(P.x), hs = Math.random() < .5 ? -1 : 1, hy = P.y + (H / S) * .7;
+      objs.push({type:'hymy', x:bio0 === 'park' ? pathX(hc, hy) + hs * 56 : hc + hs * (ROAD + 44), y:hy, v:Math.random(), done:false}); }
     loopOn('gullamb', 0); loopSet('gullamb', bio0 === 'tori' ? .22 : bio0 === 'ice' ? .1 : 0);
     if (bio0 === 'park' && tsec > nextChirp){ nextChirp = tsec + 5 + Math.random() * 9; playBuf('chirp', .22 + Math.random() * .12, false, .95 + Math.random() * .1); }
     loopOn('capeloop', 0); loopSet('capeloop', P.down > 0 ? 0 : Math.min(.32, P.v / 1300 + (P.air > 0 ? .1 : 0) + (P.boost > 0 ? .06 : 0) + Math.abs(gust.v) * .15), .85 + Math.min(.4, P.v / 900));
@@ -2050,6 +2130,7 @@ body.postiopen{overflow:hidden}
       if (p.k === 'blood'){ p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; p.vz -= 420 * dt; p.vx *= .985; p.vy *= .985;
         if (p.z <= 0){ decals.push({x:p.x, y:p.y, c:p.c, s:p.s}); if (decals.length > 3600) decals.splice(0, 300); parts.splice(k, 1); } continue; }
       if (p.k === 'txt'){ p.y -= 34 * dt; if (p.t > 1) parts.splice(k, 1); continue; }
+      if (p.k === 'ember'){ p.x += p.vx * dt; p.z += p.vz * dt; if (p.t > 2.4) parts.splice(k, 1); continue; }
       if (p.k === 'bird'){ p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; p.vz += 20 * dt; if (p.t > 1.8) parts.splice(k, 1); continue; }
       if (p.k === 'ring'){ if (p.t > .5) parts.splice(k, 1); continue; }
       if (p.k === 'fly'){ p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; p.vz -= 700 * dt; p.rot += p.vr * dt;
@@ -2169,6 +2250,8 @@ body.postiopen{overflow:hidden}
     bench: function(){ shadow(16, 4, 2); line(2); box(-15, -9, 30, 5, '#7a5a3c'); box(-15, -16, 30, 4, '#8a6a44'); ctx.fillStyle = OL; ctx.fillRect(-13, -4, 3, 5); ctx.fillRect(10, -4, 3, 5); },
     plamp: function(o){ ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fillRect(-2, -1, 7, 3); line(1.6); box(-1.5, -40, 3, 40, '#2f3330'); ell(0, -44, 4.5, 4.5); fillStroke('#ffe6a8'); moths(0, -44, o.v); },
     flowers: function(o){ var c = ['#c4552b', '#e8e0c8', '#c9a23a'][Math.floor(o.v * 3)]; for (var i = 0; i < 6; i++){ ctx.fillStyle = '#2f4722'; ctx.fillRect(-8 + i * 3, -3 + (i % 2) * 2, 1, 3); ctx.fillStyle = c; ctx.fillRect(-8 + i * 3, -5 + (i % 2) * 2, 2, 2); } },
+    hymy: function(o){ ctx.fillStyle = 'rgba(0,0,0,.4)'; ell(2, 1, 12, 4); ctx.fill(); line(1.6); box(-8, -6, 16, 6, '#8d8a82');
+      if (hymyImg.complete && hymyImg.naturalWidth){ ctx.drawImage(hymyImg, -11, -40, 22, 35); } },
     hole: function(o){ ctx.fillStyle = 'rgba(232,238,242,.55)'; ell(0, 0, 25, 13); ctx.fill(); ctx.fillStyle = '#0d1a22'; ell(0, 0, 20, 10); ctx.fill();
       ctx.fillStyle = 'rgba(120,170,200,.35)'; var t = Math.floor(performance.now() / 300 + o.v * 7) % 3; ctx.fillRect(-10 + t * 4, -2, 8, 1); ctx.fillRect(2 - t * 2, 3, 6, 1); },
     fisher: function(o){ ctx.scale(1.7, 1.7); shadow(8, 3, 1); line(1.4); box(-4, -5, 8, 5, '#6b5038'); box(-5, -15, 10, 10, o.v < .5 ? '#3e4a2c' : '#2f3a52');
@@ -2257,7 +2340,7 @@ body.postiopen{overflow:hidden}
   }
   function drawGround(vl, vr, vt, vb){
     segs(vt, vb).forEach(function(g){ ctx.save(); ctx.beginPath(); ctx.rect(vl, g[0], vr - vl, g[1] - g[0] + .5); ctx.clip();
-      ({park:drawPark, ice:drawIce, tori:drawTori, site:drawSite}[g[2]] || drawCity)(vl, vr, g[0], g[1]); ctx.restore();
+      ({park:drawPark, ice:drawIce, tori:drawTori, site:drawSite, silta:drawSilta}[g[2]] || drawCity)(vl, vr, g[0], g[1]); ctx.restore();
       if (g[0] > vt){ ctx.fillStyle = '#4c4e47'; ctx.fillRect(vl, g[0] - 3, vr - vl, 6); ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fillRect(vl, g[0] + 3, vr - vl, 3); } });
   }
   function drawPark(vl, vr, vt, vb){
@@ -2274,6 +2357,38 @@ body.postiopen{overflow:hidden}
         if ((y / 6) % 3 === 0){ ctx.fillStyle = '#6e6450'; ctx.fillRect(px - 12 + (y * 7) % 22, y + 2, 2, 2); } } }
   }
   function hsh(a, b){ return ((a * 73856093) ^ (b * 19349663)) >>> 0; }
+  // Pitkäsilta: a long wooden bridge over black water, its railings on fire, the far shore watching from its windows
+  function drawSilta(vl, vr, vt, vb){
+    var t = performance.now() / 1000;
+    ctx.fillStyle = '#060d12'; ctx.fillRect(vl, vt, vr - vl, vb - vt);
+    var k0 = Math.floor(vl / PER) - 1, k1 = Math.ceil(vr / PER) + 1;
+    for (var k = k0; k <= k1; k++){ var c = k * PER;
+      // the shores on both sides, with houses and people at the windows
+      for (var sd0 = -1; sd0 <= 1; sd0 += 2){ var sh = c + sd0 * 196;
+      ctx.fillStyle = '#121310'; ctx.fillRect(sh - 44, vt, 88, vb - vt);
+      for (var hy = Math.floor(vt / 120) * 120; hy < vb; hy += 120){ var h = hsh(k * 2 + sd0, hy / 120);
+        ctx.fillStyle = '#1d1e1a'; ctx.fillRect(sh - 34, hy + 8, 68, 104); ctx.strokeStyle = OL; ctx.lineWidth = 2; ctx.strokeRect(sh - 34, hy + 8, 68, 104);
+        for (var wi = 0; wi < 2; wi++){ var wx = sh - 26 + wi * 32, wy = hy + 22 + (wi % 2) * 40, lit = (h >> wi) & 1;
+          ctx.fillStyle = lit ? 'rgba(255,190,110,.75)' : '#0b0c0a'; ctx.fillRect(wx, wy, 18, 24);
+          if (lit && ((h >> (wi + 4)) & 1)){ ctx.fillStyle = '#14130f'; ctx.fillRect(wx + 5, wy + 10, 8, 14); ctx.beginPath(); ctx.arc(wx + 9, wy + 8, 4, 0, 7); ctx.fill(); } } } }
+      // fire on the water
+      for (var ry = Math.floor(vt / 14) * 14; ry < vb; ry += 14){ var hh = hsh(k + 7, ry / 14), fl = Math.sin(t * 3 + hh) * .5 + .5;
+        ctx.fillStyle = 'rgba(255,' + (110 + hh % 60) + ',40,' + (.05 + fl * .12) + ')'; ctx.fillRect(c - 170 + (hh % 30), ry, 34 + hh % 20, 2); ctx.fillRect(c + 130 + (hh % 24), ry + 6, 30 + hh % 16, 2); }
+      // the deck
+      ctx.fillStyle = '#2a1f15'; ctx.fillRect(c - 120, vt, 240, vb - vt);
+      for (var py = Math.floor(vt / 10) * 10; py < vb; py += 10){ ctx.fillStyle = (py / 10) % 2 ? '#3a2b1c' : '#33261a'; ctx.fillRect(c - 116, py, 232, 9); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(c - 116, py + 9, 232, 1); }
+      ctx.fillStyle = 'rgba(0,0,0,.28)'; for (var cy = Math.floor(vt / 37) * 37; cy < vb; cy += 37) ctx.fillRect(c - 40 + (cy * 7) % 80, cy, 6, 3);
+      // railings and their fire
+      for (var fy = Math.floor(vt / 24) * 24; fy < vb; fy += 24){ [-1, 1].forEach(function(sd){ var x = c + sd * 116, h2 = hsh(fy, sd + 5);
+        ctx.fillStyle = '#1a120b'; ctx.fillRect(x - 3, fy, 6, 6);
+        var f = Math.floor(t * 9 + h2) % 4, fh = 18 + (h2 % 12) + f * 3;
+        ctx.fillStyle = 'rgba(194,52,26,.9)'; ctx.fillRect(x - 7, fy - fh + 6, 14, fh); ctx.fillRect(x - 4 + (f % 2) * 3, fy - fh - 2, 6, 8);
+        ctx.fillStyle = 'rgba(255,138,42,.95)'; ctx.fillRect(x - 4, fy - fh + 9, 8, fh - 5);
+        ctx.fillStyle = 'rgba(255,214,122,.95)'; ctx.fillRect(x - 2, fy - fh + 13 + (f % 2), 4, fh - 11);
+        ctx.fillStyle = 'rgba(30,26,22,.35)'; ctx.fillRect(x - 4 + f, fy - fh - 6 - f * 3, 5, 4); }); }
+      ctx.fillStyle = '#100b07'; ctx.fillRect(c - 120, vt, 4, vb - vt); ctx.fillRect(c + 116, vt, 4, vb - vt);
+    }
+  }
   // a frozen lake with a ploughed ice road
   function drawIce(vl, vr, vt, vb){
     ctx.fillStyle = '#3f4f59'; ctx.fillRect(vl, vt, vr - vl, vb - vt);
@@ -2336,12 +2451,17 @@ body.postiopen{overflow:hidden}
       else if (o.type === 'mcar'){ var fq = sp(o.x, o.y + o.dir * 24); cone(fq[0], fq[1], o.dir > 0 ? Math.PI / 2 : -Math.PI / 2, 220 * S, .35, .9); }
       else if (o.type === 'can' || o.type === 'bigramp' || o.type === 'coffee'){ q = sp(o.x, o.y - (o.h || 16)); hole(q[0], q[1], (o.type === 'bigramp' ? 70 : 26) * S, .6); }
     });
+    for (var sy = Math.floor(vt / 48) * 48; sy < vb; sy += 48){ if (biome(sy) !== 'silta') continue; var kk0 = Math.floor((cam.x - W / S) / PER) - 1, kk1 = Math.ceil((cam.x + W / S) / PER) + 1;
+      for (var kk = kk0; kk <= kk1; kk++){ var q1 = sp(kk * PER - 116, sy), q2 = sp(kk * PER + 116, sy); hole(q1[0], q1[1], 80 * S, .85); hole(q2[0], q2[1], 80 * S, .85); var q3 = sp(kk * PER + 196, sy), q4 = sp(kk * PER - 196, sy); hole(q3[0], q3[1], 60 * S, .5); hole(q4[0], q4[1], 60 * S, .5); } }
+    objs.forEach(function(o){ if (o.type === 'hymy' && o.y > vt && o.y < vb){ var q = sp(o.x, o.y - 20); hole(q[0], q[1], 46 * S, .8); } });
     blds.forEach(function(B){ if (B.y < vt - 300 || B.y > vb + 300) return; var q = sp(B.x - B.w / 2 - 14, B.y); hole(q[0], q[1], 40 * S, .35); q = sp(B.x + B.w / 2 + 14, B.y); hole(q[0], q[1], 40 * S, .35); });
     L.globalCompositeOperation = 'source-over';
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(lcv, 0, 0); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     ctx.globalCompositeOperation = 'lighter';
     function glow(x, y, r, col){ var g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); }
     if (P.down <= 0){ var lp = sp(P.x - Math.sin(P.a) * 10, P.y + 10 - h); glow(lp[0], lp[1], 16 * S, 'rgba(255,240,190,.55)'); }
+    for (var gy = Math.floor(vt / 48) * 48; gy < vb; gy += 48){ if (biome(gy) !== 'silta') continue; var gk0 = Math.floor((cam.x - W / S) / PER) - 1, gk1 = Math.ceil((cam.x + W / S) / PER) + 1, fl = .14 + .06 * Math.sin(performance.now() / 90 + gy);
+      for (var gk = gk0; gk <= gk1; gk++){ var g1 = sp(gk * PER - 116, gy - 10), g2 = sp(gk * PER + 116, gy - 10); glow(g1[0], g1[1], 70 * S, 'rgba(255,110,40,' + fl + ')'); glow(g2[0], g2[1], 70 * S, 'rgba(255,110,40,' + fl + ')'); } }
     objs.forEach(function(o){ if (o.y < vt || o.y > vb) return;
       if (o.type === 'lamp' || o.type === 'plamp'){ var q = sp(o.x - o.side * 14, o.y - 44); glow(q[0], q[1], 22 * S, 'rgba(255,220,150,.55)'); q = sp(o.x - o.side * 14, o.y + 4); glow(q[0], q[1], 90 * S, 'rgba(255,190,110,.10)'); }
       if (o.type === 'mcar'){ var fq = sp(o.x, o.y + o.dir * 24); glow(fq[0], fq[1], 18 * S, 'rgba(255,240,200,.5)'); }
@@ -2392,6 +2512,7 @@ body.postiopen{overflow:hidden}
         ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.rotate(Math.round(k * 6)); line(1.4); box(-6, -4, 12, 8, '#fff'); ctx.restore(); return; }
       if (p.k === 'fly'){ ctx.save(); ctx.globalAlpha = Math.min(1, (2.2 - p.t) * 2); ctx.fillStyle = 'rgba(0,0,0,.35)'; ell(p.x, p.y, 12, 4); ctx.fill(); ctx.translate(Math.round(p.x), Math.round(p.y - p.z)); ctx.rotate(p.rot); draw[p.o.type](p.o); ctx.restore(); ctx.globalAlpha = 1; return; }
       if (p.k === 'ring'){ if (p.t < 0) return; var rr2 = 30 + p.t * (p.big ? 380 : 220); ctx.fillStyle = 'rgba(200,195,180,' + (1 - p.t / .5) * .7 + ')'; for (var q3 = 0; q3 < 24; q3++){ var an3 = q3 * .2618; ctx.fillRect(Math.round(p.x + Math.cos(an3) * rr2), Math.round(p.y + Math.sin(an3) * rr2 * .55), 3, 3); } return; }
+      if (p.k === 'ember'){ ctx.fillStyle = 'rgba(255,' + (150 + Math.floor(Math.random() * 90)) + ',60,' + Math.max(0, 1 - p.t / 2.4) + ')'; ctx.fillRect(Math.round(p.x), Math.round(p.y - p.z), 2, 2); return; }
       if (p.k === 'bird'){ var wf = Math.floor(performance.now() / 70 + p.x) % 2; ctx.globalAlpha = Math.max(0, 1 - p.t / 1.8); ctx.fillStyle = '#9a978c'; ctx.fillRect(Math.round(p.x) - 1, Math.round(p.y - p.z), 3, 2); ctx.fillStyle = '#c9c4b8'; ctx.fillRect(Math.round(p.x) - 4, Math.round(p.y - p.z) - (wf ? 2 : -1), 3, 1); ctx.fillRect(Math.round(p.x) + 2, Math.round(p.y - p.z) - (wf ? 2 : -1), 3, 1); ctx.globalAlpha = 1; return; }
       if (p.k === 'txt'){ ctx.globalAlpha = Math.max(0, 1 - p.t * p.t); ctx.font = '15px VT323, monospace'; ctx.textAlign = 'center'; ctx.fillStyle = OL; ctx.fillText(p.txt, Math.round(p.x) + 1, Math.round(p.y) + 1); ctx.fillStyle = p.c; ctx.fillText(p.txt, Math.round(p.x), Math.round(p.y)); ctx.globalAlpha = 1; return; }
       if (p.k === 'spark'){ ctx.fillStyle = 'rgba(255,170,90,' + (1 - p.t / .45) + ')'; var r = 8 + p.t * 50; for (var q = 0; q < 8; q++){ var an = q * .785; ctx.fillRect(Math.round(p.x + Math.cos(an) * r), Math.round(p.y + Math.sin(an) * r), 2, 2); } return; }
@@ -2876,6 +2997,22 @@ body.kiropen{overflow:hidden}
 .kir .kcrack{position:absolute;z-index:12;pointer-events:none;width:360px;height:360px;margin:-180px 0 0 -180px}
 .kir .kdrip{position:absolute;z-index:12;pointer-events:none;width:7px;border-radius:0 0 4px 4px;background:linear-gradient(rgba(214,150,40,.0),rgba(214,150,40,.75))}
 .kir .kauts{position:absolute;z-index:12;pointer-events:none;font-family:var(--f-osd);font-size:30px;letter-spacing:.05em;color:#fff3df;text-shadow:2px 2px 0 #14130f, -1px 0 #c22a1a;transform:translate(-50%,-50%) rotate(-6deg)}
+
+/* ---------- Hymytyttö at the edge of the table, and the phone that rings ---------- */
+.kir .khymy{position:absolute;z-index:3;left:4px;top:34%;width:44px;height:71px;pointer-events:none;opacity:0;transition:opacity 2.4s;filter:drop-shadow(3px 5px 3px rgba(0,0,0,.7)) brightness(.92)}
+.kir .khymy.on{opacity:1}
+.kir .khymy img{display:block;width:100%;height:auto}
+@media (min-aspect-ratio: 1/1){ .kir .khymy{left:1.2%;top:63%;width:52px;height:84px} }
+.kir .kcall{position:absolute;inset:9px 6px 12px;z-index:3;border-radius:6px;background:linear-gradient(#1f3b2a,#0e1d14);display:none;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;font-family:var(--f-osd);color:#cfe9d4;letter-spacing:.06em}
+.kir .kcall.on{display:flex}
+.kir .kcall small{font-size:13px;opacity:.75}
+.kir .kcall b{font-weight:400;font-size:30px;line-height:1;color:#effff2}
+.kir .kcall i{font-style:normal;font-size:24px;animation:kpulse .5s steps(2) infinite}
+.kir .kcall.miss{background:linear-gradient(#2a2a20,#121210)}
+.kir .kcall.miss i{animation:none}
+@keyframes kpulse{50%{opacity:.25}}
+.kir .kphone.ring{animation:kring .09s steps(2) infinite}
+@keyframes kring{0%{translate:-1.5px .5px}50%{translate:1.5px -.5px}}
 </style>
 <div class="kir idle" id="kir" role="dialog" aria-label="Peli: Kirilii">
   <div class="kwood" id="kwood"></div>
@@ -2884,7 +3021,8 @@ body.kiropen{overflow:hidden}
     <div class="klamp" id="klamp"></div>
     <div class="kprops" id="kprops"></div>
     <div id="kseats"></div>
-    <div class="kphone" id="kphone" role="button" tabindex="0" aria-label="Pistetaulukko, suurenna"><div class="scr" id="kscr"></div>
+    <div class="khymy" id="khymy" aria-hidden="true"><img src="assets/hymy/hymy.png" alt=""></div>
+    <div class="kphone" id="kphone" role="button" tabindex="0" aria-label="Pistetaulukko, suurenna"><div class="scr" id="kscr"></div><div class="kcall" id="kcall" aria-hidden="true"></div>
       <svg class="crack" viewBox="0 0 40 40" aria-hidden="true"><path d="M2 4 L14 16 L11 22 L22 30 L38 36 M14 16 L26 12 M22 30 L18 38" stroke="#cfd8d0" stroke-width=".7" fill="none"/></svg></div>
     <div class="myplayed" id="kmyplayed"></div>
   </div>
@@ -3125,6 +3263,7 @@ body.kiropen{overflow:hidden}
     hehe1:'kirilii/sfx/hehe1.mp3', hehe2:'kirilii/sfx/hehe2.mp3', hehe3:'kirilii/sfx/hehe3.mp3', holomo:'kirilii/sfx/holomo.mp3',
     throw1:'kirilii/sfx/throw1.mp3', throw2:'kirilii/sfx/throw2.mp3', throw3:'kirilii/sfx/throw3.mp3', glass1:'kirilii/sfx/glass1.mp3', glass2:'kirilii/sfx/glass2.mp3', glass3:'kirilii/sfx/glass3.mp3', ouch:'kirilii/sfx/ouch.mp3', ouch2:'kirilii/sfx/ouch2.mp3', ouch3:'kirilii/sfx/ouch3.mp3', ouch4:'kirilii/sfx/ouch4.mp3', ouch5:'kirilii/sfx/ouch5.mp3', ouch6:'kirilii/sfx/ouch6.mp3',
     bang1:'kirilii/sfx/bang1.mp3', bang2:'kirilii/sfx/bang2.mp3',
+    static:'posti/sfx/static.mp3',
     put1:'kirilii/sfx/put1.mp3', put2:'kirilii/sfx/put2.mp3', put3:'kirilii/sfx/put3.mp3', put4:'kirilii/sfx/put4.mp3'};
   function ac(){ if (!AC){ try { AC = new (window.AudioContext || window.webkitAudioContext)(); Object.keys(FILES).forEach(function(k){ fetch('assets/' + FILES[k]).then(function(r){ return r.arrayBuffer(); }).then(function(a){ return new Promise(function(ok, no){ AC.decodeAudioData(a, ok, no); }); }).then(function(b){ bufs[k] = b; }).catch(function(){}); }); } catch(e){} }
     if (AC && AC.state === 'suspended') AC.resume(); }
@@ -3289,7 +3428,7 @@ body.kiropen{overflow:hidden}
     $('kmyplate').querySelector('b').textContent = online ? me.name : 'SINÄ';
     var mt = $('kmyplate').querySelector('.tag'); if (mt) mt.textContent = online && online.watch ? 'PÖYTÄ' : ''; $('kmypts').textContent = me.pts; $('kmyplate').classList.toggle('turn', st.phase === 'play' && st.turn === 0);
     $('kmyplayed').innerHTML = me.played.map(function(c){ return cardHTML(c, cls(c)); }).join('');
-    renderHand(); renderPhone(); hint(); placeMatch(); syncBottles(); botThrows();
+    renderHand(); renderPhone(); hint(); placeMatch(); syncBottles(); botThrows(); oddCheck();
   }
   var handDirty = false;
   function renderHand(){
@@ -3593,7 +3732,7 @@ body.kiropen{overflow:hidden}
     if (online) leaveOnline(false);
     ac(); gen++; clearTimeout(autoNext); busy = false; selected = null; root.classList.remove('hu');
     st = K.newGame({difficulty:settings.difficulty, tieRule:settings.tie}); persist(); gameMusic();
-    vcrPlay(); hidePanels(); root.classList.remove('idle'); $('knext').classList.remove('on'); render(); SFX.shuffle(); dealAnim(); setTimeout(function(){ vox(['aboard'], .5, true); }, 400);
+    oddReset(); vcrPlay(); hidePanels(); root.classList.remove('idle'); $('knext').classList.remove('on'); render(); SFX.shuffle(); dealAnim(); setTimeout(function(){ vox(['aboard'], .5, true); }, 400);
     big('JAKO', st.players[st.starter].name === 'SINÄ' ? 'Sinä aloitat' : st.players[st.starter].name + ' aloittaa'); schedule();
   }
   function resume(){
@@ -3625,7 +3764,7 @@ body.kiropen{overflow:hidden}
     online = {room:d.room, token:d.token, seat:d.seat, name:name, view:null, away:{}, watch:!!d.watch}; lsSet(OSAVE, {room:d.room, token:d.token, seat:d.seat, name:name, watch:!!d.watch});
     root.classList.toggle('watch', !!d.watch);
     try { localStorage.setItem('viistone-2048-name', name); } catch(e){}
-    root.classList.add('online'); seenThrows = {}; (d.throws || []).forEach(function(x){ seenThrows[x.id] = 1; }); seenShouts = {}; (d.shouts || []).forEach(function(x){ seenShouts[x.id] = 1; }); seenBangs = {}; (d.bangs || []).forEach(function(x){ seenBangs[x.id] = 1; });
+    root.classList.add('online'); oddReset(); seenThrows = {}; (d.throws || []).forEach(function(x){ seenThrows[x.id] = 1; }); seenShouts = {}; (d.shouts || []).forEach(function(x){ seenShouts[x.id] = 1; }); seenBangs = {}; (d.bangs || []).forEach(function(x){ seenBangs[x.id] = 1; });
     history.replaceState(null, '', '#kirilii-' + d.room); applyView(d); poll();
   }
   $('konline').addEventListener('click', function(){ ac(); showLobby(''); });
@@ -3756,6 +3895,29 @@ body.kiropen{overflow:hidden}
       var l = root.querySelectorAll('.played .kc, .myplayed .kc'); for (var i = 0; i < l.length; i++) l[i].animate([{rotate:'0deg'}, {rotate:((Math.random() - .5) * 14) + 'deg', offset:.3}, {rotate:'0deg'}], {duration:700, easing:'ease-out', composite:'add'}); }
     big('HÖYLÄ<br>McBUENO!!!', name + ' huutaa', true);
     if (navigator.vibrate) try { navigator.vibrate([40, 60, 40, 60, 90]); } catch(e){}
+  }
+
+
+  // ---------- now and then: Hymytyttö turns up at the edge of the table; Mami calls and nobody answers ----------
+  var oddRolled = false, hymyRound = 99, mamiRound = 99, hymyOn = false, mamiDone = false, mamiT = [];
+  function oddReset(){ oddRolled = false; hymyOn = false; mamiDone = false; $('khymy').classList.remove('on'); mamiStop(); }
+  function hymySeen(k){ try { var h = JSON.parse(localStorage.getItem('viistone-hymy') || '{}'); if (!h[k]){ h[k] = Date.now(); localStorage.setItem('viistone-hymy', JSON.stringify(h)); } } catch(e){} }
+  function oddCheck(){
+    if (!st || root.classList.contains('idle')) return;
+    if (!oddRolled){ oddRolled = true; hymyRound = Math.random() < .3 ? 1 + Math.floor(Math.random() * 3) : 99; mamiRound = Math.random() < .35 ? 2 + Math.floor(Math.random() * 3) : 99; }
+    if (!hymyOn && st.round >= hymyRound){ hymyOn = true; setTimeout(function(){ $('khymy').classList.add('on'); playS('static', .18); setTimeout(function(){ hymySeen('c09'); }, 2500); }, 1500 + Math.random() * 4000); }
+    if (!mamiDone && st.phase === 'play' && st.round >= mamiRound && (st.lap || 0) >= 1 && !$('kphone').classList.contains('big')){ mamiDone = true; mamiCall(); }
+  }
+  function mamiStop(){ mamiT.forEach(clearTimeout); mamiT = []; $('kphone').classList.remove('ring'); var c = $('kcall'); c.className = 'kcall'; c.innerHTML = ''; }
+  function mamiCall(){
+    var c = $('kcall'), ph = $('kphone');
+    c.className = 'kcall on'; c.innerHTML = '<small>SOITTAA</small><b>MAMI</b><i>☎</i>';
+    for (var r = 0; r < 6; r++) (function(r){ mamiT.push(setTimeout(function(){
+      ph.classList.add('ring'); if (navigator.vibrate) try { navigator.vibrate(400); } catch(e){}
+      [0, .14, .28, .42].forEach(function(d, i){ setTimeout(function(){ tone(i % 2 ? 1046 : 1318, .12, 'square', .03); }, d * 1000); });
+      noise(.5, .06, 140); mamiT.push(setTimeout(function(){ ph.classList.remove('ring'); }, 650)); }, r * 1300)); })(r);
+    mamiT.push(setTimeout(function(){ ph.classList.remove('ring'); c.className = 'kcall on miss'; c.innerHTML = '<small>VASTAAMATON</small><b>MAMI</b><small>1 PUHELU</small>'; }, 6 * 1300 + 300));
+    mamiT.push(setTimeout(function(){ c.className = 'kcall'; c.innerHTML = ''; }, 6 * 1300 + 3400));
   }
 
   // ---------- bottles over the table: one per lap each; when it is you, it comes at the screen ----------
