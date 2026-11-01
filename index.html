@@ -2550,6 +2550,8 @@ body.kiropen{overflow:hidden}
 .kir .kshout{position:absolute;left:max(10px, env(safe-area-inset-left,0px));bottom:calc(var(--hand) + 10px);z-index:8;display:none;flex-direction:column;gap:6px;align-items:flex-start}
 .kir .kshout button{font-family:var(--f-osd);font-size:19px;letter-spacing:.05em;color:#14130f;background:#ffb35c;border:0;padding:3px 10px;cursor:pointer;box-shadow:2px 3px 0 rgba(0,0,0,.55);transform:rotate(-2deg)}
 .kir .kshout button + button{background:#ffd23a;transform:rotate(1.5deg)}
+.kir .kshout button.mcb{background:#ff5a2e;color:#fff6e0;font-size:19px !important;padding:5px 10px !important;transform:rotate(-3deg)}
+.kir .kshout button + button.mcb,.kir .kshout button.mcb + button{transform:rotate(1.5deg)}
 .kir .kshout button:disabled{opacity:.3;cursor:default}
 .kir .bub.shout{font-family:var(--f-osd);font-size:22px;letter-spacing:.04em;color:#c8321f;background:#fff4d8;border:2px solid #c8321f;transform:translateY(6px) rotate(-3deg)}
 .kir .bub.shout.on{transform:translateY(0) rotate(-3deg) scale(1.08)}
@@ -2587,7 +2589,7 @@ body.kiropen{overflow:hidden}
     <div class="myhand" id="kmyhand" role="group" aria-label="Kätesi"></div>
   </div>
   <button class="knext" id="knext" type="button">SEURAAVA JAKO ▶</button>
-  <div class="kshout" id="kshout"><button type="button" data-k="0">HÖYLÄ!</button><button type="button" data-k="1">McBUENO!!!</button><button type="button" data-k="2">TÄÄ ON MUN PIENIN!</button><button type="button" data-k="3">EIIIIHHH!!!</button></div>
+  <div class="kshout" id="kshout"><button type="button" data-k="1" class="mcb">HÖYLÄ McBUENO!!!</button><button type="button" data-k="0">HÖYLÄ!</button><button type="button" data-k="2">TÄÄ ON MUN PIENIN!</button><button type="button" data-k="3">EIIIIHHH!!!</button></div>
   <button class="kbangb" id="kbang" type="button" aria-label="Paukuta pöytää">PAUKUTA</button>
   <div class="kvig" aria-hidden="true"></div>
   <div class="kscan" aria-hidden="true"></div>
@@ -2800,6 +2802,7 @@ body.kiropen{overflow:hidden}
     bar1:'kirilii/sfx/bar1.mp3', bar2:'kirilii/sfx/bar2.mp3', deal:'kirilii/sfx/deal.mp3', flip:'kirilii/sfx/flip.mp3', cards:'kirilii/sfx/cards.mp3', over:'kirilii/sfx/over.mp3',
     impossible:'kirilii/sfx/impossible.mp3', laughr:'kirilii/sfx/laughr.mp3', laughe:'kirilii/sfx/laughe.mp3', aboard:'kirilii/sfx/aboard.mp3',
     nouhh:'kirilii/sfx/nouhh.mp3', no1:'kirilii/sfx/no1.mp3', no2:'kirilii/sfx/no2.mp3', yes:'kirilii/sfx/yes.mp3', idiots:'kirilii/sfx/idiots.mp3', sonofa:'kirilii/sfx/sonofa.mp3',
+    bang1:'kirilii/sfx/bang1.mp3', bang2:'kirilii/sfx/bang2.mp3',
     put1:'kirilii/sfx/put1.mp3', put2:'kirilii/sfx/put2.mp3', put3:'kirilii/sfx/put3.mp3', put4:'kirilii/sfx/put4.mp3'};
   function ac(){ if (!AC){ try { AC = new (window.AudioContext || window.webkitAudioContext)(); Object.keys(FILES).forEach(function(k){ fetch('assets/' + FILES[k]).then(function(r){ return r.arrayBuffer(); }).then(function(a){ return new Promise(function(ok, no){ AC.decodeAudioData(a, ok, no); }); }).then(function(b){ bufs[k] = b; }).catch(function(){}); }); } catch(e){} }
     if (AC && AC.state === 'suspended') AC.resume(); }
@@ -3085,7 +3088,7 @@ body.kiropen{overflow:hidden}
     R.hoyla.forEach(function(h){
       at(T, function(){
         var by = st.players[h.by].name, vic = st.players[h.victim].name;
-        if (h.mcbueno){ $('kvhs').classList.remove('on'); void $('kvhs').offsetWidth; $('kvhs').classList.add('on'); big('HÖYLÄ McBUENO!', by + ' → ' + vic, true); shake(true); wobble(true); tipGlass(); SFX.mcbueno(); $('kscr').classList.add('mc');
+        if (h.mcbueno){ $('kvhs').classList.remove('on'); void $('kvhs').offsetWidth; $('kvhs').classList.add('on'); big('HÖYLÄ<br>McBUENO!', by + ' → ' + vic, true); shake(true); wobble(true); tipGlass(); SFX.mcbueno(); $('kscr').classList.add('mc');
           setTimeout(function(){ $('kscr').classList.remove('mc'); }, 2100); if (herjaOk() || settings.herja !== 'pois') say(speakerFor(h.victim, h.by), pick(LINES.mc), 'McBUENO');
         } else { big('HÖYLÄYS!', by + ' höyläsi: ' + vic); shake(false); wobble(false); SFX.hoyla(); SFX.clink(); (function(by, vi){ setTimeout(function(){ vox(vi === 0 ? ['impossible', 'nouhh'] : ['no1', 'no2', 'sonofa'], .55, true); }, 900); if (by !== 0) setTimeout(function(){ vox(['laughr', 'laughe'], .45, true); }, 2300); })(h.by, h.victim);
           var pl = h.victim === 0 ? $('kmyplate') : $('kplate' + h.victim); if (pl){ pl.classList.remove('hit'); void pl.offsetWidth; pl.classList.add('hit'); }
@@ -3322,7 +3325,7 @@ body.kiropen{overflow:hidden}
   var seenBangs = {}, bangQ = null;
   function knock(f){
     if (!settings.fx || !AC) return; var t = AC.currentTime;
-    if (bufs.bang){ playS('bang', .5 + f * .4, .92 + Math.random() * .16); return; }
+    if (bufs.bang1){ playS(Math.random() < .6 ? 'bang1' : 'bang2', .6 + f * .35, .9 + Math.random() * .2); if (Math.random() < .3) setTimeout(function(){ tone(2500 + Math.random() * 900, .14, 'sine', .02); }, 40); return; }
     var o = AC.createOscillator(), g = AC.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(95 + Math.random() * 20, t); o.frequency.exponentialRampToValueAtTime(42, t + .16);
     g.gain.setValueAtTime(.55 * f + .2, t); g.gain.exponentialRampToValueAtTime(.0001, t + .22); o.connect(g).connect(AC.destination); o.start(t); o.stop(t + .25);
     var n = Math.floor(AC.sampleRate * .09), b = AC.createBuffer(1, n, AC.sampleRate), a = b.getChannelData(0); for (var i = 0; i < n; i++) a[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 4);
@@ -3352,6 +3355,16 @@ body.kiropen{overflow:hidden}
     (v.bangs || []).forEach(function(x){ if (seenBangs[x.id]) return; seenBangs[x.id] = 1; if (x.seat === v.me) return;
       var pid = (x.seat - Math.max(0, v.me) + 6) % 6; x.p.forEach(function(ms){ setTimeout(function(){ bangFx(pid); }, ms); }); });
   }
+  // the McBueno shout hits everyone at the table: tape glitch, the table jumps, the phone goes red
+  function mcbBlast(pid, name){
+    SFX.mcbueno(); shake(true); wobble(true);
+    if (!reduce){ var vh = $('kvhs'); vh.classList.remove('on'); void vh.offsetWidth; vh.classList.add('on');
+      $('kscr').classList.add('mc'); setTimeout(function(){ $('kscr').classList.remove('mc'); }, 2100);
+      [0, 380, 760].forEach(function(t){ setTimeout(function(){ bangFx(pid); }, t); });
+      var l = root.querySelectorAll('.played .kc, .myplayed .kc'); for (var i = 0; i < l.length; i++) l[i].animate([{rotate:'0deg'}, {rotate:((Math.random() - .5) * 14) + 'deg', offset:.3}, {rotate:'0deg'}], {duration:700, easing:'ease-out', composite:'add'}); }
+    big('HÖYLÄ<br>McBUENO!!!', name + ' huutaa', true);
+    if (navigator.vibrate) try { navigator.vibrate([40, 60, 40, 60, 90]); } catch(e){}
+  }
   function showShouts(v){
     (v.shouts || []).forEach(function(x){ if (seenShouts[x.id]) return; seenShouts[x.id] = 1;
       var pid = (x.seat - Math.max(0, v.me) + 6) % 6, name = v.seats[x.seat] ? v.seats[x.seat].name : '';
@@ -3361,7 +3374,7 @@ body.kiropen{overflow:hidden}
       var x0 = Math.min(sr.width - 230, Math.max(8, r.left - sr.left + r.width / 2 - 90)), y0 = pid === 0 ? r.top - sr.top - 70 : r.bottom - sr.top + 6;
       b.style.left = x0 + 'px'; b.style.top = y0 + 'px'; requestAnimationFrame(function(){ b.classList.add('on'); });
       setTimeout(function(){ b.classList.remove('on'); setTimeout(function(){ b.remove(); }, 300); }, 2800);
-      if (x.k === 1){ shake(true); SFX.mcbueno(); } else if (x.k === 0){ shake(false); SFX.hoyla(); } else if (x.k === 2){ SFX.clink(); tone(220, .3, 'triangle', .05, 330); } else { if (bufs.nouhh) vox(['nouhh'], .6, true); else tone(880, 1.1, 'sawtooth', .05, 110); wobble(false); }
+      if (x.k === 1){ mcbBlast(pid, name); } else if (x.k === 0){ shake(false); SFX.hoyla(); } else if (x.k === 2){ SFX.clink(); tone(220, .3, 'triangle', .05, 330); } else { if (bufs.nouhh) vox(['nouhh'], .6, true); else tone(880, 1.1, 'sawtooth', .05, 110); wobble(false); }
     });
   }
 
