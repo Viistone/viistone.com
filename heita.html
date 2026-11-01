@@ -15,6 +15,14 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #tl{left:max(16px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top))}
 #tl b{display:block;font-weight:400;font-size:clamp(26px,4.4vw,44px);line-height:1}
 #tl span{display:block;font-size:clamp(17px,2.4vw,26px);opacity:.85;margin-top:4px;text-shadow:none}
+body.grab #miss{opacity:0}
+#miss{transition:opacity .3s}
+#miss,#smiss,#omiss{font-size:clamp(15px,2vw,20px);text-shadow:none;margin-top:8px;letter-spacing:.03em}
+#miss b,#smiss b,#omiss b{font-weight:400;color:#e7c25a}
+#miss ul,#smiss ul,#omiss ul{list-style:none;margin:2px 0 0;padding:0;line-height:1.25}
+#miss .ok,#smiss .ok,#omiss .ok{color:#cfe8a8}
+#smiss,#omiss{margin:10px auto 14px;display:inline-block;text-align:left}
+.lvlup{color:#ff6a33;font-size:clamp(28px,4.5vw,44px)}
 #tr{right:max(16px,env(safe-area-inset-right));top:calc(max(12px,env(safe-area-inset-top)) + 50px);text-align:right}
 #score{font-size:clamp(30px,5vw,54px);line-height:1;color:#ff6a33}
 #dist{font-size:clamp(18px,2.6vw,28px);text-shadow:none}
@@ -44,14 +52,14 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #start .note{font-size:18px;opacity:.6;margin-top:18px}
 </style></head><body>
 <canvas id="cv"></canvas>
-<div class="hud" id="tl"><b>HEITÄ VIISTONE</b><span id="song">CH 02</span></div>
+<div class="hud" id="tl"><b>HEITÄ VIISTONE</b><span id="song">CH 02</span><div id="miss"></div></div>
 <div class="hud" id="tr"><div id="score">0</div><div id="dist">0 M</div></div>
 <div class="hud" id="mid"><div id="combo"></div></div>
 <div id="viisi">VIISI<small style="display:block;font-size:.22em;color:#ece4cc">VIISI OSUMAA PUTKEEN</small></div>
 <div id="hint">TARTU VIISTOSEEN<br>PYÖRITÄ MONTA KIERROSTA<br>JA PÄÄSTÄ IRTI</div>
 <div id="btns"><button id="bmus" aria-label="Musiikki">♪</button><button id="bfx" aria-label="Äänet">FX</button><a href="/" aria-label="Kotisivulle">⏏</a></div>
-<div class="panel on" id="start"><h1>HEITÄ<br>VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Mitä useampi kierros, sitä pidempi lento.</p><p>Viisi osumaa putkeen: VIISI.</p><div class="act" style="margin-top:18px"><button class="go" id="bgo">ALOITA</button></div><div class="note">testiversio</div></div>
-<div class="panel" id="over"><h1>VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div class="act"><button class="go" id="bagain">UUDESTAAN</button><a class="alt" href="/">KOTISIVULLE</a></div></div>
+<div class="panel on" id="start"><h1>HEITÄ<br>VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Mitä useampi kierros, sitä pidempi lento.</p><p>Viisi osumaa putkeen: VIISI.</p><div id="smiss"></div><div class="act" style="margin-top:6px"><button class="go" id="bgo">ALOITA</button></div><div class="note">testiversio</div></div>
+<div class="panel" id="over"><h1>VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div id="omiss"></div><div class="act"><button class="go" id="bagain">UUDESTAAN</button><a class="alt" href="/">KOTISIVULLE</a></div></div>
 <script src="assets/lib/matter.min.js"></script>
 <script>
 (function(){
@@ -181,14 +189,24 @@ function makeExtras(){ seed = 4242; TREES = []; ICE = []; CROWS = []; const G = 
   RATS.forEach(x => { const y = gy(x + 80), b = Bodies.rectangle(x + 80, y - 33, 180, 66, {isStatic:true, restitution:.9, friction:.2, chamfer:{radius:26}}); b.plugin = {kind:'rat', w:180, h:66, t:-9}; Composite.add(world, b); bodies.push(b); });
   if (rnd() < .3){ const g2 = pick(); if (g2){ const x = (g2[0] + g2[1]) / 2 + 40; if (!TREES.some(t => Math.abs(t.x - x) < 120)){ const y = gy(x), b = Bodies.rectangle(x, y - 46, 28, 92, {isStatic:true, friction:.4}); b.plugin = {kind:'hymy', w:28, h:92}; Composite.add(world, b); bodies.push(b); } } }
   bigRockets(G);
+  BALLOONS = []; for (let x = 1500 + rnd() * 400; x < 28000; x += 650 + rnd() * 700){ BALLOONS.push({x, h:300 + rnd() * 520, ph:rnd() * 6, gas:rnd() < .4, popped:false, col:['#c23b3b', '#3d6f96', '#e7c25a', '#5f8a4a'][Math.floor(rnd() * 4)]}); }
+  CARSPOTS = []; for (let x = 2600 + rnd() * 800; x < 28000; x += 1400 + rnd() * 1300) CARSPOTS.push({x, done:false});
   LOOSE = []; G.forEach(([a, b], i) => { if (RIDX.includes(i) || i < 1) return; if (TREES.some(t => t.x > a - 20 && t.x < b + 20)) return; if (rnd() < .55){ const x = a + 20 + rnd() * Math.max(10, b - a - 40), k = rnd(); LOOSE.push([x, k < .45 ? 'oil' : k < .8 ? 'gas' : 'fw']); } });
   for (let i = 0; i < 5; i++){ const g2 = G[1 + Math.floor(rnd() * (G.length - 1))]; if (!g2) continue; const x = g2[0] + rnd() * (g2[1] - g2[0]); const n = 3 + Math.floor(rnd() * 4); CROWS.push({x, birds:Array.from({length:n}, (_, k) => ({x:x + (k - n / 2) * 16 + (rnd() - .5) * 8, y:0, vx:0, vy:0, fly:false, ph:rnd() * 6}))}); } }
-let BIGR = [], LOOSE = [];
+let BIGR = [], LOOSE = [], BALLOONS = [], CARSPOTS = [];
 function bigRockets(G){ BIGR = []; const idx = [3, 11, 21, 33]; idx.forEach(i => { const g2 = G[i]; if (!g2) return; const x = (g2[0] + g2[1]) / 2; if (TREES.some(t => Math.abs(t.x - x) < 140)) TREES = TREES.filter(t => Math.abs(t.x - x) >= 140); BIGR.push({x, y:gy(x), st:'idle', t:0, px:x, py:gy(x) - 80, ang:-Math.PI / 2}); }); }
+function balloonStep(){ if (!rag || state !== 'fly') return; const p = rag.torso.position; for (const b of BALLOONS){ if (b.popped) continue; const by = gy(b.x) - b.h + Math.sin(simT * 1.3 + b.ph) * 10; if (Math.hypot(p.x - b.x, p.y - (by - 20)) < 62){ b.popped = true; b.py = by;
+      rag.all.forEach(q => Body.setVelocity(q, {x:q.velocity.x * .8 + 8, y:Math.min(q.velocity.y, 0) - 24})); explode(b.x, by, b.gas ? 240 : 110, b.gas ? 22 : 5, b.gas ? 'boom_bright' : 'boom_tan'); sfx('fireball', .5, {x:b.x, y:by, force:true});
+      for (let i = 0; i < 18; i++){ const a = rnd() * 6.28, v = 2 + rnd() * 6; parts.push({x:b.x, y:by - 30, vx:Math.cos(a) * v, vy:Math.sin(a) * v, life:2 + rnd(), t:0, k:'leaf', s:5 + rnd() * 4, r:rnd() * 6, vr:(rnd() - .5) * .3, c:b.col}); }
+      const k2 = block('crate', b.x, by + 40, 30, 22); Body.setVelocity(k2, {x:(rnd() - .5) * 4, y:2}); k2.sleepThreshold = Infinity; if (b.gas){ const g2 = explosive('gas', b.x + 8, by + 20); g2.sleepThreshold = Infinity; arm(g2); }
+      award(1500, b.x, by - 90, 'ILMAPALLO', '#ffd28a'); mEv('balloon'); } } }
+function carsStep(){ for (const b of bodies){ const p = b.plugin; if (!p || p.kind !== 'car' || !p.drive) continue; const up = Math.abs(b.angle - p.a0) < .7; if (!up || p.st >= 2 || b.position.y > gy(b.position.x) + 30){ p.drive = false; continue; }
+    Sleeping.set(b, false); const sl = Math.atan2(gy(b.position.x + 20) - gy(b.position.x - 20), 40), want = -4.5, vx = b.velocity.x * Math.cos(sl) + b.velocity.y * Math.sin(sl), f = clamp((want - vx) * .0009, -.004, .004) * b.mass;
+    Body.applyForce(b, b.position, {x:Math.cos(sl) * f, y:Math.sin(sl) * f}); } }
 function bigStep(dt){ for (const r of BIGR){
     if (r.st === 'idle' && rag && state === 'fly'){ const p = rag.torso.position; if (Math.abs(p.x - r.x) < 60 && p.y > r.y - 190 && p.y < r.y + 10){ r.st = 'fly'; r.t = 0; r.x0 = r.x; r.y0 = r.y - 80;
         r.c = Constraint.create({pointA:{x:r.px, y:r.py}, bodyB:rag.torso, pointB:{x:0, y:0}, stiffness:.35, damping:.1, length:0}); Composite.add(world, r.c);
-        sfx('fuse', .7, {force:true}); sfx('jet', .8, {force:true, delay:.1}); sfx('crowd_cheer', .25, {force:true}); pops.push({x:r.x, y:r.y - 200, t:0, s:'RAKETTI!', col:'#ff8a5c'}); rag.face = 'shock'; } }
+        sfx('fuse', .7, {force:true}); sfx('jet', .8, {force:true, delay:.1}); sfx('crowd_cheer', .25, {force:true}); pops.push({x:r.x, y:r.y - 200, t:0, s:'RAKETTI!', col:'#ff8a5c'}); rag.face = 'shock'; mEv('rocket'); } }
     else if (r.st === 'fly'){ r.t += dt; const t = r.t;
       // up and onward, a bit of wobble, then a bend over the top
       const nx = r.x0 + 1250 * t + 110 * t * t + Math.sin(t * 7) * 18, ny = r.y0 - (1600 * t - 170 * t * t);
@@ -200,6 +218,7 @@ function bigStep(dt){ for (const r of BIGR){
         rag.all.forEach(q => Body.setVelocity(q, {x:22 + rnd() * 6, y:-4 + rnd() * 4}));
         for (let i = 0; i < 90; i++){ const a = rnd() * 6.28, v = 3 + rnd() * 12, cols = ['#ff6a6a', '#ffd27a', '#7ab0d0', '#cfe8a8', '#e7a0e0', '#ffffff']; parts.push({x:r.px, y:r.py, vx:Math.cos(a) * v, vy:Math.sin(a) * v, life:1.6 + rnd(), t:0, k:'spark', c:cols[i % cols.length], s:4}); }
         booms.push({x:r.px, y:r.py, r:260, t:0}); flashT = .25; shake = 24; sfx('boom_bright', 1, {force:true}); sfx('fireworks_crackle', .8, {force:true, delay:.3}); award(5000, r.px, r.py - 140, 'AVARUUSLENTO', '#cfe9ff'); } } } }
+
 function drawBigRockets(){ for (const r of BIGR){ if (r.st === 'done') continue; const x = r.st === 'idle' ? r.x : r.px, y = r.st === 'idle' ? r.y - 80 : r.py, a = r.st === 'idle' ? -Math.PI / 2 : r.ang;
     if (r.st === 'idle'){ line(r.x - 34, r.y, r.x - 14, r.y - 40, INK, 5); line(r.x + 34, r.y, r.x + 14, r.y - 40, INK, 5); line(r.x - 34, r.y, r.x - 14, r.y - 40, C.woodD, 2.5); line(r.x + 34, r.y, r.x + 14, r.y - 40, C.woodD, 2.5); }
     at(x, y, a + Math.PI / 2, () => {
@@ -212,7 +231,7 @@ function treeTop(t, u){ const y = gy(t.x); return {x:t.x + Math.sin(t.b) * t.h *
 function treesStep(dt){ for (const t of TREES){
     if (t.ph === 'load'){ t.t += dt; const k = Math.min(1, t.t / .32); t.b = t.dir * 1.15 * Math.pow(k, .7); const pt = treeTop(t, t.u); if (t.c){ t.c.pointA.x = pt.x; t.c.pointA.y = pt.y; }
       if (k >= 1){ if (t.c) Composite.remove(world, t.c); t.c = null; t.ph = 'whip'; t.t = 0; rag.all.forEach(q => Body.setVelocity(q, {x:t.dir * (16 + rnd() * 6) + q.velocity.x * .2, y:-30 - rnd() * 6}));
-        sfx('fireball', .45, {x:t.x, y:gy(t.x), force:true}); sfx('wood_pile', .5, {x:t.x, y:gy(t.x)}); award(900, pt.x, pt.y - 80, 'KOIVU LINKOAA', '#cfe8a8'); shake = 10;
+        sfx('fireball', .45, {x:t.x, y:gy(t.x), force:true}); sfx('wood_pile', .5, {x:t.x, y:gy(t.x)}); award(900, pt.x, pt.y - 80, 'KOIVU LINKOAA', '#cfe8a8'); shake = 10; mInc('tree');
         for (let i = 0; i < 26; i++){ const a = rnd() * 6.28, v = 2 + rnd() * 6; parts.push({x:pt.x, y:pt.y, vx:Math.cos(a) * v, vy:Math.sin(a) * v - 2, life:2 + rnd() * 1.5, t:0, k:'leaf', s:3 + rnd() * 2.5, r:rnd() * 6, vr:(rnd() - .5) * .3, c:rnd() < .5 ? '#c9a243' : '#8a9a48'}); } } }
     else if (t.ph === 'whip'){ t.t += dt; t.b = t.dir * 1.15 * Math.cos(t.t * 13) * Math.exp(-t.t * 3.2); if (t.t > 2){ t.ph = 'done'; t.b = 0; } }
     else if (!t.used && rag && state === 'fly'){ const p = rag.torso.position, base = gy(t.x), sp = Math.hypot(rag.torso.velocity.x, rag.torso.velocity.y);
@@ -275,6 +294,7 @@ const ORDER = ['kaasut', 'roskakatos', 'mokki', 'savupiippu', 'tynnyrit', 'halko
 function planCourse(){ seed = 1 + Math.floor(Math.random() * 2e9); structs = []; let x = 820, i = 0; const ORD = ORDER.slice(); for (let k = ORD.length - 1; k > 0; k--){ const j = Math.floor(R() * (k + 1)); [ORD[k], ORD[j]] = [ORD[j], ORD[k]]; }
   while (x < 29000){ const t = i < ORD.length ? ORD[i] : ORD[Math.floor(R() * ORD.length)]; structs.push({t, x, spawned:false, done:false}); x += 460 + R() * 300 + (t === 'kerrostalo' || t === 'muuri' || t === 'vesitorni' ? 160 : 0); i++; } }
 function spawnAhead(){ const edge = cam.x + viewW() * .5 + 2600;
+  for (const c2 of CARSPOTS){ if (!c2.done && c2.x < edge){ c2.done = true; if (FLATS.some(f => c2.x > f.a - 100 && c2.x < f.b + 100)) continue; const y = gy(c2.x), a = Math.atan2(gy(c2.x + 20) - gy(c2.x - 20), 40); const b = car(c2.x - Math.sin(a) * 22, y - Math.cos(a) * 22 - 2); Body.setAngle(b, a); b.plugin.drive = true; b.plugin.a0 = a; } }
   for (const l of LOOSE){ if (!l.done && l[0] < edge){ l.done = true; const y = gy(l[0]), a = Math.atan2(gy(l[0] + 10) - gy(l[0] - 10), 20), h = l[1] === 'fw' ? 12 : l[1] === 'oil' ? 20 : 19; const b = explosive(l[1], l[0] + Math.sin(a) * h, y - Math.cos(a) * h - 1, a); b.plugin.a0 = a; Sleeping.set(b, true); } } for (const s of structs){ if (!s.spawned && s.x < edge){ s.spawned = true; const r = T[s.t](s.x); s.name = r[0]; s.list = r[1]; s.bonus = r[2]; s.list.forEach(b => Sleeping.set(b, true)); } } }
 
 // ramps: a couple of wooden kickers along the way
@@ -316,18 +336,42 @@ function makeRag(hx, hy){ const opt = (d) => ({collisionFilter:{group:GROUP}, de
   const all = [P.torso, P.head, P.ua1, P.fa1, P.ua2, P.fa2, P.th1, P.sh1, P.th2, P.sh2, mic];
   all.forEach(b => { b.plugin = Object.assign(b.plugin || {}, {kind:'rag', pv:{x:0, y:0}}); }); mic.plugin.kind = 'mic';
   Composite.add(world, all); Composite.add(world, cons); Composite.add(world, micC);
-  return Object.assign(P, {all, cons, mic, micC, hat:true, face:'shock'}); }
+  const joints = [[P.torso, P.head, -.6, .6], [P.ua1, P.fa1, -2.3, 2.3], [P.ua2, P.fa2, -2.3, 2.3], [P.torso, P.th1, -1.9, 1.9], [P.torso, P.th2, -1.9, 1.9], [P.th1, P.sh1, -2.1, 2.1], [P.th2, P.sh2, -2.1, 2.1], [P.torso, P.ua1, -3.2, 3.2], [P.torso, P.ua2, -3.2, 3.2]];
+  return Object.assign(P, {all, cons, mic, micC, joints, hat:true, face:'shock'}); }
+function limitJoints(){ if (!rag || !rag.joints) return; for (const [A, B, lo, hi] of rag.joints){ let r = B.angle - A.angle; r = Math.atan2(Math.sin(r), Math.cos(r)); const k = A === rag.torso && (B === rag.ua1 || B === rag.ua2) ? .9 : .82;
+    Body.setAngularVelocity(B, A.angularVelocity + (B.angularVelocity - A.angularVelocity) * k);
+    if (r < lo || r > hi){ Body.setAngle(B, A.angle + (r < lo ? lo : hi)); Body.setAngularVelocity(B, A.angularVelocity); } } }
 function handPos(b){ const L = b.plugin.len / 2; return {x:b.position.x - Math.sin(b.angle) * L, y:b.position.y + Math.cos(b.angle) * L}; }
 function ends(b){ const L = (b.plugin.len || 14) / 2, s = Math.sin(b.angle), c = Math.cos(b.angle); return [b.position.x + s * L, b.position.y - c * L, b.position.x - s * L, b.position.y + c * L]; }
 
 // ---------- scoring ----------
-function total(){ return score + Math.max(0, Math.round(maxDist)) * 100; }
+const MPOOL = {
+  d100:['LENNÄ 100 M', () => maxDist >= 100], d200:['LENNÄ 200 M', () => maxDist >= 200], d350:['LENNÄ 350 M', () => maxDist >= 350],
+  rocket:['LENNÄ RAKETILLA', () => RUN.ev.rocket], tree2:['KOIVU LINKOAA KAHDESTI', () => (RUN.cnt.tree || 0) >= 2], oil3:['RÄJÄYTÄ 3 ÖLJYTYNNYRIÄ', () => (RUN.cnt.oil || 0) >= 3],
+  gas5:['RÄJÄYTÄ 5 KAASUPULLOA', () => (RUN.cnt.gas || 0) >= 5], viisi:['SAA VIISI', () => RUN.ev.viisi], tower:['KAADA VESITORNI', () => RUN.ev.VESITORNI], tall:['KAADA TORNITALO', () => RUN.ev.TORNITALO],
+  chimney:['KAADA SAVUPIIPPU', () => RUN.ev.SAVUPIIPPU], rat:['POMPPAA JÄTTIROTASTA', () => RUN.ev.rat], tramp:['TRAMPOLIINI KAHDESTI', () => (RUN.cnt.tramp || 0) >= 2], balloon:['PUHKAISE ILMAPALLO', () => RUN.ev.balloon],
+  pts50:['TEE 50 000 PISTETTÄ', () => rawTotal() >= 50000], pts150:['TEE 150 000 PISTETTÄ', () => rawTotal() >= 150000], perfect:['TÄYDELLINEN HEITTO', () => RUN.ev.perfect], ice:['LIUKU JÄÄLLÄ', () => RUN.ev.ice],
+  car:['OSU AUTOON', () => RUN.ev.car], combo10:['COMBO x10', () => maxCombo >= 10], space:['NÄE AVARUUS', () => RUN.ev.space], hymy:['LÖYDÄ HYMYTYTTÖ', () => RUN.ev.hymy] };
+const MHARD = {d350:3, pts150:3, hymy:4, combo10:2, d200:2, gas5:2};
+let MS = null, RUN = {ev:{}, cnt:{}}, mTickT = 0;
+function mLoad(){ try { MS = JSON.parse(localStorage.getItem('viistone-heita-m') || 'null'); } catch(e){} if (!MS || !MS.cur){ MS = {lvl:1, cur:[], done:[], seen:[]}; mPick(); } }
+function mSave(){ try { localStorage.setItem('viistone-heita-m', JSON.stringify(MS)); } catch(e){} }
+function mPick(){ const ids = Object.keys(MPOOL).filter(k => !MS.cur.includes(k) && !(MS.seen || []).slice(-6).includes(k) && (MHARD[k] || 1) <= MS.lvl + 1); const out = []; while (out.length < 3 && ids.length) out.push(ids.splice(Math.floor(Math.random() * ids.length), 1)[0]); MS.cur = out; MS.done = []; mSave(); }
+function mult(){ return 1 + (MS.lvl - 1) * .1; }
+function mEv(k){ RUN.ev[k] = 1; mCheck(); } function mInc(k){ RUN.cnt[k] = (RUN.cnt[k] || 0) + 1; mCheck(); }
+function mCheck(){ if (!MS || state !== 'fly') return; for (const k of MS.cur){ if (MS.done.includes(k) || !MPOOL[k][1]()) continue; MS.done.push(k); mSave(); renderMiss();
+    const p = rag ? rag.torso.position : {x:cam.x, y:cam.y}; pops.push({x:p.x, y:p.y - 150, t:0, s:'TEHTÄVÄ ✓ ' + MPOOL[k][0], col:'#cfe8a8'}); sfx('victory' + (1 + Math.floor(rnd() * 2)), .5, {force:true}); } }
+function mTick(){ if (simT - mTickT > .4){ mTickT = simT; if (rag && gy(cam.x) - cam.y > 1800) RUN.ev.space = 1; mCheck(); } }
+function renderMiss(){ if (!MS) return; const li = MS.cur.map(k => '<li class="' + (MS.done.includes(k) ? 'ok' : '') + '">' + (MS.done.includes(k) ? '✓ ' : '· ') + MPOOL[k][0] + '</li>').join('');
+  $('miss').innerHTML = '<b>TASO ' + MS.lvl + ' · PISTEET x' + mult().toFixed(1).replace('.', ',') + '</b><ul>' + li + '</ul>'; $('smiss').innerHTML = $('miss').innerHTML; }
+function rawTotal(){ return score + Math.max(0, Math.round(maxDist)) * 100; }
+function total(){ return Math.round(rawTotal() * (MS ? mult() : 1) / 10) * 10; }
 function award(pts, x, y, label, col){ if (ended) return 0; const now = simT; if (pts >= 280){ if (now - lastHit < 1.3) combo++; else combo = 1; lastHit = now; maxCombo = Math.max(maxCombo, combo); }
   const mult = 1 + (Math.min(Math.max(combo, 1), 9) - 1) * .25, p = Math.round(pts * mult / 10) * 10; score += p;
   if (label) pops.push({x, y, t:0, s:label + ' +' + p.toLocaleString('fi-FI'), col:col || '#ffd28a'});
   if (combo > 1 && combo !== comboShown){ comboShown = combo; const el = $('combo'); el.innerHTML = 'COMBO x' + combo; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 1300); }
   return p; }
-function viisi(){ slowT = .9; $('viisi').classList.add('on'); setTimeout(() => $('viisi').classList.remove('on'), 1100); award(2500, rag.torso.position.x, rag.torso.position.y - 120, 'VIISI OSUMAA', '#ff2e2e'); sfx('slow', .7, {force:true, vary:false}); sfx(rnd() < .5 ? 'victory1' : 'victory2', .7, {delay:.9, force:true}); }
+function viisi(){ slowT = .9; mEv('viisi'); $('viisi').classList.add('on'); setTimeout(() => $('viisi').classList.remove('on'), 1100); award(2500, rag.torso.position.x, rag.torso.position.y - 120, 'VIISI OSUMAA', '#ff2e2e'); sfx('slow', .7, {force:true, vary:false}); sfx(rnd() < .5 ? 'victory1' : 'victory2', .7, {delay:.9, force:true}); }
 
 // ---------- damage and breaking ----------
 function hurt(b, amount, x, y){ const p = b.plugin; if (!p || p.gone || amount <= 0) return;
@@ -359,15 +403,15 @@ function removeBody(b){ b.plugin.gone = true; Composite.remove(world, b); const 
 // ---------- explosives ----------
 const EXPL = {gas:1, fw:1, jerry:1, cab:1, oil:1};
 function arm(b){ const p = b.plugin; if (p.armed) return; p.armed = true; p.armT = simT; const x = b.position.x, y = b.position.y;
-  if (p.kind === 'gas'){ p.hiss = sfx(rnd() < .5 ? 'gas_hiss' : 'gas_release', .7, {x, y, force:true}); later(.9 + rnd() * .5, () => blow(b, 300, 32, 'boom_' + ['bright', 'rocky', 'tan'][Math.floor(rnd() * 3)], 'KAASUPULLO', 2000)); }
+  if (p.kind === 'gas'){ p.hiss = sfx(rnd() < .5 ? 'gas_hiss' : 'gas_release', .7, {x, y, force:true}); later(.9 + rnd() * .5, () => blow(b, 300, 32, 'boom_' + ['bright', 'rocky', 'tan'][Math.floor(rnd() * 3)], 'KAASUPULLO', 2000) || mInc('gas')); }
   else if (p.kind === 'fw'){ sfx('fuse', .6, {x, y, force:true}); later(.7, () => fireworks(b)); }
   else if (p.kind === 'jerry'){ sfx('flame_burst', .8, {x, y, force:true}); later(.25, () => { fires.push({x:b.position.x, y:b.position.y + 10, t:0, life:4}); blow(b, 270, 24, 'fireball', 'BENSAKANISTERI', 1200); }); }
-  else if (p.kind === 'oil'){ sfx('flame_burst', .6, {x, y, force:true}); later(.35 + rnd() * .3, () => { fires.push({x:b.position.x, y:b.position.y + 14, t:0, life:5}); blow(b, 320, 34, 'boom_' + ['bright', 'rocky', 'tan'][Math.floor(rnd() * 3)], 'TYNNYRI', 1800); }); }
+  else if (p.kind === 'oil'){ sfx('flame_burst', .6, {x, y, force:true}); later(.35 + rnd() * .3, () => { fires.push({x:b.position.x, y:b.position.y + 14, t:0, life:5}); blow(b, 320, 34, 'boom_' + ['bright', 'rocky', 'tan'][Math.floor(rnd() * 3)], 'TYNNYRI', 1800); mInc('oil'); }); }
   else if (p.kind === 'cab'){ zap(b); } }
 function later(t, fn){ timers.push({t:simT + t, fn}); }
 function blow(b, r, power, snd, label, pts){ if (b.plugin.boomed) return; b.plugin.boomed = true; const x = b.position.x, y = b.position.y; if (!b.plugin.gone) removeBody(b);
   explode(x, y, r, power, snd); tally.boom += award(pts, x, y - 30, label, '#ff8a5c'); }
-function explode(x, y, r, power, snd){ booms.push({x, y, r, t:0}); shake = Math.max(shake, Math.min(40, power * 1.25)); flashT = Math.max(flashT, Math.min(.25, power / 120));
+function explode(x, y, r, power, snd){ booms.push({x, y, r, t:0}); shake = Math.max(shake, Math.min(40, power * 1.25)); if (power >= 20) flashT = Math.max(flashT, Math.min(.14, power / 220));
   for (let i = 0; i < 8; i++){ const a = -Math.PI / 2 + (rnd() - .5) * 2.4, v = 6 + rnd() * 9; parts.push({x, y, vx:Math.cos(a) * v, vy:Math.sin(a) * v, life:1.4 + rnd(), t:0, k:'ember', s:4 + rnd() * 4}); }
   sfx(snd || 'boom_tan', 1, {x, y, force:true, gap:.02}); for (let i = 0; i < 10; i++) smoke(x + (rnd() - .5) * r * .5, y - rnd() * r * .4, 1);
   for (let i = 0; i < 26; i++){ const a = rnd() * 6.28, v = 4 + rnd() * 10; parts.push({x, y, vx:Math.cos(a) * v, vy:Math.sin(a) * v - 3, life:.6 + rnd() * .5, t:0, k:'spark', c:rnd() < .5 ? '#ffd27a' : '#ff8a2a', s:3}); }
@@ -417,11 +461,12 @@ function ragHit(part, other, imp, rv, x, y){ if (state !== 'fly' || (rag.torso.p
     sfx(rv > 14 ? 'thud_heavy' : 'thud_soft', clamp(imp / 30, .2, .9), {x, y, gap:.07}); shake = Math.max(shake, Math.min(10, imp * .25));
     if (imp > 24) ouch(); if (rag.hat && (part === rag.head) && imp > 12) loseHat();
     if (imp > 11){ bleed(x, y, Math.min(34, imp * .9), 2 + imp * .12); rag.bleedT = Math.max(rag.bleedT || 0, 1.6); } if (imp > 30 && simT - (rag.splatT || -9) > 4){ rag.splatT = simT; splatScreen(); } }
-  if (other.plugin && other.plugin.kind === 'tramp' && simT - other.plugin.t > .4){ other.plugin.t = simT; rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 6) + 5, y:Math.min(q.velocity.y, 0) - 26})); sfx('thud_soft', .9, {x, y, force:true}); sfx('wood_creak', .5, {x, y}); pops.push({x, y:y - 60, t:0, s:'BOING', col:'#ece4cc'}); award(300, x, y - 40); shake = 12; }
+  if (other.plugin && other.plugin.kind === 'tramp' && simT - other.plugin.t > .4){ other.plugin.t = simT; rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 6) + 5, y:Math.min(q.velocity.y, 0) - 26})); sfx('thud_soft', .9, {x, y, force:true}); sfx('wood_creak', .5, {x, y}); pops.push({x, y:y - 60, t:0, s:'BOING', col:'#ece4cc'}); award(300, x, y - 40); shake = 12; mInc('tramp'); }
   const op = other.plugin || {}; if (imp > 8 && !other.isStatic && op.kind && op.kind !== 'rag'){ if (simT - (rag.stT || -9) < 1.6) rag.streak = (rag.streak || 0) + 1; else rag.streak = 1; rag.stT = simT;
     if (rag.streak >= 2 && rag.streak < 5) pops.push({x, y:y - 90, t:.3, s:rag.streak + ' / 5', col:'#ff8a5c'}); if (rag.streak === 5) viisi(); }
-  if (op.kind === 'rat' && simT - op.t > .5){ op.t = simT; rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 8) + 8, y:Math.min(q.velocity.y, 0) - 34})); sfx('rat', .9, {x, y, force:true}); sfx('thud_soft', .8, {x, y, force:true}); award(1000, x, y - 80, 'JÄTTIROTTA', '#ece4cc'); shake = 16; }
-  if (op.kind === 'hymy' && !op.seen){ op.seen = true; sfx('static', .5, {force:true}); hymySeen('c02'); award(1500, x, y - 120, 'HYMYTYTTÖ', '#cfe0e8'); }
+  if (op.kind === 'car' && imp > 6) mEv('car');
+  if (op.kind === 'rat' && simT - op.t > .5){ op.t = simT; rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 8) + 8, y:Math.min(q.velocity.y, 0) - 34})); sfx('rat', .9, {x, y, force:true}); sfx('thud_soft', .8, {x, y, force:true}); award(1000, x, y - 80, 'JÄTTIROTTA', '#ece4cc'); shake = 16; mEv('rat'); }
+  if (op.kind === 'hymy' && !op.seen){ op.seen = true; sfx('static', .5, {force:true}); hymySeen('c02'); award(1500, x, y - 120, 'HYMYTYTTÖ', '#cfe0e8'); mEv('hymy'); }
   if (rag.micC && imp > 18 && rnd() < .5) loseMic(); }
 function hymySeen(k){ try { const h = JSON.parse(localStorage.getItem('viistone-hymy') || '{}'); if (!h[k]){ h[k] = Date.now(); localStorage.setItem('viistone-hymy', JSON.stringify(h)); } } catch(e){} }
 function ouch(force){ const t = simT; if (t - lastOuch < (force ? 2 : 3.4)) return; lastOuch = t; rag.face = 'ouch'; rag.faceT = t;
@@ -445,16 +490,19 @@ cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', e
 let spin = 0, spinA = null, spinTurns = 0, spinShown = 0;
 function spinTrack(w){ const a = Math.atan2(w.y - GRAB_C.y, w.x - GRAB_C.x), r = Math.hypot(w.x - GRAB_C.x, w.y - GRAB_C.y); if (r < 60){ spinA = null; return; }
   if (spinA != null){ let d = a - spinA; if (d > Math.PI) d -= 2 * Math.PI; if (d < -Math.PI) d += 2 * Math.PI; spin += d; } spinA = a;
-  spinTurns = Math.min(4, Math.abs(spin) / (2 * Math.PI)); const full = Math.floor(spinTurns);
-  if (full > spinShown){ spinShown = full; sfx('fireball', .25 + full * .1, {force:true, rate:.8 + full * .15, vary:false}); if (full >= 2) sfx('crowd_cheer', .2 + full * .08, {force:true}); pops.push({x:GRAB_C.x, y:GRAB_C.y - GRAB_R - 30, t:0, s:full >= 4 ? 'TÄYSI VAUHTI' : 'KIERROS ' + full + ' / 4', col:full >= 4 ? '#ff6a33' : '#ffd28a'}); } }
-function doGrab(w){ spin = 0; spinA = null; spinTurns = 0; spinShown = 0; state = 'grab'; $('hint').classList.remove('on'); rag = makeRag(STAGE.x + 10, STAGE.y - 60); rag.face = 'shock';
+  spinTurns = Math.min(4, Math.abs(spin) / (2 * Math.PI) * 1.6); const full = Math.floor(spinTurns);
+  if (full > spinShown){ spinShown = full; sfx('fireball', .25 + full * .1, {force:true, rate:.8 + full * .15, vary:false}); if (full >= 2) sfx('crowd_cheer', .2 + full * .08, {force:true}); pops.push({x:GRAB_C.x, y:GRAB_C.y + 40, t:0, s:full >= 4 ? 'TÄYSI VAUHTI' : 'KIERROS ' + full + ' / 4', col:full >= 4 ? '#ff6a33' : '#ffd28a'}); } }
+function doGrab(w){ document.body.classList.add('grab'); spin = 0; spinA = null; spinTurns = 0; spinShown = 0; state = 'grab'; $('hint').classList.remove('on'); rag = makeRag(STAGE.x + 10, STAGE.y - 60); rag.face = 'shock';
   const f = rag.fa1, hp = handPos(f); grab = Constraint.create({pointA:{x:hp.x, y:hp.y}, bodyB:f, pointB:{x:hp.x - f.position.x, y:hp.y - f.position.y}, stiffness:.32, damping:.08, length:0}); Composite.add(world, grab);
   const t = clampGrab(w); grab.pointA.x = t.x; grab.pointA.y = t.y; ptrHist = [];
   sfx('grab', .9, {force:true}); sfx('crowd_cheer', .55, {force:true, x:STAGE.x, y:STAGE.y}); }
-function release(){ Composite.remove(world, grab); grab = null; state = 'fly'; flyT = 0; restT = 0;
+function release(){ document.body.classList.remove('grab'); Composite.remove(world, grab); grab = null; state = 'fly'; flyT = 0; restT = 0;
   // a good swing gets a little extra, as if he helped
   let pvx = 0, pvy = 0; const now = performance.now(), h = ptrHist.filter(q => now - q.t < 90); if (h.length > 1){ const a = h[0], b = h[h.length - 1], dt = Math.max(8, b.t - a.t); pvx = (b.x - a.x) / dt * 16.67; pvy = (b.y - a.y) / dt * 16.67; }
-  const pw = 1 + spinTurns * .32, cap = 44 + spinTurns * 4.5; rag.power = spinTurns;
+  // the perfect release: letting go while he's heading up and forward, with some spin behind it
+  const pa = Math.atan2(pvy, pvx) * 180 / Math.PI, perfect = spinTurns >= 1 && pa > -72 && pa < -22 && Math.hypot(pvx, pvy) > 8;
+  const pw = (1 + spinTurns * .32) * (perfect ? 1.15 : 1), cap = (44 + spinTurns * 4.5) * (perfect ? 1.1 : 1); rag.power = spinTurns;
+  if (perfect){ pops.push({x:GRAB_C.x, y:GRAB_C.y - 40, t:0, s:'TÄYDELLINEN HEITTO', col:'#cfe8a8'}); sfx('fireball', .7, {force:true, rate:1.4, vary:false}); award(1500, GRAB_C.x, GRAB_C.y - 200); mEv('perfect'); }
   rag.all.forEach(b => { let vx = (b.velocity.x * .35 + pvx * .95) * pw, vy = (b.velocity.y * .35 + pvy * .95) * pw; const s = Math.hypot(vx, vy); if (s > cap){ vx *= cap / s; vy *= cap / s; } Body.setVelocity(b, {x:vx + spinTurns * 1.5, y:vy - spinTurns * 3.5}); });
   rag.throwV = Math.hypot(pvx, pvy);
   rag.face = 'ouch'; sfx('yell_strained', .85, {force:true}); sfx('crowd_shout', .6, {force:true, x:STAGE.x, y:STAGE.y}); }
@@ -463,19 +511,23 @@ function release(){ Composite.remove(world, grab); grab = null; state = 'fly'; f
 function newGame(){ if (engine){ Composite.clear(engine.world, false); Engine.clear(engine); }
   engine = Engine.create({enableSleeping:true}); engine.gravity.scale = .00085; engine.positionIterations = 10; engine.velocityIterations = 8; engine.constraintIterations = 4; world = engine.world;
   bodies = []; parts = []; rockets = []; timers = []; pops = []; booms = []; arcs = []; fires = []; stains = []; splats = []; flashT = 0; rag = null; grab = null;
+  RUN = {ev:{}, cnt:{}}; mTickT = 0; if (!MS) mLoad(); renderMiss();
   score = 0; combo = 0; maxCombo = 0; comboShown = 0; viisiCount = 0; lastHit = -9; tally = {self:0, env:0, boom:0}; simT = 0; flyT = 0; restT = 0; slowT = 0; shake = 0; maxDist = 0; ended = false;
   buildCurve(); planCourse(); makeFlats(); makeExtras(); terrain(); stage(); RAMPS.forEach(x => { if (!FLATS.some(f => x > f.a - 260 && x < f.b + 240)) ramp(x); });
   Events.on(engine, 'collisionStart', onCollide);
   Events.on(engine, 'afterUpdate', () => { for (const b of world.bodies){ if (b.plugin && b.plugin.pv){ b.plugin.pv.x = b.velocity.x; b.plugin.pv.y = b.velocity.y; } } });
   cam.x = cam.tx = STAGE.x + 60; cam.y = cam.ty = STAGE.y - 130; cam.z = cam.tz = 1.35; spawnAhead();
   state = 'stage'; $('over').classList.remove('on'); $('hint').classList.add('on'); $('score').textContent = '0'; $('dist').textContent = '0 M'; }
-function finish(){ if (ended) return; ended = true; state = 'over';
+function finish(){ if (ended) return; mCheck(); ended = true; state = 'over';
+  let lvlUp = false; const doneNow = MS.cur.map(k => [k, MS.done.includes(k)]); if (MS.cur.every(k => MS.done.includes(k))){ MS.lvl++; MS.seen = (MS.seen || []).concat(MS.cur); lvlUp = true; mPick(); }
   const d = Math.round(maxDist), tot = total(), rec = tot > best, recD = d > bestD + .5, missD = Math.round(bestD) - d; if (rec){ best = tot; try { localStorage.setItem('viistone-heita-best', String(best)); } catch(e){} } if (recD){ bestD = d; try { localStorage.setItem('viistone-heita-bestd', String(d)); } catch(e){} }
   sfx('groan' + (1 + Math.floor(rnd() * 7)), .7, {force:true, x:rag.torso.position.x, y:rag.torso.position.y}); sfx('crowd_aww', .45, {force:true, delay:.9});
   if (rec && tot > 0) sfx(rnd() < .5 ? 'victory1' : 'victory2', .6, {force:true, delay:2.4});
   tally.env = Math.max(0, score - tally.self - tally.boom);
   $('opts').textContent = tot.toLocaleString('fi-FI') + ' PTS';
   $('orows').innerHTML = d + ' M · COMBO x' + Math.max(1, maxCombo) + '<br>MATKA ' + (Math.max(0, d) * 100).toLocaleString('fi-FI') + ' · VIISTONE ITSE ' + tally.self.toLocaleString('fi-FI') + ' · YMPÄRISTÖ ' + tally.env.toLocaleString('fi-FI') + ' · RÄJÄHDYKSET ' + tally.boom.toLocaleString('fi-FI') + '<br>' + (rec && tot > 0 ? '<span class="rec">UUSI ENNÄTYS</span>' : 'ENNÄTYS ' + best.toLocaleString('fi-FI')) + '<br>' + (recD ? '<span class="rec">PISIN MATKA TÄHÄN ASTI</span>' : missD > 0 && missD <= 40 ? '<span class="rec">' + missD + ' M PUUTTUI MATKAENNÄTYKSESTÄ</span>' : '');
+  $('omiss').innerHTML = (lvlUp ? '<div class="lvlup">TASO ' + MS.lvl + '! PISTEET x' + mult().toFixed(1).replace('.', ',') + '</div>' : '<b>TEHTÄVÄT</b>') + '<ul>' + doneNow.map(([k, ok]) => '<li class="' + (ok ? 'ok' : '') + '">' + (ok ? '✓ ' : '· ') + MPOOL[k][0] + '</li>').join('') + '</ul>' + (lvlUp ? '<b>UUDET TEHTÄVÄT</b><ul>' + MS.cur.map(k => '<li>· ' + MPOOL[k][0] + '</li>').join('') + '</ul>' : '');
+  if (lvlUp) sfx('victory1', .7, {force:true, delay:1.4}); renderMiss();
   setTimeout(() => { if (state === 'over') $('over').classList.add('on'); }, 1000); }
 addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && state === 'over'){ e.preventDefault(); newGame(); } });
 $('bgo').onclick = () => { audioInit(); $('start').classList.remove('on'); startSong(); newGame(); };
@@ -484,7 +536,7 @@ $('bagain').onclick = () => { audioInit(); newGame(); };
 // ---------- simulation step ----------
 const STEP = 1000 / 120;
 function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= dt;
-  engine.timing.timeScale = ts; const n = 2; for (let i = 0; i < n; i++){ Engine.update(engine, STEP); }
+  engine.timing.timeScale = ts; const n = 2; for (let i = 0; i < n; i++){ Engine.update(engine, STEP); limitJoints(); }
   const sdt = dt * ts; simT += sdt;
   for (let i = timers.length - 1; i >= 0; i--) if (timers[i].t <= simT){ const f = timers[i].fn; timers.splice(i, 1); f(); }
   // armed gas bottles fly around like rockets while they hiss
@@ -503,8 +555,8 @@ function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= d
   // the mic lets go if it gets yanked
   if (rag && rag.micC){ const c = rag.micC, A = c.bodyA, B = c.bodyB; const ax = A.position.x + c.pointA.x, ay = A.position.y + c.pointA.y, bx = B.position.x + c.pointB.x, by = B.position.y + c.pointB.y; if (Math.hypot(ax - bx, ay - by) > 14) loseMic(); }
   if (state === 'fly' && rag){ const t0 = rag.torso, gx = t0.position.x, sl = (gy(gx + 30) - gy(gx - 30)) / 60; if (t0.position.y > gy(gx) - 50 && sl > .04){ const f = .00045 * Math.min(sl, 1.2), nrm = Math.hypot(1, sl); rag.all.forEach(q => { if (q !== rag.mic) Body.applyForce(q, q.position, {x:q.mass * f / nrm, y:q.mass * f * sl / nrm}); }); } }
-  treesStep(sdt); crowsStep(dt); bigStep(sdt);
-  if (rag && state === 'fly' && onIce(rag.torso.position.x) && !rag.iceSaid && rag.torso.position.y > gy(rag.torso.position.x) - 50){ rag.iceSaid = true; pops.push({x:rag.torso.position.x, y:rag.torso.position.y - 90, t:0, s:'JÄÄTÄ', col:'#cfe9ff'}); }
+  treesStep(sdt); crowsStep(dt); bigStep(sdt); balloonStep(); carsStep(); mTick();
+  if (rag && state === 'fly' && onIce(rag.torso.position.x) && !rag.iceSaid && rag.torso.position.y > gy(rag.torso.position.x) - 50){ rag.iceSaid = true; pops.push({x:rag.torso.position.x, y:rag.torso.position.y - 90, t:0, s:'JÄÄTÄ', col:'#cfe9ff'}); mEv('ice'); }
   if (state === 'fly' && rag.torso.position.x < STAGE.x - 240 && (flyT > .8 || rag.torso.velocity.x < -2)){ backOnStage('VÄÄRÄ SUUNTA'); return; }
   // keep him from going so fast he slips through the ground, and pull him back up if he ever does
   if (rag && (state === 'fly' || state === 'over')){ for (const q of rag.all){ const v = q.velocity, sp = Math.hypot(v.x, v.y); if (sp > 64) Body.setVelocity(q, {x:v.x * 64 / sp, y:v.y * 64 / sp}); }
@@ -529,7 +581,7 @@ function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= d
   for (const s of structs){ if (!s.spawned || s.awake || !s.list) continue; if (s.list.some(b => b.plugin.gone || !b.isSleeping)){ s.awake = true; s.list.forEach(b => { if (!b.plugin.gone){ Sleeping.set(b, false); b.sleepThreshold = Infinity; } }); } }
   // structure bonus once most of it has gone over
   for (const s of structs){ if (!s.spawned || s.done || !s.list) continue; let moved = 0; for (const b of s.list){ const p = b.plugin; if (p.gone || p.boomed || Math.hypot(b.position.x - p.x0, b.position.y - p.y0) > 50 || Math.abs(b.angle - p.a0) > .6) moved++; }
-    if (moved >= s.list.length * .6){ s.done = true; tally.env += 0; award(s.bonus, s.x + 60, gy(s.x) - 170, s.name, '#ffd28a'); sfx('wood_metal_smash', .4, {x:s.x, y:gy(s.x), gap:.4}); } } }
+    if (moved >= s.list.length * .6){ s.done = true; tally.env += 0; award(s.bonus, s.x + 60, gy(s.x) - 170, s.name, '#ffd28a'); mEv(s.name); sfx('wood_metal_smash', .4, {x:s.x, y:gy(s.x), gap:.4}); } } }
 function backOnStage(msg){ // a weak or backwards throw: he gets back up and you can try again
   rag.all.forEach(b => Composite.remove(world, b)); rag.cons.forEach(c => Composite.remove(world, c)); if (rag.micC) Composite.remove(world, rag.micC); rag = null; state = 'stage'; $('hint').classList.add('on'); BIGR.forEach(r => { if (r.c) Composite.remove(world, r.c); r.c = null; if (r.st === 'fly') r.st = 'done'; });
   score = 0; tally = {self:0, env:0, boom:0}; combo = 0; maxCombo = 0; maxDist = 0; pops.push({x:STAGE.x, y:STAGE.y - 200, t:0, s:msg || 'HEITÄ KUNNOLLA', col:'#ece4cc'}); }
@@ -538,7 +590,7 @@ function backOnStage(msg){ // a weak or backwards throw: he gets back up and you
 function camStep(dt){ if (rag && state !== 'stage'){ const t = rag.torso, v = t.velocity, sp = Math.hypot(v.x, v.y);
     cam.tx = t.position.x + clamp(v.x * 14, -260, 520); cam.ty = t.position.y + clamp(v.y * 8, -200, 260) - 40; const above = Math.max(0, gy(t.position.x) - t.position.y); cam.tz = Math.min(clamp(1.1 - sp / 70, .5, 1.1), clamp(H * .42 / baseZ() / (above + 160), H > W ? .72 : .62, 1.1)); if (above > 900) cam.tz = Math.min(cam.tz, H > W ? .66 : .58);
     if (above < 900) cam.ty = Math.max(cam.ty, gy(t.position.x) - H * .36 / (baseZ() * cam.z));
-    if (state === 'grab'){ cam.tx = GRAB_C.x + 60; cam.ty = GRAB_C.y + 20; cam.tz = H > W ? 1 : .86; } }
+    if (state === 'grab'){ cam.tx = GRAB_C.x; cam.ty = GRAB_C.y + 30; cam.tz = Math.min(H > W ? 1 : .95, Math.min(H, W * 1.1) / (780 * baseZ())); } }
   else { cam.tx = STAGE.x + 60; cam.ty = STAGE.y - 150; cam.tz = H > W ? 1.25 : 1.1; }
   const k = 1 - Math.pow(.02, dt), kz = 1 - Math.pow(.2, dt); cam.x += (cam.tx - cam.x) * k; cam.y += (cam.ty - cam.y) * k; cam.z += (cam.tz - cam.z) * kz;
   shake *= Math.pow(.02, dt); }
@@ -597,7 +649,12 @@ function draw(t){ g.setTransform(DPR, 0, 0, DPR, 0, 0);
     for (let i = 1; i < 6; i++){ const u = i / 6.5, px2 = (1 - u) * (1 - u) * t.x + 2 * (1 - u) * u * cx + u * u * top.x, py2 = (1 - u) * (1 - u) * y + 2 * (1 - u) * u * cy + u * u * top.y; line(px2 - 3, py2, px2 + 2, py2 + 1, INK, 2.2); }
     [[0, 0, 34], [-26, 14, 24], [24, 12, 26], [-8, -24, 24], [14, -20, 20]].forEach(([dx, dy, r]) => disc(top.x + dx, top.y + dy, r, t.used ? '#7d8a40' : '#6b7a3a', 3)); }
   if (state === 'grab'){ g.beginPath(); g.arc(GRAB_C.x, GRAB_C.y, GRAB_R, 0, 7); g.setLineDash([10, 14]); g.strokeStyle = 'rgba(236,228,204,.25)'; g.lineWidth = 3; g.stroke(); g.setLineDash([]);
+    const sd = spin >= 0 ? 1 : -1, a0 = sd > 0 ? -2.36 : .79; g.beginPath(); g.arc(GRAB_C.x, GRAB_C.y, GRAB_R + 16, a0 - .45, a0 + .45); g.strokeStyle = 'rgba(207,232,168,' + (spinTurns >= 1 ? .85 : .25) + ')'; g.lineWidth = 12; g.lineCap = 'round'; g.stroke(); if (spinTurns >= 1){ g.fillStyle = '#cfe8a8'; g.font = '22px VT323'; g.textAlign = 'center'; g.fillText('PÄÄSTÄ TÄSSÄ', GRAB_C.x + Math.cos(a0) * (GRAB_R + 46), GRAB_C.y + Math.sin(a0) * (GRAB_R + 46)); }
     g.beginPath(); g.arc(GRAB_C.x, GRAB_C.y, GRAB_R, -Math.PI / 2, -Math.PI / 2 + spinTurns / 4 * Math.PI * 2); g.strokeStyle = spinTurns >= 4 ? '#ff6a33' : '#ffb35c'; g.lineWidth = 9; g.lineCap = 'round'; g.stroke(); }
+  for (const b of BALLOONS){ if (b.popped || b.x < x0 - 200 || b.x > x1 + 200) continue; const by = gy(b.x) - b.h + Math.sin(t * 1.3 + b.ph) * 10;
+    line(b.x - 14, by + 30, b.x - 9, by + 52, INK, 2); line(b.x + 14, by + 30, b.x + 9, by + 52, INK, 2); rr(b.x - 12, by + 50, 24, 16, 3); ink(C.wood, 2.5); if (b.gas){ rr(b.x - 4, by + 40, 8, 12, 3); ink(C.red, 2); }
+    g.beginPath(); g.ellipse(b.x, by - 20, 40, 48, 0, 0, 7); ink(b.col); g.save(); g.clip(); for (let i = -2; i <= 2; i++){ g.beginPath(); g.ellipse(b.x + i * 16, by - 20, 6, 50, 0, 0, 7); g.fillStyle = 'rgba(236,228,204,.28)'; g.fill(); } g.restore();
+    if (Math.sin(t * 9 + b.ph) > .3) disc(b.x, by + 34, 4, '#ffb347', 0); }
   drawStains();
   drawBigRockets();
   drawStage();
@@ -614,7 +671,7 @@ function draw(t){ g.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (!vig){ vig = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .75); vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(0,0,0,.55)'); }
   g.fillStyle = vig; g.fillRect(0, 0, W, H);
   if (slowT > 0){ g.fillStyle = 'rgba(120,0,0,.18)'; g.fillRect(0, 0, W, H); }
-  if (flashT > 0){ g.fillStyle = 'rgba(255,220,160,' + (flashT * 1.6).toFixed(2) + ')'; g.fillRect(0, 0, W, H); flashT -= .016; }
+  if (flashT > 0){ g.fillStyle = 'rgba(255,220,160,' + (flashT * 1.2).toFixed(2) + ')'; g.fillRect(0, 0, W, H); flashT -= .016; }
   drawSplats(.016);
   cv.style.filter = slowT > 0 ? 'grayscale(.85) contrast(1.1)' : ''; }
 
@@ -644,7 +701,8 @@ function drawBody(b){ const p = b.plugin; if (!p || p.gone) return; const x = b.
   case 'backdrop': at(x, y, 0, () => { rr(-20, -1110, 40, 2220, 3); ink('#3a302a'); for (let i = -1090; i < 1100; i += 40) line(-16, i, 16, i + 10, '#2a221d', 2); }); return;
   case 'speaker': at(x, y, a, () => { rr(-20, -40, 40, 80, 4); ink('#1f1f22'); disc(0, -18, 11, '#2c2c30', 2.5); disc(0, -18, 4, '#111', 0); disc(0, 16, 14, '#2c2c30', 2.5); disc(0, 16, 5, '#111', 0); }); return;
   case 'hat': at(x, y, a, () => { g.beginPath(); g.arc(0, 4, 15, Math.PI, 0); ink(C.beanie); rr(-16, 0, 32, 7, 3); ink('#555a52', 2.5); disc(3, -12, 3.5, C.beanie, 2); }); return;
-  case 'car': at(x, y, a, () => { path([[-75, 10], [-72, -8], [-48, -10], [-30, -36], [36, -36], [52, -12], [75, -8], [75, 14], [-75, 14]]); ink(p.st === 2 ? '#5a1a14' : '#7a2c22');
+  case 'car': if (p.drive){ at(x, y, a, () => { g.beginPath(); g.moveTo(-74, -2); g.lineTo(-240, -40); g.lineTo(-240, 30); g.closePath(); g.fillStyle = 'rgba(255,241,196,.12)'; g.fill(); }); }
+    at(x, y, a, () => { if (p.drive || p.flip) { p.flip = true; g.scale(-1, 1); } path([[-75, 10], [-72, -8], [-48, -10], [-30, -36], [36, -36], [52, -12], [75, -8], [75, 14], [-75, 14]]); ink(p.st === 2 ? '#5a1a14' : '#7a2c22');
       const glassCol = p.st ? '#1d1e22' : 'rgba(160,205,215,.7)'; path([[-26, -12], [-14, -31], [2, -31], [2, -12]]); ink(glassCol, 2.5); path([[8, -12], [8, -31], [32, -31], [44, -12]]); ink(glassCol, 2.5);
       if (p.st){ line(10, -28, 24, -16, C.glassL, 1.5); line(-20, -16, -6, -28, C.glassL, 1.5); } if (p.st === 2){ path([[-10, -36], [4, -26], [18, -36]]); ink('#4a120d', 2); }
       disc(-46, 14, 13, '#1a1a1a', LW); disc(-46, 14, 5, '#8d8a82', 2); disc(46, 14, 13, '#1a1a1a', LW); disc(46, 14, 5, '#8d8a82', 2); rr(66, -6, 8, 5, 1); ink('#fff1c4', 1.5); }); return;
@@ -735,7 +793,7 @@ function frame(ts){ requestAnimationFrame(frame); const t = ts / 1000, dt = Math
   draw(t);
   const tt = total(); if (tt !== shownScore){ shownScore = tt; $('score').textContent = tt.toLocaleString('fi-FI'); }
   if (rag && state === 'fly') $('dist').textContent = Math.max(0, Math.round(maxDist)) + ' M'; }
-resize(); makeBg(); buildCurve(); planCourse();
+resize(); makeBg(); buildCurve(); planCourse(); mLoad();
 engine = null; document.fonts && document.fonts.load('30px VT323');
 newGame(); state = 'start'; $('hint').classList.remove('on');
 requestAnimationFrame(frame);
