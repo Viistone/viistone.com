@@ -52,6 +52,7 @@ body.menu .hud{opacity:0}
 #btns{position:fixed;right:max(12px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));display:flex;gap:8px}
 #btns button,#btns a{font:inherit;font-size:22px;color:#ece4cc;background:rgba(27,23,20,.55);border:2px solid rgba(236,228,204,.45);border-radius:4px;width:44px;height:38px;display:grid;place-items:center;cursor:pointer;text-decoration:none;padding:0}
 #btns .off{opacity:.4;text-decoration:line-through}
+@media (max-width:440px){ #btns{gap:6px} #btns button,#btns a{width:36px;height:34px;font-size:18px} #tl b{font-size:22px} #tl span{font-size:15px} }
 .panel{position:fixed;inset:0;display:none;overflow:auto;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:rgba(15,13,16,.55);padding:20px}
 .panel.on{display:flex}
 .panel h1{font-weight:400;font-size:clamp(46px,9vw,100px);line-height:.95;margin:0 0 10px;text-shadow:-3px 0 rgba(255,40,40,.5),3px 0 rgba(40,220,255,.45),2px 4px 0 #1b1714}
@@ -74,8 +75,8 @@ body.menu .hud{opacity:0}
 <div class="hud" id="mid"><div id="combo"></div></div>
 <div id="viisi">VIISI<small style="display:block;font-size:.22em;color:#ece4cc">VIISI OSUMAA PUTKEEN</small></div>
 <div id="hint">TARTU VIISTOSEEN<br>PYÖRITÄ MONTA KIERROSTA<br>JA PÄÄSTÄ IRTI</div>
-<div id="btns"><button id="bmus" aria-label="Musiikki">♪</button><button id="bfx" aria-label="Äänet">FX</button><a href="/" aria-label="Kotisivulle">⏏</a></div>
-<div class="panel on" id="start"><h1>HEITÄ VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Mitä useampi kierros, sitä pidempi lento.</p><p>Mäki on pitkä. Kukaan ei ole nähnyt sen loppua.</p><div class="act" style="margin-top:6px"><button class="go" id="bgo">ALOITA</button></div><div class="note">testiversio</div></div>
+<div id="btns"><button id="breset" aria-label="Uusi heitto">↺</button><button id="bmus" aria-label="Musiikki">♪</button><button id="bfx" aria-label="Äänet">FX</button><a href="/" aria-label="Kotisivulle">⏏</a></div>
+<div class="panel on" id="start"><h1>HEITÄ VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Mitä useampi kierros, sitä pidempi lento.</p><p>Mäki on pitkä. Kukaan ei ole nähnyt sen loppua.</p><div class="act" style="margin-top:6px"><button class="go" id="bgo">ALOITA</button></div><button id="bclear" class="reset">NOLLAA ENNÄTYKSET</button><div class="note">testiversio</div></div>
 <div id="next"><div id="nres"></div><button id="bnext">SEURAAVA HEITTO</button></div>
 <div id="zone"></div>
 <div class="panel" id="over"><h1 id="oh">VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div id="omiss"></div><div class="act"><button class="go" id="bagain">UUDESTAAN</button><a class="alt" href="/">KOTISIVULLE</a></div></div>
@@ -636,6 +637,10 @@ function finish(){ if (ended) return; ended = true; state = 'over'; $('oh').text
 addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && state === 'over'){ e.preventDefault(); newGame(); } });
 $('bgo').onclick = () => { audioInit(); document.body.classList.remove('menu'); $('start').classList.remove('on'); startSong(); newGame(); };
 $('bagain').onclick = () => { audioInit(); newGame(); };
+// start this throw over at any point
+$('breset').onclick = () => { if (state === 'start') return; audioInit(); if (ptr != null){ ptr = null; } if (grab){ Composite.remove(world, grab); grab = null; } document.body.classList.remove('grab'); newGame(); };
+$('bclear').onclick = e => { const b2 = e.currentTarget; if (!b2.dataset.sure){ b2.dataset.sure = 1; b2.textContent = 'VARMASTI? PAINA UUDESTAAN'; setTimeout(() => { delete b2.dataset.sure; b2.textContent = 'NOLLAA ENNÄTYKSET'; }, 3000); return; }
+  best = 0; bestD = 0; try { localStorage.removeItem('viistone-heita-best'); localStorage.removeItem('viistone-heita-bestd'); } catch(e2){} delete b2.dataset.sure; b2.textContent = 'NOLLATTU'; };
 
 // ---------- simulation step ----------
 const STEP = 1000 / 120;
