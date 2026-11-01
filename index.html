@@ -2949,10 +2949,19 @@ body.kiropen{overflow:hidden}
     if (!mchain){ try { var src = AC.createMediaElementSource(audio), hp = AC.createBiquadFilter(), lp = AC.createBiquadFilter(), pk = AC.createBiquadFilter(), g = AC.createGain();
         hp.type = 'highpass'; lp.type = 'lowpass'; lp.Q.value = .7; pk.type = 'peaking'; pk.frequency.value = 650; pk.Q.value = 1.1;
         src.connect(hp).connect(pk).connect(lp).connect(g).connect(AC.destination); mchain = {hp:hp, lp:lp, pk:pk, g:g}; } catch(e){ return; } }
-    var on = settings.juke, t = AC.currentTime;
-    mchain.lp.frequency.setTargetAtTime(on ? 1250 : 20000, t, .25); mchain.hp.frequency.setTargetAtTime(on ? 150 : 10, t, .25);
-    mchain.pk.gain.setTargetAtTime(on ? 5 : 0, t, .25); mchain.g.gain.setTargetAtTime(on ? 1.25 : 1, t, .25);
+    musicIntro();
   }
+  // each song starts as if from the jukebox next door, then after 10 s glides into full quality
+  function musicIntro(){
+    if (!AC || !mchain) return;
+    var t = AC.currentTime, P = [[mchain.lp.frequency, 1250, 20000], [mchain.hp.frequency, 150, 10], [mchain.pk.gain, 5, 0], [mchain.g.gain, 1.25, 1]];
+    P.forEach(function(x){ var a = x[0]; a.cancelScheduledValues(t);
+      if (!settings.juke || audio.currentTime > 10){ a.setTargetAtTime(x[2], t, .3); return; }
+      var wait = Math.max(0, 10 - audio.currentTime);
+      a.setValueAtTime(x[1], t); a.setValueAtTime(x[1], t + wait);
+      if (a === mchain.lp.frequency) a.exponentialRampToValueAtTime(x[2], t + wait + 6); else a.linearRampToValueAtTime(x[2], t + wait + 6); });
+  }
+  audio.addEventListener('play', function(){ musicIntro(); });
 
   // ---------- the lamp, the grain, the tape ----------
   (function(){ var c = document.createElement('canvas'); c.width = c.height = 160; var x = c.getContext('2d'), d = x.createImageData(160, 160);
@@ -3209,7 +3218,7 @@ body.kiropen{overflow:hidden}
     R.hoyla.forEach(function(h){
       at(T, function(){
         var by = st.players[h.by].name, vic = st.players[h.victim].name;
-        if (h.mcbueno){ vcrChew(); $('kvhs').classList.remove('on'); void $('kvhs').offsetWidth; $('kvhs').classList.add('on'); big('HÖYLÄ<br>McBUENO!', by + ' → ' + vic, true); shake(true); wobble(true); tipGlass(); SFX.mcbueno(); $('kscr').classList.add('mc');
+        if (h.mcbueno){ $('kvhs').classList.remove('on'); void $('kvhs').offsetWidth; $('kvhs').classList.add('on'); big('HÖYLÄ<br>McBUENO!', by + ' → ' + vic, true); shake(true); wobble(true); tipGlass(); SFX.mcbueno(); $('kscr').classList.add('mc');
           setTimeout(function(){ $('kscr').classList.remove('mc'); }, 2100); if (herjaOk() || settings.herja !== 'pois') say(speakerFor(h.victim, h.by), pick(LINES.mc), 'McBUENO');
         } else { vcrRew(); big('HÖYLÄYS!', by + ' höyläsi: ' + vic); shake(false); wobble(false); SFX.hoyla(); SFX.clink(); (function(by, vi){ setTimeout(function(){ vox(vi === 0 ? ['impossible', 'nouhh'] : ['no1', 'no2', 'sonofa'], .55, true); }, 900); if (by !== 0) setTimeout(function(){ vox(['laughr', 'laughe'], .45, true); }, 2300); })(h.by, h.victim);
           var pl = h.victim === 0 ? $('kmyplate') : $('kplate' + h.victim); if (pl){ pl.classList.remove('hit'); void pl.offsetWidth; pl.classList.add('hit'); }
@@ -3480,7 +3489,7 @@ body.kiropen{overflow:hidden}
   }
   // the McBueno shout hits everyone at the table: tape glitch, the table jumps, the phone goes red
   function mcbBlast(pid, name){
-    SFX.mcbueno(); shake(true); wobble(true); vcrChew();
+    SFX.mcbueno(); shake(true); wobble(true);
     if (!reduce){ var vh = $('kvhs'); vh.classList.remove('on'); void vh.offsetWidth; vh.classList.add('on');
       $('kscr').classList.add('mc'); setTimeout(function(){ $('kscr').classList.remove('mc'); }, 2100);
       [0, 380, 760].forEach(function(t){ setTimeout(function(){ bangFx(pid); }, t); });
