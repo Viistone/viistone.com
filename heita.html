@@ -631,6 +631,13 @@ cv.addEventListener('pointerdown', e => { if (state !== 'stage') return; audioIn
 cv.addEventListener('pointermove', e => { if (e.pointerId !== ptr || !grab) return; const w = clampGrab(toWorld(e.clientX, e.clientY)); grab.pointA.x = w.x; grab.pointA.y = w.y; spinTrack(w); ptrHist.push({t:performance.now(), x:w.x, y:w.y}); if (ptrHist.length > 8) ptrHist.shift(); });
 const endPtr = e => { if (e.pointerId !== ptr) return; ptr = null; if (grab) release(); };
 cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+// on a computer the mouse can leave the window mid-swing: then he goes, as if you had let go
+function letGo(){ if (!grab) return; ptr = null; release(); }
+cv.addEventListener('lostpointercapture', () => { if (grab) letGo(); });
+document.addEventListener('mouseleave', letGo); document.documentElement.addEventListener('mouseleave', letGo);
+window.addEventListener('pointerout', e => { if (!e.relatedTarget && e.pointerType === 'mouse') letGo(); });
+window.addEventListener('blur', letGo); document.addEventListener('visibilitychange', () => { if (document.hidden) letGo(); });
+cv.addEventListener('pointermove', e => { if (grab && e.pointerType === 'mouse' && e.buttons === 0) letGo(); });
 
 let spin = 0, spinA = null, spinTurns = 0, spinShown = 0;
 function spinTrack(w){ const a = Math.atan2(w.y - GRAB_C.y, w.x - GRAB_C.x), r = Math.hypot(w.x - GRAB_C.x, w.y - GRAB_C.y); if (r < 60){ spinA = null; return; }
