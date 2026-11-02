@@ -461,7 +461,7 @@ function terrain(){ const step = 60, th = 160; EDGEY = gy(EDGE - 1); for (let x 
 
 // the stage itself: a platform with two speakers
 function stage(){ const b = Bodies.rectangle(STAGE.x, STAGE.y - 15, STAGE.w, 30, {isStatic:true, friction:.9}); b.plugin = {kind:'stage'}; Composite.add(world, b); bodies.push(b);
-  const wall = Bodies.rectangle(STAGE.x - 190, STAGE.y - 1090, 40, 2220, {isStatic:true, friction:.3, restitution:.5}); wall.plugin = {kind:'backdrop'}; Composite.add(world, wall); bodies.push(wall);
+  const wall = Bodies.rectangle(STAGE.x - 190, STAGE.y - 1090, 40, 2220, {isStatic:true, friction:.6, restitution:0}); wall.plugin = {kind:'backdrop'}; Composite.add(world, wall); bodies.push(wall);
   addBody(Bodies.rectangle(STAGE.x - 125, STAGE.y - 70, 40, 80, {density:.002, friction:.8, chamfer:{radius:4}}), 'speaker', null, 40, 80, {hp:999});
   addBody(Bodies.rectangle(STAGE.x + 125, STAGE.y - 70, 40, 80, {density:.002, friction:.8, chamfer:{radius:4}}), 'speaker', null, 40, 80, {hp:999}); }
 
@@ -623,7 +623,7 @@ function loseMic(){ if (!rag.micC) return; Composite.remove(world, rag.micC); ra
 // ---------- input: grab the raised hand, swing, let go ----------
 function toWorld(cx, cy){ const z = baseZ() * cam.z; return {x:(cx - W / 2) / z + cam.x, y:(cy - H / 2) / z + cam.y}; }
 let ptr = null, ptrHist = [];
-const GRAB_C = {x:STAGE.x + 120, y:STAGE.y - 230}, GRAB_R = 280;
+const GRAB_C = {x:STAGE.x + 170, y:STAGE.y - 230}, GRAB_R = 280;
 function clampGrab(p){ const cx = GRAB_C.x, cy = GRAB_C.y, dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy), R0 = GRAB_R; return d > R0 ? {x:cx + dx / d * R0, y:cy + dy / d * R0} : p; }
 cv.addEventListener('pointerdown', e => { if (state !== 'stage') return; audioInit(); const w = toWorld(e.clientX, e.clientY);
   if (Math.hypot(w.x - (STAGE.x + 10), w.y - (STAGE.y - 110)) > 160) return;
@@ -661,10 +661,11 @@ function release(){ document.body.classList.remove('grab'); Composite.remove(wor
   // a good swing gets a little extra, as if he helped
   let pvx = 0, pvy = 0; const now = performance.now(), h = ptrHist.filter(q => now - q.t < 90); if (h.length > 1){ const a = h[0], b = h[h.length - 1], dt = Math.max(8, b.t - a.t); pvx = (b.x - a.x) / dt * 16.67; pvy = (b.y - a.y) / dt * 16.67; }
   // the perfect release: letting go while he's heading up and forward, with some spin behind it
+  if (pvx < 0) pvx = -pvx * .85;
   const pa = Math.atan2(pvy, pvx) * 180 / Math.PI, perfect = spinTurns >= 1 && pa > -72 && pa < -22 && Math.hypot(pvx, pvy) > 8;
   const pw = (1 + spinTurns * .32) * (perfect ? 1.15 : 1), cap = (44 + spinTurns * 4.5) * (perfect ? 1.1 : 1); rag.power = spinTurns;
   if (perfect){ pops.push({x:GRAB_C.x, y:GRAB_C.y - 40, t:0, s:'TÄYDELLINEN HEITTO', col:'#cfe8a8'}); sfx('fireball', .7, {force:true, rate:1.4, vary:false}); award(1500, GRAB_C.x, GRAB_C.y - 200); mEv('perfect'); }
-  rag.all.forEach(b => { let vx = (b.velocity.x * .35 + pvx * .95) * pw, vy = (b.velocity.y * .35 + pvy * .95) * pw; const s = Math.hypot(vx, vy); if (s > cap){ vx *= cap / s; vy *= cap / s; } Body.setVelocity(b, {x:vx + spinTurns * 1.5, y:vy - spinTurns * 2}); });
+  rag.all.forEach(b => { let vx = (b.velocity.x * .35 + pvx * .95) * pw, vy = (b.velocity.y * .35 + pvy * .95) * pw; const s = Math.hypot(vx, vy); if (s > cap){ vx *= cap / s; vy *= cap / s; } Body.setVelocity(b, {x:Math.abs(vx) + spinTurns * 1.5, y:vy - spinTurns * 2}); });
   rag.throwV = Math.hypot(pvx, pvy);
   rag.face = 'ouch'; sfx('yell_strained', .85, {force:true}); sfx('crowd_shout', .6, {force:true, x:STAGE.x, y:STAGE.y});
   rag.dives = 0; }
