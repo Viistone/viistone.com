@@ -2966,6 +2966,8 @@ body.kiropen{overflow:hidden}
 .kir .kwin img{width:min(300px,72vw);height:auto;box-shadow:0 10px 30px rgba(0,0,0,.6);transform:rotate(-1.5deg)}
 .kir .kwin .go{font-size:26px}
 /* tää on mun pienin: a card that shrinks to nothing */
+.kir .kpien.real{background:none;border:0;box-shadow:none;top:63%;width:86px;height:122px;margin:-61px 0 0 -43px;--sw:86px;--sh:122px}
+.kir .kpien.real .kc{box-shadow:0 8px 24px rgba(0,0,0,.6)}
 .kir .kpien{position:absolute;z-index:12;left:50%;top:44%;width:120px;height:170px;margin:-85px 0 0 -60px;border-radius:10px;background:#f2ecdc;box-shadow:0 8px 24px rgba(0,0,0,.6);border:3px solid #1b1714;font-family:var(--f-osd);font-size:90px;line-height:170px;text-align:center;color:#b8241a;pointer-events:none}
 
 .kir .kvhs.rew{animation:kvhs .9s steps(9)}
@@ -3276,7 +3278,7 @@ body.kiropen{overflow:hidden}
     hehe1:'kirilii/sfx/hehe1.mp3', hehe2:'kirilii/sfx/hehe2.mp3', hehe3:'kirilii/sfx/hehe3.mp3', holomo:'kirilii/sfx/holomo.mp3',
     throw1:'kirilii/sfx/throw1.mp3', throw2:'kirilii/sfx/throw2.mp3', throw3:'kirilii/sfx/throw3.mp3', glass1:'kirilii/sfx/glass1.mp3', glass2:'kirilii/sfx/glass2.mp3', glass3:'kirilii/sfx/glass3.mp3', ouch:'kirilii/sfx/ouch.mp3', ouch2:'kirilii/sfx/ouch2.mp3', ouch3:'kirilii/sfx/ouch3.mp3', ouch4:'kirilii/sfx/ouch4.mp3', ouch5:'kirilii/sfx/ouch5.mp3', ouch6:'kirilii/sfx/ouch6.mp3',
     bang1:'kirilii/sfx/bang1.mp3', bang2:'kirilii/sfx/bang2.mp3',
-    static:'posti/sfx/static.mp3',
+    static:'posti/sfx/static.mp3', breath:'kirilii/sfx/breath.mp3',
     put1:'kirilii/sfx/put1.mp3', put2:'kirilii/sfx/put2.mp3', put3:'kirilii/sfx/put3.mp3', put4:'kirilii/sfx/put4.mp3'};
   function ac(){ if (!AC){ try { AC = new (window.AudioContext || window.webkitAudioContext)(); Object.keys(FILES).forEach(function(k){ fetch('assets/' + FILES[k]).then(function(r){ return r.arrayBuffer(); }).then(function(a){ return new Promise(function(ok, no){ AC.decodeAudioData(a, ok, no); }); }).then(function(b){ bufs[k] = b; }).catch(function(){}); }); } catch(e){} }
     if (AC && AC.state === 'suspended') AC.resume(); }
@@ -3292,7 +3294,7 @@ body.kiropen{overflow:hidden}
     s.connect(f).connect(g).connect(AC.destination); s.start(t); }
   var breathT = 0, breathOn = false;
   setInterval(function(){ var want = root.classList.contains('on') && root.classList.contains('hu') && !root.classList.contains('idle');
-    if (!want){ breathOn = false; return; } var now = Date.now(); if (!breathOn){ breathOn = true; breathT = 0; } if (now - breathT < 2300) return; breathT = now; huff(true, .16); setTimeout(function(){ huff(false, .2); }, 850); }, 200);
+    if (!want){ breathOn = false; return; } var now = Date.now(); if (!breathOn){ breathOn = true; breathT = 0; } if (now - breathT < (bufs.breath ? 5900 : 2300)) return; breathT = now; if (bufs.breath) playS('breath', .55); else { huff(true, .16); setTimeout(function(){ huff(false, .2); }, 850); } }, 200);
   function vox(list, vol, force){ var t = Date.now(); if (!force && t - voxT < 2600) return; voxT = t; playS(list[Math.floor(Math.random() * list.length)], vol == null ? .5 : vol, .96 + Math.random() * .08); }
   var SFX = {
     slap: function(f){ f = f == null ? .5 : f; var k = f < .25 ? (Math.random() < .5 ? 'put2' : 'put3') : 'put' + (1 + Math.floor(Math.random() * 4));
@@ -3940,10 +3942,10 @@ body.kiropen{overflow:hidden}
       var pid = (x.seat - Math.max(0, v.me) + 6) % 6; x.p.forEach(function(ms){ setTimeout(function(){ bangFx(pid); }, ms); }); });
   }
   // "tää on mun pienin": a card is held up for everyone, then shrinks to a dot while a sad horn plays
-  function pieninFx(pid, name){
+  function pieninFx(pid, name, card){
     big('TÄÄ ON<br>MUN PIENIN!', name + ' näyttää', false);
     if (settings.fx && AC){ [[392, 370], [370, 349], [349, 330]].forEach(function(f, i){ setTimeout(function(){ tone(f[0], .32, 'sawtooth', .045, f[1]); }, 250 + i * 340); }); setTimeout(function(){ tone(330, 1.3, 'sawtooth', .05, 160); }, 250 + 3 * 340); }
-    if (reduce) return; var c = document.createElement('div'); c.className = 'kpien'; c.textContent = '2'; root.appendChild(c);
+    if (reduce) return; var c = document.createElement('div'); c.className = 'kpien' + (card ? ' real' : ''); if (card) c.innerHTML = cardHTML(card); else c.textContent = '?'; root.appendChild(c);
     c.animate([{transform:'scale(.2) rotate(-30deg)', opacity:0}, {transform:'scale(1.1) rotate(4deg)', opacity:1, offset:.15}, {transform:'scale(1) rotate(-2deg)', offset:.35}, {transform:'scale(.6) rotate(6deg)', offset:.55}, {transform:'scale(.25) rotate(-8deg)', offset:.75}, {transform:'scale(.03) rotate(0deg)', opacity:1, offset:.95}, {transform:'scale(0)', opacity:0}], {duration:2400, easing:'ease-in-out'});
     setTimeout(function(){ c.remove(); }, 2450); if (navigator.vibrate) try { navigator.vibrate([20, 40, 20]); } catch(e){}
   }
@@ -4056,7 +4058,7 @@ body.kiropen{overflow:hidden}
       var x0 = Math.min(sr.width - 230, Math.max(8, r.left - sr.left + r.width / 2 - 90)), y0 = pid === 0 ? r.top - sr.top - 70 : r.bottom - sr.top + 6;
       b.style.left = x0 + 'px'; b.style.top = y0 + 'px'; requestAnimationFrame(function(){ b.classList.add('on'); });
       setTimeout(function(){ b.classList.remove('on'); setTimeout(function(){ b.remove(); }, 300); }, 2800);
-      if (x.k === 1){ mcbBlast(pid, name); } else if (x.k === 0){ shake(false); SFX.hoyla(); } else if (x.k === 2){ pieninFx(pid, name); } else if (x.k === 4){ if (bufs.holomo) vox(['holomo'], .6, true); else tone(300, .5, 'square', .04, 600); wobble(false); }
+      if (x.k === 1){ mcbBlast(pid, name); } else if (x.k === 0){ shake(false); SFX.hoyla(); } else if (x.k === 2){ pieninFx(pid, name, x.c || (pid === 0 && st && st.players[0].hand.length ? st.players[0].hand.reduce(function(a, b){ return b.v < a.v ? b : a; }) : null)); } else if (x.k === 4){ if (bufs.holomo) vox(['holomo'], .6, true); else tone(300, .5, 'square', .04, 600); wobble(false); }
       else if (x.k === 5){ if (bufs.hehe1) vox(['hehe1', 'hehe2', 'hehe3'], .55, true); else tone(700, .3, 'triangle', .04, 900); }
       else { if (bufs.nouhh) vox(['nouhh'], .6, true); else tone(880, 1.1, 'sawtooth', .05, 110); wobble(false); }
     });
@@ -4086,7 +4088,7 @@ body.kiropen{overflow:hidden}
   $('keject').addEventListener('click', home); $('khome').addEventListener('click', home); $('khome2').addEventListener('click', home);
   var pb = document.getElementById('pick09'); if (pb) pb.addEventListener('click', open);
   if (/^#kirilii(-[A-Za-z]{4})?$/.test(location.hash)) open();
-  window.__kirilii = {open:open, close:close, state:function(){ return st; }, newGame:startNew, next:next, settings:settings, _over:function(wi){ st.players.forEach(function(p){ p.out = p.id !== wi; }); st.winner = wi; st.phase = 'over'; gameOver(); }, _pienin:function(){ pieninFx(0, 'VII'); }};
+  window.__kirilii = {open:open, close:close, state:function(){ return st; }, newGame:startNew, next:next, settings:settings, _over:function(wi){ st.players.forEach(function(p){ p.out = p.id !== wi; }); st.winner = wi; st.phase = 'over'; gameOver(); }, _pienin:function(){ var h = st.players[0].hand; pieninFx(0, 'VII', h.length ? h.reduce(function(a, b){ return b.v < a.v ? b : a; }) : null); }};
 })();
 </script>
 <!--/KIRILII-->

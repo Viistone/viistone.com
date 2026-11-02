@@ -540,7 +540,7 @@ function koView(room, seat) {
     hoyla: (st.result.hoyla || []).map(h => ({ by: h.by, victim: h.victim, mcbueno: h.mcbueno }))
   } : null;
   base.at = room.at;
-  base.shouts = (room.shouts || []).filter(x => now - x.at < KO.SHOUT_MS).map(x => ({ id: x.id, seat: x.seat, k: x.k }));
+  base.shouts = (room.shouts || []).filter(x => now - x.at < KO.SHOUT_MS).map(x => x.c ? { id: x.id, seat: x.seat, k: x.k, c: x.c } : { id: x.id, seat: x.seat, k: x.k });
   const lk = koLapKey(room.st), used = (room.shouts || []).filter(x => x.seat === seat && x.lap === lk).map(x => x.k);
   base.canShout = seat >= 0 ? [0, 1, 2, 3, 4, 5].map(k => used.indexOf(k) < 0) : [false, false, false, false, false, false];
   base.watchers = (room.watch || []).length;
@@ -659,7 +659,10 @@ async function kiriliiOnline(req, env, url) {
       room.shouts = (room.shouts || []).filter(x => now - x.at < 60000);
       if (room.shouts.some(x => x.seat === seat && x.lap === key && x.k === k)) return json(req, Object.assign(koView(room, seat), { error: 'used' }), 409);
       room.shoutN = (room.shoutN || 0) + 1;
-      room.shouts.push({ id: room.shoutN, seat, k, lap: key, at: now });
+      const sh = { id: room.shoutN, seat, k, lap: key, at: now };
+      // "this is my smallest": the table gets to see the shouter's actual lowest card
+      if (k === 2){ const pl = room.st.players[seat], hd = pl && pl.hand || []; if (hd.length){ const lo = hd.reduce((a, c) => (c.v < a.v ? c : a)); sh.c = { id: lo.id, v: lo.v, s: lo.s }; } }
+      room.shouts.push(sh);
       if (await koUpdate(db, room, got.v)) return json(req, koView(room, seat));
       continue;
     }
