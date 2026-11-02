@@ -622,13 +622,13 @@ function loseMic(){ if (!rag.micC) return; Composite.remove(world, rag.micC); ra
 
 // ---------- input: grab the raised hand, swing, let go ----------
 function toWorld(cx, cy){ const z = baseZ() * cam.z; return {x:(cx - W / 2) / z + cam.x, y:(cy - H / 2) / z + cam.y}; }
-let ptr = null, ptrHist = [];
+let ptr = null, ptrHist = [], ptrMouse = false, grabFrom = {x:0, y:0, cx:0, cy:0};
 const GRAB_C = {x:STAGE.x + 170, y:STAGE.y - 230}, GRAB_R = 280;
 function clampGrab(p){ const cx = GRAB_C.x, cy = GRAB_C.y, dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy), R0 = GRAB_R; return d > R0 ? {x:cx + dx / d * R0, y:cy + dy / d * R0} : p; }
 cv.addEventListener('pointerdown', e => { if (state !== 'stage') return; audioInit(); const w = toWorld(e.clientX, e.clientY);
   if (Math.hypot(w.x - (STAGE.x + 10), w.y - (STAGE.y - 110)) > 160) return;
-  e.preventDefault(); cv.setPointerCapture(e.pointerId); ptr = e.pointerId; doGrab(w); });
-cv.addEventListener('pointermove', e => { if (e.pointerId !== ptr || !grab) return; const w = clampGrab(toWorld(e.clientX, e.clientY)); grab.pointA.x = w.x; grab.pointA.y = w.y; spinTrack(w); ptrHist.push({t:performance.now(), x:w.x, y:w.y}); if (ptrHist.length > 8) ptrHist.shift(); });
+  e.preventDefault(); cv.setPointerCapture(e.pointerId); ptr = e.pointerId; ptrMouse = e.pointerType === 'mouse'; doGrab(w); grabFrom = {x:grab.pointA.x, y:grab.pointA.y, cx:e.clientX, cy:e.clientY}; });
+cv.addEventListener('pointermove', e => { if (e.pointerId !== ptr || !grab) return; const sc = GRAB_R * 1.25 / (Math.min(W, H) / 2), w = clampGrab({x:grabFrom.x + (e.clientX - grabFrom.cx) * sc, y:grabFrom.y + (e.clientY - grabFrom.cy) * sc}); grab.pointA.x = w.x; grab.pointA.y = w.y; spinTrack(w); ptrHist.push({t:performance.now(), x:w.x, y:w.y}); if (ptrHist.length > 8) ptrHist.shift(); });
 const endPtr = e => { if (e.pointerId !== ptr) return; ptr = null; if (grab) release(); };
 cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
 // on a computer the mouse can leave the window mid-swing: then he goes, as if you had let go
@@ -661,6 +661,8 @@ function release(){ document.body.classList.remove('grab'); Composite.remove(wor
   // a good swing gets a little extra, as if he helped
   let pvx = 0, pvy = 0; const now = performance.now(), h = ptrHist.filter(q => now - q.t < 90); if (h.length > 1){ const a = h[0], b = h[h.length - 1], dt = Math.max(8, b.t - a.t); pvx = (b.x - a.x) / dt * 16.67; pvy = (b.y - a.y) / dt * 16.67; }
   // the perfect release: letting go while he's heading up and forward, with some spin behind it
+  // a mouse moves fewer world pixels for the same swing than a finger on a phone: give it the same power
+  if (ptrMouse){ pvx *= 1.1; pvy *= 1.1; }
   if (pvx < 0) pvx = -pvx * .85;
   const pa = Math.atan2(pvy, pvx) * 180 / Math.PI, perfect = spinTurns >= 1 && pa > -72 && pa < -22 && Math.hypot(pvx, pvy) > 8;
   const pw = (1 + spinTurns * .32) * (perfect ? 1.15 : 1), cap = (44 + spinTurns * 4.5) * (perfect ? 1.1 : 1); rag.power = spinTurns;
