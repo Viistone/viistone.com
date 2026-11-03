@@ -55,6 +55,7 @@ body.menu .hud{opacity:0}
 #btns .off{opacity:.4;text-decoration:line-through}
 #btns #brec{font-size:16px;width:50px;color:#ff8a7a}#btns #brec.live{color:#ff4a3a;border-color:#ff4a3a;animation:recb 1.2s steps(2) infinite}@keyframes recb{50%{opacity:.45}}#btns #brec.na{display:none}
 #bvid[disabled]{opacity:.5;cursor:default}
+#bvid{min-width:calc(15ch + 56px);box-sizing:border-box;text-align:center}
 @media (max-width:440px){ #btns{gap:6px} #btns button,#btns a{width:36px;height:34px;font-size:18px} #tl b{font-size:22px} #tl span{font-size:15px} }
 .panel{position:fixed;inset:0;display:none;overflow:auto;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:rgba(15,13,16,.55);padding:20px}
 .panel.on{display:flex}
@@ -957,13 +958,13 @@ function newGame(){ recAbort(); gameId++; PEE = null; if (engine){ Composite.cle
 // ---------- lorotus: someone nearby walks up to him when it's all over ----------
 let PEE = null;
 const PEEK = {posti:[0, '#d8702a'], skater:[0, '#c23b3b'], spuge:[0, '#5f6a3a', 1], loyly:[0, '#d8806a'], kauppias:[30, '#ece4cc'], kiekko:[0, '#2f5592'], hyppaaja:[0, '#e7c25a'], grillari:[24, '#ece4cc'], piru:[0], hirvi:[0]};
-function peeFind(){ if (!rag || rag.overEdge) return null; const p = rag.torso.position, fy = surf(p.x, p.y); if (p.y < fy - 160 || p.x > EDGE - 40 || (inWater(p.x) && !onDeck(p.x))) return null;
+function peeFind(){ if (!rag || rag.overEdge) return null; const p = rag.torso.position, fy = surf(p.x, p.y); if (p.y < fy - 420 || p.x > EDGE - 40 || (inWater(p.x) && !onDeck(p.x))) return null;
   // the way there has to be walkable: no river, no lava, no cliff
-  const ok = cx => { if (cx > EDGE - 20) return false; for (let i = 0; i <= 12; i++){ const xx = cx + (p.x - cx) * i / 12; if (Math.abs(surf(xx) - fy) > 130 + Math.abs(xx - p.x) * .5 || onLava(xx) || (inWater(xx) && !onDeck(xx))) return false; } return true; }; let best = null, bd = 801;
+  const ok = cx => { if (cx > EDGE - 20 || cx < STAGE.x + 200 || Math.abs(surf(cx) - fy) > 300) return false; for (let i = 0; i <= 12; i++){ const xx = cx + (p.x - cx) * i / 12; if (onLava(xx) || (inWater(xx) && !onDeck(xx))) return false; } return true; }; let best = null, bd = 801;
   for (const n of NPCS){ const k = PEEK[n.kind]; if (!k || n.ph === 'hold') continue; const cx = n.x + k[0], d = Math.abs(cx - p.x); if (d < bd && ok(cx)){ bd = d; best = {n, cx}; } }
   for (const f of FOLK){ const d = Math.abs(f.x - p.x); if (d < bd && ok(f.x)){ bd = d; best = {f, cx:f.x}; } }
   // nobody around: someone comes along from the side
-  if (!best){ const z = zoneAt(p.x); if (z && z.k === 'tikut') return null; for (const sd of [-1, 1]){ const cx = p.x + sd * 430; if (ok(cx)){ const f = {x:cx, z:z ? z.id : '', col:FOLKCOL[Math.floor(rnd() * FOLKCOL.length)], hat:rnd() < .4, said:true, ch:0, dir:-sd}; FOLK.push(f); return {f, cx}; } } }
+  if (!best){ const z = zoneAt(p.x); for (const [sd, dd] of [[-1, 430], [1, 430], [-1, 220], [1, 220]]){ const cx = p.x + sd * dd; if (ok(cx)){ const f = {x:cx, z:z ? z.id : '', col:FOLKCOL[Math.floor(rnd() * FOLKCOL.length)], hat:rnd() < .4, said:true, ch:0, dir:-sd}; FOLK.push(f); return {f, cx}; } } }
   return best; }
 function peeStart(c2){ const p = rag.torso.position, dir = Math.sign(p.x - c2.cx) || 1, tx = p.x - dir * 58; let o, type;
   if (c2.f){ o = c2.f; type = 'folk'; o.dir = dir; }
