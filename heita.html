@@ -183,7 +183,7 @@ let songLab = '';
 function musLabel(){ const st = curP && curP.lvl > .04 && SONGT[curP.song], l = st ? 'CH 02  ▶ ' + st[0] + ' ' + st[1] : 'CH 02'; if (l !== songLab){ songLab = l; $('song').textContent = l; } }
 function lis(){ if (rag && state !== 'stage' && state !== 'start') return rag.torso.position; return {x:STAGE.x, y:STAGE.y}; }
 function srcD(s, L){ if (s.edge) return L.x > EDGE ? 0 : Math.max(0, s.x - L.x); return Math.hypot(L.x - s.x, (L.y - s.y) * .35); }
-function musGain(d){ const k = clamp(1 - (d - 280) / 1750, 0, 1); return k * k; }
+function musGain(d){ const k = clamp(1 - (d - 500) / 2600, 0, 1); return k * k; }
 function musLvl(song){ for (const p of DECK) if (p.song === song && p.lvl > .001) return p.lvl; return 0; }
 function musStep(){ if (!AC || DECK.length < 2) return 0; const t = AC.currentTime, dt = clamp(t - musT, 0, .1), L = lis(); musT = t;
   let best = null, bd = 1e9; for (const s of SRCS){ const d = srcD(s, L); if (d < bd){ bd = d; best = s; } }
@@ -193,7 +193,7 @@ function musStep(){ if (!AC || DECK.length < 2) return 0; const t = AC.currentTi
   if (curP && curP.s){ const d = srcD(curP.s, L), want = musGain(d) * Math.pow(1 - out.lvl, 2); curP.lvl += (want - curP.lvl) * Math.min(1, dt * 5); if (curP.f) curP.f.frequency.setTargetAtTime(clamp(16000 * Math.exp(-d / 1500), 450, 16000), t, .1); }
   for (const p of DECK) if (p.g) p.g.gain.setTargetAtTime(p.lvl * .9, t, .05); musLabel();
   // the next song is fetched only when its area comes near
-  if (out.lvl === 0){ let nx = null, nd = 1e9; for (const s of SRCS){ if (curP && s === curP.s) continue; const d = srcD(s, L); if (d < nd){ nd = d; nx = s; } } if (nx && nd < 3400 && out.song !== nx.song) musLoad(out, nx); }
+  if (out.lvl === 0){ let nx = null, nd = 1e9; for (const s of SRCS){ if (curP && s === curP.s) continue; const d = srcD(s, L); if (d < nd){ nd = d; nx = s; } } if (nx && nd < 4400 && out.song !== nx.song) musLoad(out, nx); }
   return curP ? curP.lvl : 0; }
 function mixUpdate(){ if (!AC) return; const t = AC.currentTime; const wet = WX === 'sade' && state !== 'start';
   if (rain) rain.g.gain.setTargetAtTime(wet ? .3 : 0, t, .5);
@@ -690,10 +690,12 @@ const ZDEF = {
   vuori:{n:'VUORI', s:'SAUNA VUOREN JUURELLA', g:'#d0d8dc', set:['sauna', 'halkopino', 'mokki', 'sauna', 'kaasut'], npc:'kauris', npc2:'loyly', snow:true},
   silta:{n:'PITKÄSILTA', s:'KAITEET TULESSA', g:'#5a5650', set:['bussi', 'kaljat', 'roskakatos', 'tynnyrit'], npc:'ratikka', bridge:true}
 };
-// the course: always the same order, each area once; what is in them changes every time
-const COURSE = [{k:'skeitti'}, {k:'tikut', song:'kymmenentikkuu'}, {k:'vuosaari', song:'postinkantaja'}, {k:'tivoli'}, {k:'silta', song:'pitkasilta'}, {k:'tyomaa'},
+// the course: every area once, in a new order every throw; Helvetti is always last
+const COURSE_ALL = [{k:'skeitti'}, {k:'tikut', song:'kymmenentikkuu'}, {k:'vuosaari', song:'postinkantaja'}, {k:'tivoli'}, {k:'silta', song:'pitkasilta'}, {k:'tyomaa'},
   {k:'hymy', song:'hymytytto'}, {k:'grilli'}, {k:'uni', song:'symmetrisiiunii'}, {k:'romu'}, {k:'yobussi', song:'kotiinpaluu'}, {k:'pelto'}, {k:'vuori', song:'valiivuodella'}, {k:'metsa'}, {k:'maki'}, {k:'helvetti', song:'vikaselka'}];
-const SILTA_I = COURSE.findIndex(c2 => c2.k === 'silta');
+let COURSE = COURSE_ALL, SILTA_I = COURSE.findIndex(c2 => c2.k === 'silta');
+function shuffleCourse(){ const a = COURSE_ALL.filter(c2 => c2.k !== 'helvetti'); for (let k = a.length - 1; k > 0; k--){ const j = Math.floor(Math.random() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; }
+  COURSE = a.concat(COURSE_ALL.filter(c2 => c2.k === 'helvetti')); SILTA_I = COURSE.findIndex(c2 => c2.k === 'silta'); }
 let ZL = [], EDGE = 34000, EDGEY = 0;
 function zoneAt(x){ for (const z of ZL) if (x >= z.a && x < z.b) return z; return null; }
 const ORDER = ['kaasut', 'roskakatos', 'mokki', 'savupiippu', 'tynnyrit', 'halkopino', 'trampoliini', 'vesitorni', 'bussi', 'kioski', 'telineet', 'tornitalo', 'tynnyrit', 'muuri', 'auto', 'savupiippu', 'trampoliini', 'sauna', 'kerrostalo', 'vesitorni', 'kaljat', 'tornitalo', 'kaasut'];
@@ -950,7 +952,7 @@ function newGame(){ recAbort(); gameId++; PEE = null; if (engine){ Composite.cle
   bodies = []; parts = []; rockets = []; timers = []; pops = []; booms = []; arcs = []; fires = []; stains = []; splats = []; flashT = 0; rag = null; grab = null;
   RUN = {ev:{}, cnt:{}}; mTickT = 0; NPCS = []; $('dives').textContent = ''; $('zone').classList.remove('on');
   score = 0; combo = 0; maxCombo = 0; comboShown = 0; viisiCount = 0; lastHit = -9; tally = {self:0, env:0, boom:0}; simT = 0; flyT = 0; restT = 0; slowT = 0; shake = 0; maxDist = 0; ended = false;
-  buildCurve(); planCourse(); makeFlats(); makeExtras(); terrain(); bridgeBody(); stage(); RAMPS.forEach(x => { if (!FLATS.some(f => x > f.a - 260 && x < f.b + 240)) ramp(x); });
+  shuffleCourse(); buildCurve(); planCourse(); makeFlats(); makeExtras(); terrain(); bridgeBody(); stage(); RAMPS.forEach(x => { if (!FLATS.some(f => x > f.a - 260 && x < f.b + 240) && !offBridge(x) && !offBridge(x + 140)) ramp(x); });
   Events.on(engine, 'collisionStart', onCollide);
   Events.on(engine, 'afterUpdate', () => { for (const b of world.bodies){ if (b.plugin && b.plugin.pv){ b.plugin.pv.x = b.velocity.x; b.plugin.pv.y = b.velocity.y; } } });
   cam.x = cam.tx = STAGE.x + 60; cam.y = cam.ty = STAGE.y - 130; cam.z = cam.tz = 1.35; spawnAhead();
