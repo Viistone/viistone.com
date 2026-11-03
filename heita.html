@@ -124,20 +124,20 @@ function line(x1, y1, x2, y2, col, lw){ g.beginPath(); g.moveTo(x1, y1); g.lineT
 function disc(x, y, r, fill, lw){ g.beginPath(); g.arc(x, y, r, 0, 7); if (lw === 0){ g.fillStyle = fill; g.fill(); return; } ink(fill, lw); }
 
 // ---------- sound ----------
-const SFX_LIST = ['boom_bright','boom_rocky','boom_tan','crowd_aww','crowd_cheer','crowd_murmur','crowd_shout','dumpster','electric','fireball','fireball_glitch','fireworks','fireworks_crackle','fireworks_red','flame_burst','fuse','gas_hiss','gas_release','glass_break','glass_debris','glass_heavy','grab','groan1','groan2','groan3','groan4','groan5','groan6','groan7','metal_slam','metal_strike','metal_table1','metal_table2','plywood_crumble','thud_heavy','thud_soft','victory1','victory2','wind_loop','wood_creak','wood_explode','wood_metal_smash','wood_pile','yell_strained'];
+const SFX_LIST = ['thunder_far','thunder_clap','thunder_close','moo1','moo2','sizzle','cowbells','rain_loop','boom_bright','boom_rocky','boom_tan','crowd_aww','crowd_cheer','crowd_murmur','crowd_shout','dumpster','electric','fireball','fireball_glitch','fireworks','fireworks_crackle','fireworks_red','flame_burst','fuse','gas_hiss','gas_release','glass_break','glass_debris','glass_heavy','grab','groan1','groan2','groan3','groan4','groan5','groan6','groan7','metal_slam','metal_strike','metal_table1','metal_table2','plywood_crumble','thud_heavy','thud_soft','victory1','victory2','wind_loop','wood_creak','wood_explode','wood_metal_smash','wood_pile','yell_strained'];
 const EXTRA = {aboard:'assets/kirilii/sfx/aboard.mp3', laughe:'assets/kirilii/sfx/laughe.mp3', cry:'assets/posti/sfx/cry.mp3', burp:'assets/kirilii/sfx/burp1.mp3', yes:'assets/kirilii/sfx/yes.mp3', gull1:'assets/posti/sfx/gull1.mp3', gull2:'assets/posti/sfx/gull2.mp3', jet:'assets/posti/sfx/jet.mp3', rat:'assets/posti/sfx/rat.mp3', crow1:'assets/posti/sfx/crow1.mp3', crow2:'assets/posti/sfx/crow2.mp3', crow3:'assets/posti/sfx/crow3.mp3', static:'assets/posti/sfx/static.mp3', ouch1:'assets/kirilii/sfx/ouch.mp3', ouch2:'assets/kirilii/sfx/ouch2.mp3', ouch3:'assets/kirilii/sfx/ouch3.mp3', ouch4:'assets/kirilii/sfx/ouch4.mp3', ouch5:'assets/kirilii/sfx/ouch5.mp3', ouch6:'assets/kirilii/sfx/ouch6.mp3', slow:'assets/posti/sfx/slow.mp3', sonofa:'assets/kirilii/sfx/sonofa.mp3', alarm:'assets/posti/sfx/alarm1.mp3'};
 const SONGS = [['02','KYMMENEN TIKKUU','kymmenentikkuu'],['03','PITKÄSILTA','pitkasilta'],['04','SYMMETRISII UNII','symmetrisiiunii'],['05','VÄLII VUODELLA','valiivuodella'],['06','POSTINKANTAJA','postinkantaja'],['07','HYMYTYTTÖ','hymytytto'],['08','KOTIINPALUU KAI JOTENKI JÄRJESTYY','kotiinpaluu'],['09','VIKA SELKÄ','vikaselka']];
 let AC = null, master, fxBus, musBus, buf = {}, voices = 0, lastPlay = {};
 let musOn = true, fxOn = true;
 try { musOn = localStorage.getItem('viistone-heita-mus') !== '0'; fxOn = localStorage.getItem('viistone-heita-fx') !== '0'; } catch(e){}
-let song = null, songSrc = null, songFilt = null, songGain = null, crowd = null, wind = null;
+let song = null, songSrc = null, songFilt = null, songGain = null, crowd = null, wind = null, rain = null, nextThunder = 0;
 function audioInit(){
   if (AC){ if (AC.state === 'suspended') AC.resume(); return; }
   const A = window.AudioContext || window.webkitAudioContext; if (!A) return;
   AC = new A(); master = AC.createGain(); master.connect(AC.destination);
   fxBus = AC.createGain(); fxBus.gain.value = fxOn ? 1 : 0; fxBus.connect(master);
   musBus = AC.createGain(); musBus.gain.value = musOn ? 1 : 0; musBus.connect(master);
-  const load = (k, url) => fetch(url).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => AC.decodeAudioData(a, ok, no))).then(b => { buf[k] = b; if (k === 'crowd_murmur') startCrowd(); if (k === 'wind_loop') startWind(); }).catch(() => {});
+  const load = (k, url) => fetch(url).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => AC.decodeAudioData(a, ok, no))).then(b => { buf[k] = b; if (k === 'crowd_murmur') startCrowd(); if (k === 'wind_loop') startWind(); if (k === 'rain_loop' && !rain) rain = loop('rain_loop', 0); }).catch(() => {});
   SFX_LIST.forEach(k => load(k, 'assets/heita/sfx/' + k + '.mp3'));
   Object.keys(EXTRA).forEach(k => load(k, EXTRA[k]));
 }
@@ -159,7 +159,9 @@ function startSong(){
     songSrc.connect(songFilt); songFilt.connect(songGain); songGain.connect(musBus); }
   song.src = 'assets/' + pick[2] + '.m4a'; const p = song.play(); if (p && p.catch) p.catch(() => {}); }
 // the song stays on the stage: it fades and dulls the further he is from it
-function mixUpdate(){ if (!AC) return; const t = AC.currentTime;
+function mixUpdate(){ if (!AC) return; const t = AC.currentTime; const wet = WX === 'sade' && state !== 'start';
+  if (rain) rain.g.gain.setTargetAtTime(wet ? .3 : 0, t, .5);
+  if (wet && t > nextThunder){ if (nextThunder > 0){ const cl = rnd() < .35; sfx(cl ? 'thunder_clap' : 'thunder_far', cl ? .45 : .6, {force:true}); if (cl) flashT = Math.max(flashT, .1); } nextThunder = t + 12 + rnd() * 16; }
   const d = rag ? Math.max(0, Math.hypot(rag.torso.position.x - STAGE.x, (rag.torso.position.y - STAGE.y) * .6) - 250) : 0;
   const ear = Math.max(d, Math.max(0, Math.abs(cam.x - STAGE.x) - 400));
   if (songGain){ songGain.gain.setTargetAtTime(.9 / Math.pow(1 + ear / 1400, 1.3), t, .15); songFilt.frequency.setTargetAtTime(clamp(16000 * Math.exp(-ear / 2600), 260, 16000), t, .15); }
@@ -290,7 +292,7 @@ function drawBigRockets(){ for (const r of BIGR){ if (r.st === 'done') continue;
       disc(0, -32, 6, '#7ab0d0', 2); }); } }
 let NPCS = [];
 function showZone(n, sub){ const el = $('zone'); el.innerHTML = n + (sub ? '<small>' + sub + '</small>' : ''); el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 1800); }
-function zoneTick(){ if (!rag || state !== 'fly') return; const z = zoneAt(rag.torso.position.x); if (z && !z.seen){ z.seen = true; showZone(ZDEF[z.k].n, ZDEF[z.k].s); } }
+function zoneTick(){ if (!rag || state !== 'fly') return; const z = zoneAt(rag.torso.position.x); if (z && !z.seen){ z.seen = true; showZone(ZDEF[z.k].n, ZDEF[z.k].s); if (z.k === 'maki') sfx('cowbells', .5, {force:true}); if (z.k === 'pelto') sfx('moo2', .45, {force:true, delay:.4}); } }
 function fling(vx, vy){ rag.all.forEach(q => Body.setVelocity(q, {x:vx + (rnd() - .5) * 3, y:vy + (rnd() - .5) * 3})); }
 const NPCTXT = {piru:'PIRU HEITTÄÄ', skater:'SKEITTARI HEITTÄÄ', spuge:'SPUGE POTKAISEE', loyly:'LÖYLYMIES HEITTÄÄ', pallo:'PURKUPALLO', tykki:'IHMISTYKKI', kauppias:'KAUPPIAS HEITTÄÄ', kiekko:'LÄMÄRI!', magneetti:'MAGNEETTI', hirvi:'HIRVI PUSKEE', lokki:'LOKKI NAPPAA', hyppaaja:'MÄKIHYPPÄÄJÄ KYYDITTÄÄ', grillari:'MAKKARAT MUKAAN', traktori:'TRAKTORI NOSTAA', ufo:'UFO SIEPPAA'};
 function npcGo(n){ n.used = true; n.ph = 'act'; n.at = 0; const x = n.x, y = n.y; pops.push({x, y:y - 260, t:0, s:NPCTXT[n.kind], col:'#ffd28a'}); award(1500, x, y - 200); shake = Math.max(shake, 10); mEv(n.kind);
@@ -308,8 +310,8 @@ function npcGo(n){ n.used = true; n.ph = 'act'; n.at = 0; const x = n.x, y = n.y
     case 'piru': fling(36, -32); sfx('laughe', 1, {x, y, force:true}); sfx('fireball', .8, {x, y, force:true}); for (let i = 0; i < 20; i++) parts.push({x:x + 40, y:y - 60, vx:4 + rnd() * 4, vy:-2 - rnd() * 4, life:.9, t:0, k:'flame', s:10 + rnd() * 8}); break;
     case 'lokki': hold(); sfx('gull' + (1 + Math.floor(rnd() * 2)), .9, {x, y, force:true}); break;
     case 'hyppaaja': hold(); sfx('crowd_cheer', .6, {force:true}); sfx('fireball', .4, {force:true, rate:.8}); break;
-    case 'grillari': fling(31, -15); sfx('flame_burst', .7, {x, y, force:true}); sfx('burp', .8, {force:true, delay:.7}); for (let i = 0; i < 16; i++) parts.push({x:x + 20, y:y - 70, vx:3 + rnd() * 7, vy:-4 - rnd() * 6, life:1.4, t:0, k:'spark', c:rnd() < .5 ? '#b5532e' : '#e7c25a', s:6}); break;
-    case 'traktori': hold(); sfx('metal_strike', .8, {x, y, force:true}); sfx('gas_release', .5, {x, y, force:true}); break; } }
+    case 'grillari': fling(31, -15); sfx('flame_burst', .7, {x, y, force:true}); sfx('sizzle', .7, {x, y, force:true}); sfx('burp', .8, {force:true, delay:.7}); for (let i = 0; i < 16; i++) parts.push({x:x + 20, y:y - 70, vx:3 + rnd() * 7, vy:-4 - rnd() * 6, life:1.4, t:0, k:'spark', c:rnd() < .5 ? '#b5532e' : '#e7c25a', s:6}); break;
+    case 'traktori': hold(); sfx('metal_strike', .8, {x, y, force:true}); sfx('gas_release', .5, {x, y, force:true}); sfx('moo2', .7, {force:true, delay:.6}); break; } }
 function npcStep(dt){ for (const n of NPCS){ n.t += dt; if (n.ph === 'act'){ n.at += dt; if (n.at > 1.2) n.ph = 'done'; }
     else if (n.ph === 'hold'){ n.ht += dt; const ht = n.ht; let px2, py2, end = 0;
       if (n.kind === 'tykki'){ px2 = n.x + 46; py2 = n.y - 58; end = .7; }
@@ -337,7 +339,8 @@ function makeFolk(){ FOLK = []; for (const z of ZL){ if (z.k === 'helvetti' && r
     for (let i = 0; i < n; i++){ const x = z.k === 'grilli' && i > 1 ? npcX - 150 - i * 34 : z.a + 300 + rnd() * (ZLEN - 600); if (Math.abs(x - npcX) < 140 && !(z.k === 'grilli' && i > 1)) continue; FOLK.push({x, z:z.k, col:FOLKCOL[Math.floor(rnd() * FOLKCOL.length)], hat:rnd() < .4, said:false, ch:0, dir:rnd() < .5 ? -1 : 1}); } }
   const r = Math.random(); WX = r < .45 ? 'selkea' : r < .7 ? 'sade' : r < .85 ? 'lumi' : 'sumu'; EVT = {ufo:Math.random() < .3, salama:WX === 'sade' && Math.random() < .8, ufoDone:false, salamaDone:false}; }
 function folkStep(){ if (!rag || state !== 'fly') return; const p = rag.torso.position; for (const f of FOLK){ if (f.ch > 0) f.ch -= .016; if (f.said || Math.abs(p.x - f.x) > 220 || p.y < gy(f.x) - 700) continue; f.said = true; f.ch = 1.4; f.dir = 1;
-    if (simT - lastShout > 1.1){ lastShout = simT; const L = FOLKTXT[f.z] || ['OIOI']; pops.push({x:f.x, y:gy(f.x) - 120, t:0, s:L[Math.floor(rnd() * L.length)], col:'#ece4cc'}); sfx('crowd_shout', .25, {x:f.x, y:gy(f.x), gap:.8}); } } }
+    if (simT - lastShout > 1.1){ lastShout = simT; const L = FOLKTXT[f.z] || ['OIOI']; pops.push({x:f.x, y:gy(f.x) - 120, t:0, s:L[Math.floor(rnd() * L.length)], col:'#ece4cc'}); if (f.z === 'pelto') sfx(rnd() < .5 ? 'moo1' : 'moo2', .7, {x:f.x, y:gy(f.x), force:true}); else sfx('crowd_shout', .25, {x:f.x, y:gy(f.x), gap:.8}); } }
+  for (const n of NPCS){ if (n.kind === 'grillari' && !n.sz && Math.abs(p.x - n.x) < 1100){ n.sz = true; sfx('sizzle', .55, {x:n.x, y:n.y, force:true}); } } }
 function drawFolk(x0, x1, t){ for (const f of FOLK){ if (f.x < x0 - 60 || f.x > x1 + 60) continue; const y = gy(f.x), up = f.ch > 0 ? Math.abs(Math.sin(t * 9)) : 0, x = f.x, d = f.dir, hop = f.ch > 0 ? Math.abs(Math.sin(t * 9)) * 6 : 0;
     line(x - 4, y - 26 - hop, x - 6, y, INK, 7); line(x + 4, y - 26 - hop, x + 6, y, INK, 7); line(x - 4, y - 26 - hop, x - 6, y, '#2a2b30', 3.5); line(x + 4, y - 26 - hop, x + 6, y, '#2a2b30', 3.5);
     rr(x - 9, y - 52 - hop, 18, 28, 7); ink(f.col, 2.5); line(x + 6 * d, y - 46 - hop, x + (12 + up * 4) * d, y - 30 - up * 34 - hop, INK, 6); line(x - 6 * d, y - 46 - hop, x - 12 * d, y - 30 - hop, INK, 6); disc(x, y - 62 - hop, 10, C.skin, 2.5);
@@ -346,7 +349,7 @@ function eventsStep(dt){ if (!rag || state !== 'fly') return; const p = rag.tors
   if (EVT.ufo && !EVT.ufoDone && flyT > 2.5 && alt > 520 && !holding && p.x < EDGE - 2500 && p.x > STAGE.x + 1500){ EVT.ufoDone = true; const n = {kind:'ufo', x:p.x, y:p.y, x0:p.x, y0:p.y, used:true, ph:'hold', ht:0, t:0, at:0, ux:p.x, uy:p.y - 170};
     n.c = Constraint.create({pointA:{x:p.x, y:p.y}, bodyB:rag.torso, pointB:{x:0, y:0}, stiffness:.35, damping:.1, length:0}); Composite.add(world, n.c); NPCS.push(n); pops.push({x:p.x, y:p.y - 260, t:0, s:'UFO SIEPPAA', col:'#cfe8a8'}); sfx('electric', .8, {force:true}); sfx('wind_loop', .3, {force:true, rate:1.8}); mEv('ufo'); }
   if (EVT.salama && !EVT.salamaDone && flyT > 2 && alt > 380 && !holding && rnd() < dt * .35){ EVT.salamaDone = true; arcs.push({x1:p.x + (rnd() - .5) * 200, y1:p.y - 900, x2:p.x, y2:p.y, t:0}); arcs.push({x1:p.x - 40, y1:p.y - 500, x2:p.x, y2:p.y, t:0}); flashT = .35; shake = 18;
-    rag.all.forEach(q => Body.setVelocity(q, {x:q.velocity.x + 9, y:q.velocity.y - 6})); award(1800, p.x, p.y - 80, 'SALAMA ISKI', '#cfe9ff'); sfx('electric', 1, {force:true}); sfx('boom_bright', .7, {force:true}); rag.face = 'shock'; } }
+    rag.all.forEach(q => Body.setVelocity(q, {x:q.velocity.x + 9, y:q.velocity.y - 6})); award(1800, p.x, p.y - 80, 'SALAMA ISKI', '#cfe9ff'); sfx('electric', 1, {force:true}); sfx('thunder_close', 1, {force:true, delay:.1}); rag.face = 'shock'; nextThunder = AC ? AC.currentTime + 14 : 0; } }
 function drawWeather(t){ if (state === 'start') return;
   if (WX === 'sade'){ g.strokeStyle = 'rgba(190,205,220,.35)'; g.lineWidth = 1.5; g.beginPath(); for (let i = 0; i < 140; i++){ const sx = ((i * 173.3 - cam.x * .5 + t * 60) % (W + 60) + W + 60) % (W + 60) - 30, sy = ((i * 97.1 + t * (700 + i % 5 * 90) - cam.y * .5) % (H + 60) + H + 60) % (H + 60) - 30; g.moveTo(sx, sy); g.lineTo(sx - 5, sy + 18); } g.stroke(); }
   if (WX === 'sumu'){ const fg = g.createLinearGradient(0, H * .35, 0, H); fg.addColorStop(0, 'rgba(170,170,180,0)'); fg.addColorStop(1, 'rgba(170,170,180,.32)'); g.fillStyle = fg; g.fillRect(0, 0, W, H); } }
@@ -835,7 +838,7 @@ function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= d
     if (!hold && span > 4 && moved < 90 && flyT > 3){ rag.stuckT = (rag.stuckT || 0) + dt; if (rag.stuckT > (timers.length || rockets.some(near) ? 3 : .6)) restT = 99; } else rag.stuckT = 0;
     if (rag.jumpX != null && simT - rag.jumpT > .6 && t.position.y > gy(t.position.x) - 45){ const m = Math.max(1, Math.round((t.position.x - rag.jumpX) / PXM)), lost = Object.keys(rag.off).length;
       const jj = [0, 1, 2].map(() => Math.max(8, Math.round((19.5 - lost * 2.5 - rnd() * 3.5) * 2) / 2)); award(m * 80 + Math.round(jj.reduce((a2, b2) => a2 + b2) * 30), t.position.x, t.position.y - 100, 'HYPPY ' + m + ' M', '#cfe9ff');
-      pops.push({x:t.position.x, y:t.position.y - 150, t:0, s:'TYYLI ' + jj.map(v => v.toFixed(1).replace('.', ',')).join('  '), col:'#ece4cc'}); sfx(m > 60 ? 'crowd_cheer' : 'crowd_aww', .6, {force:true}); rag.jumpX = null; }
+      pops.push({x:t.position.x, y:t.position.y - 150, t:0, s:'TYYLI ' + jj.map(v => v.toFixed(1).replace('.', ',')).join('  '), col:'#ece4cc'}); sfx(m > 60 ? 'crowd_cheer' : 'crowd_aww', .6, {force:true}); sfx('cowbells', .6, {force:true}); rag.jumpX = null; }
     if (maxDist > (rag.bestD || 0) + 3){ rag.bestD = maxDist; rag.bestT = simT; } const high = gy(t.position.x) - t.position.y > 900;
     if (!hold && !high && flyT > 20 && simT - (rag.bestT || 0) > 25) restT = 99;
     if (rag.face === 'ouch' && simT - (rag.faceT || 0) > 1.2) rag.face = rag.off.head ? 'out' : 'shock';
