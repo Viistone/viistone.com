@@ -124,20 +124,20 @@ function line(x1, y1, x2, y2, col, lw){ g.beginPath(); g.moveTo(x1, y1); g.lineT
 function disc(x, y, r, fill, lw){ g.beginPath(); g.arc(x, y, r, 0, 7); if (lw === 0){ g.fillStyle = fill; g.fill(); return; } ink(fill, lw); }
 
 // ---------- sound ----------
-const SFX_LIST = ['lorina','kids_amb','kids_yeah','skate_crash','stomp','step','sticks','fart','bird_percy','ufo_crash','ufo_pass','thunder_far','thunder_clap','thunder_close','moo1','moo2','sizzle','cowbells','rain_loop','boom_bright','boom_rocky','boom_tan','crowd_aww','crowd_cheer','crowd_murmur','crowd_shout','dumpster','electric','fireball','fireball_glitch','fireworks','fireworks_crackle','fireworks_red','flame_burst','fuse','gas_hiss','gas_release','glass_break','glass_debris','glass_heavy','grab','groan1','groan2','groan3','groan4','groan5','groan6','groan7','metal_slam','metal_strike','metal_table1','metal_table2','plywood_crumble','thud_heavy','thud_soft','victory1','victory2','wind_loop','wood_creak','wood_explode','wood_metal_smash','wood_pile','yell_strained'];
-const EXTRA = {aboard:'assets/kirilii/sfx/aboard.mp3', laughe:'assets/kirilii/sfx/laughe.mp3', cry:'assets/posti/sfx/cry.mp3', burp:'assets/kirilii/sfx/burp1.mp3', yes:'assets/kirilii/sfx/yes.mp3', gull1:'assets/posti/sfx/gull1.mp3', gull2:'assets/posti/sfx/gull2.mp3', jet:'assets/posti/sfx/jet.mp3', rat:'assets/posti/sfx/rat.mp3', crow1:'assets/posti/sfx/crow1.mp3', crow2:'assets/posti/sfx/crow2.mp3', crow3:'assets/posti/sfx/crow3.mp3', static:'assets/posti/sfx/static.mp3', ouch1:'assets/kirilii/sfx/ouch.mp3', ouch2:'assets/kirilii/sfx/ouch2.mp3', ouch3:'assets/kirilii/sfx/ouch3.mp3', ouch4:'assets/kirilii/sfx/ouch4.mp3', ouch5:'assets/kirilii/sfx/ouch5.mp3', ouch6:'assets/kirilii/sfx/ouch6.mp3', slow:'assets/posti/sfx/slow.mp3', sonofa:'assets/kirilii/sfx/sonofa.mp3', alarm:'assets/posti/sfx/alarm1.mp3'};
+const SFX_LIST = ['bus','city','bluebird','kauris','lorina','kids_amb','kids_yeah','skate_crash','stomp','step','sticks','fart','bird_percy','ufo_crash','ufo_pass','thunder_far','thunder_clap','thunder_close','moo1','moo2','sizzle','cowbells','rain_loop','boom_bright','boom_rocky','boom_tan','crowd_aww','crowd_cheer','crowd_murmur','crowd_shout','dumpster','electric','fireball','fireball_glitch','fireworks','fireworks_crackle','fireworks_red','flame_burst','fuse','gas_hiss','gas_release','glass_break','glass_debris','glass_heavy','grab','groan1','groan2','groan3','groan4','groan5','groan6','groan7','metal_slam','metal_strike','metal_table1','metal_table2','plywood_crumble','thud_heavy','thud_soft','victory1','victory2','wind_loop','wood_creak','wood_explode','wood_metal_smash','wood_pile','yell_strained'];
+const EXTRA = {bell:'assets/posti/sfx/bell1.mp3', flap:'assets/posti/sfx/flap.mp3', aboard:'assets/kirilii/sfx/aboard.mp3', laughe:'assets/kirilii/sfx/laughe.mp3', cry:'assets/posti/sfx/cry.mp3', burp:'assets/kirilii/sfx/burp1.mp3', yes:'assets/kirilii/sfx/yes.mp3', gull1:'assets/posti/sfx/gull1.mp3', gull2:'assets/posti/sfx/gull2.mp3', jet:'assets/posti/sfx/jet.mp3', rat:'assets/posti/sfx/rat.mp3', crow1:'assets/posti/sfx/crow1.mp3', crow2:'assets/posti/sfx/crow2.mp3', crow3:'assets/posti/sfx/crow3.mp3', static:'assets/posti/sfx/static.mp3', ouch1:'assets/kirilii/sfx/ouch.mp3', ouch2:'assets/kirilii/sfx/ouch2.mp3', ouch3:'assets/kirilii/sfx/ouch3.mp3', ouch4:'assets/kirilii/sfx/ouch4.mp3', ouch5:'assets/kirilii/sfx/ouch5.mp3', ouch6:'assets/kirilii/sfx/ouch6.mp3', slow:'assets/posti/sfx/slow.mp3', sonofa:'assets/kirilii/sfx/sonofa.mp3', alarm:'assets/posti/sfx/alarm1.mp3'};
 const SONGT = {prologi:['01', 'PROLOGI'], kymmenentikkuu:['02', 'KYMMENEN TIKKUU'], pitkasilta:['03', 'PITKÄSILTA'], symmetrisiiunii:['04', 'SYMMETRISII UNII'], valiivuodella:['05', 'VÄLII VUODELLA'], postinkantaja:['06', 'POSTINKANTAJA'], hymytytto:['07', 'HYMYTYTTÖ'], kotiinpaluu:['08', 'KOTIINPALUU KAI JOTENKI JÄRJESTYY'], vikaselka:['09', 'VIKA SELKÄ'], epilogi:['10', 'EPILOGI']};
 let AC = null, master, fxBus, musBus, buf = {}, voices = 0, lastPlay = {};
 let musOn = true, fxOn = true;
 try { musOn = localStorage.getItem('viistone-heita-mus') !== '0'; fxOn = localStorage.getItem('viistone-heita-fx') !== '0'; } catch(e){}
-let crowd = null, wind = null, rain = null, kidsAmb = null, nextThunder = 0;
+let crowd = null, wind = null, rain = null, kidsAmb = null, cityAmb = null, nextThunder = 0;
 function audioInit(){
   if (AC){ if (AC.state === 'suspended') AC.resume(); return; }
   const A = window.AudioContext || window.webkitAudioContext; if (!A) return;
   AC = new A(); master = AC.createGain(); master.connect(AC.destination);
   fxBus = AC.createGain(); fxBus.gain.value = fxOn ? 1 : 0; fxBus.connect(master);
   musBus = AC.createGain(); musBus.gain.value = musOn ? 1 : 0; musBus.connect(master);
-  const load = (k, url) => fetch(url).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => AC.decodeAudioData(a, ok, no))).then(b => { buf[k] = b; if (k === 'crowd_murmur') startCrowd(); if (k === 'wind_loop') startWind(); if (k === 'rain_loop' && !rain) rain = loop('rain_loop', 0); if (k === 'kids_amb' && !kidsAmb) kidsAmb = loop('kids_amb', 0); }).catch(() => {});
+  const load = (k, url) => fetch(url).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => AC.decodeAudioData(a, ok, no))).then(b => { buf[k] = b; if (k === 'city' && !cityAmb) cityAmb = loop('city', 0); if (k === 'crowd_murmur') startCrowd(); if (k === 'wind_loop') startWind(); if (k === 'rain_loop' && !rain) rain = loop('rain_loop', 0); if (k === 'kids_amb' && !kidsAmb) kidsAmb = loop('kids_amb', 0); }).catch(() => {});
   SFX_LIST.forEach(k => load(k, 'assets/heita/sfx/' + k + '.mp3'));
   Object.keys(EXTRA).forEach(k => load(k, EXTRA[k]));
 }
@@ -202,6 +202,8 @@ function mixUpdate(){ if (!AC) return; const t = AC.currentTime; const wet = WX 
   const ear = Math.max(d, Math.max(0, Math.abs(cam.x - STAGE.x) - 400));
   if (crowd) crowd.g.gain.setTargetAtTime(state === 'start' ? 0 : .35 / Math.pow(1 + ear / 700, 1.6), t, .2);
   // the kids in the yard can be heard until they run off to hide
+  // the city at night around the last bus
+  if (cityAmb){ const L = lis(), cz = ZL.find(z2 => z2.k === 'yobussi'), cd = cz ? Math.max(0, cz.a - L.x, L.x - cz.b) : 1e9; cityAmb.g.gain.setTargetAtTime(state === 'start' ? 0 : .4 * Math.pow(clamp(1 - cd / 1400, 0, 1), 2), t, .4); }
   if (kidsAmb){ const L = lis(), kn = NPCS.find(n2 => n2.kind === 'tikut'), ks = kn || structs.find(s2 => s2.npc === 'tikut'), dk = ks ? Math.hypot(L.x - ks.x, (L.y - surf(ks.x)) * .4) : 1e9, hid = kn && kn.kick != null && simT - kn.kick > 1.2;
     kidsAmb.g.gain.setTargetAtTime(state === 'start' || hid ? 0 : .55 * Math.pow(clamp(1 - (dk - 200) / 1500, 0, 1), 2), t, hid ? .4 : .2); }
   // between the songs it is quieter: wind and whatever is around
@@ -272,10 +274,10 @@ function car(x, y){ const b = Bodies.rectangle(x, y, 150, 42, {density:.0016, fr
 
 // a slab of concrete dug into the hill so things stand level
 function pad(x0, x1){ const top = surf(x0), bot = surf(x1) + 12, h = bot - top; const b = Bodies.rectangle((x0 + x1) / 2, top + h / 2, x1 - x0, h, {isStatic:true, friction:.6}); b.plugin = {kind:'pad', w:x1 - x0, h}; Composite.add(world, b); bodies.push(b); return top; }
-const SPAN = {npc:[-60, 170], ramppi:[-20, 170], kontit:[-20, 250], vesitorni:[-20, 220], savupiippu:[-20, 130], tornitalo:[-20, 170], tynnyrit:[-20, 120], kaasut:[-20, 130], trampoliini:[-20, 150], roskakatos:[-20, 150], mokki:[-70, 200], halkopino:[-20, 160], bussi:[-20, 200], mankka:[-90, 90], kioski:[-80, 140], telineet:[-20, 210], muuri:[-20, 290], auto:[-30, 240], sauna:[-30, 180], kerrostalo:[-20, 290], kaljat:[-20, 180], paalit:[-20, 180], lato:[-20, 230], grillikoju:[-40, 170]};
+const SPAN = {npc:[-60, 170], ramppi:[-20, 170], kontit:[-20, 250], vesitorni:[-20, 220], savupiippu:[-20, 130], tornitalo:[-20, 170], tynnyrit:[-20, 120], kaasut:[-20, 130], trampoliini:[-20, 150], roskakatos:[-20, 150], mokki:[-70, 200], halkopino:[-20, 160], bussi:[-20, 200], mankka:[-90, 90], patsas:[-80, 80], kioski:[-80, 140], telineet:[-20, 210], muuri:[-20, 290], auto:[-30, 240], sauna:[-30, 180], kerrostalo:[-20, 290], kaljat:[-20, 180], paalit:[-20, 180], lato:[-20, 230], grillikoju:[-40, 170]};
 let TREES = [], ICE = [], CROWS = [], LAVA = [], bestD = 0;
 try { bestD = +localStorage.getItem('viistone-heita-bestd') || 0; } catch(e){}
-const hymyImg = new Image(); hymyImg.src = 'assets/hymy/hymy.png';
+const hymyImg = new Image(); hymyImg.src = 'assets/hymy/hymy.png'; const ratImg = new Image(); ratImg.src = 'assets/posti/rat.webp';
 function gaps(){ const out = []; for (let i = 0; i < FLATS.length - 1; i++){ const a = FLATS[i].b + 110, b = FLATS[i + 1].a - 70; if (b - a > 70) out.push([a, b]); } return out; }
 function makeExtras(){ seed = 4242; TREES = []; ICE = []; CROWS = []; LAVA = []; const G = gaps();
   const RIDX = [3, 11, 21, 33];
@@ -284,17 +286,20 @@ function makeExtras(){ seed = 4242; TREES = []; ICE = []; CROWS = []; LAVA = [];
   const pick = () => G[2 + Math.floor(rnd() * (G.length - 2))]; const RATS = [];
   for (let i = 0; i < 2; i++){ const g2 = i === 0 ? G[2 + Math.floor(rnd() * Math.min(6, G.length - 2))] : pick(); if (!g2) continue; const x = g2[0] + 30 + rnd() * Math.max(10, g2[1] - g2[0] - 160); if (TREES.some(t => Math.abs(t.x - x) < 200) || offBridge(x)) continue; RATS.push(x); }
   RATS.forEach(x => { const y = gy(x + 80), b = Bodies.rectangle(x + 80, y - 33, 180, 66, {isStatic:true, restitution:.9, friction:.2, chamfer:{radius:26}}); b.plugin = {kind:'rat', w:180, h:66, t:-9}; Composite.add(world, b); bodies.push(b); });
+  ZL.filter(z => ZDEF[z.k].rat).forEach(z => { const nx = (structs.find(s2 => s2.t === 'npc' && s2.npc === ZDEF[z.k].npc && s2.x > z.a && s2.x < z.b) || {x:z.a + ZLEN * .3}).x, x = (nx + (z.a + z.b) / 2) / 2 - 60, y = gy(x + 80), b = Bodies.rectangle(x + 80, y - 40, 230, 80, {isStatic:true, restitution:.9, friction:.2, chamfer:{radius:30}}); b.plugin = {kind:'rat', w:230, h:80, t:-9, img:true}; Composite.add(world, b); bodies.push(b); });
   if (rnd() < .3){ const g2 = pick(); if (g2){ const x = (g2[0] + g2[1]) / 2 + 40; if (!TREES.some(t => Math.abs(t.x - x) < 120) && !offBridge(x)){ const y = gy(x), b = Bodies.rectangle(x, y - 46, 28, 92, {isStatic:true, friction:.4}); b.plugin = {kind:'hymy', w:28, h:92}; Composite.add(world, b); bodies.push(b); } } }
   bigRockets(G);
   SKY = []; let planes = 0; for (let x = 1600 + rnd() * 500; x < EDGE - 1500; x += 520 + rnd() * 600){ const r = rnd(), zz = zoneAt(x); if (zz && ZDEF[zz.k].hell) continue;
     if (r < .26) SKY.push({k:'crows', x, h:380 + rnd() * 500, ph:rnd() * 6}); else if (r < .48) SKY.push({k:'line', x, h:210 + rnd() * 50}); else if (r < .66) SKY.push({k:'kite', x, h:430 + rnd() * 300, ph:rnd() * 6}); else if (r < .86) SKY.push({k:'drone', x, h:260 + rnd() * 380, ph:rnd() * 6}); else if (planes < 3 && x > 4000){ planes++; SKY.push({k:'plane', x, h:950 + rnd() * 500, ph:0}); } }
   BALLOONS = []; ZL.filter(z => z.k === 'tivoli').forEach(z => { for (let i = 0; i < 4; i++) BALLOONS.push({x:z.a + 400 + i * 700 + rnd() * 200, h:260 + rnd() * 400, ph:rnd() * 6, gas:rnd() < .4, popped:false, col:['#c23b3b', '#3d6f96', '#e7c25a', '#5f8a4a'][i % 4]}); });
   for (let x = 1500 + rnd() * 400; x < EDGE - 600; x += 650 + rnd() * 700){ BALLOONS.push({x, h:300 + rnd() * 520, ph:rnd() * 6, gas:rnd() < .4, popped:false, col:['#c23b3b', '#3d6f96', '#e7c25a', '#5f8a4a'][Math.floor(rnd() * 4)]}); }
-  CARSPOTS = []; ZL.filter(z => ['lahio', 'romu'].includes(z.k)).forEach(z => { for (let x = z.a + 500 + rnd() * 400; x < z.b - 300; x += 1100 + rnd() * 900) CARSPOTS.push({x, done:false}); });
+  CARSPOTS = []; ZL.filter(z => ['vuosaari', 'romu', 'yobussi'].includes(z.k)).forEach(z => { for (let x = z.a + 500 + rnd() * 400; x < z.b - 300; x += 1100 + rnd() * 900) CARSPOTS.push({x, done:false}); });
   LOOSE = []; G.forEach(([a, b], i) => { if (b > EDGE - 200) return; if (RIDX.includes(i) || i < 1) return; if (TREES.some(t => t.x > a - 20 && t.x < b + 20)) return; if (rnd() < .55){ const x = a + 20 + rnd() * Math.max(10, b - a - 40), k = rnd(); LOOSE.push([x, k < .45 ? 'oil' : k < .8 ? 'gas' : 'fw']); } });
   for (let i = 0; i < 5; i++){ const g2 = G[1 + Math.floor(rnd() * (G.length - 1))]; if (!g2) continue; const x = g2[0] + rnd() * (g2[1] - g2[0]); const n = 3 + Math.floor(rnd() * 4); CROWS.push({x, birds:Array.from({length:n}, (_, k) => ({x:x + (k - n / 2) * 16 + (rnd() - .5) * 8, y:0, vx:0, vy:0, fly:false, ph:rnd() * 6}))}); }
   // nothing that needs solid ground ends up in the river under Pitkäsilta
   TREES = TREES.filter(t => !offBridge(t.x)); ICE = ICE.filter(r => !offBridge(r[0]) && !offBridge(r[1])); LOOSE = LOOSE.filter(l => !offBridge(l[0])); CROWS = CROWS.filter(c2 => !offBridge(c2.x)); BIGR = BIGR.filter(r => !offBridge(r.x)); SKY = SKY.filter(o => !(o.k === 'line' && offBridge(o.x)));
+  // the big rat in Vuosaari keeps its spot to itself
+  { const RX = bodies.filter(b2 => b2.plugin && b2.plugin.img).map(b2 => b2.position.x), nearR = x => RX.some(r => Math.abs(r - x) < 280); TREES = TREES.filter(t => !nearR(t.x)); LOOSE = LOOSE.filter(l => !nearR(l[0])); BIGR = BIGR.filter(r => !nearR(r.x)); CROWS = CROWS.filter(c2 => !nearR(c2.x)); }
   // gulls: on the burning railing and over the bridge
   if (BR){ for (let i = 0; i < 3; i++){ let x = BR.d0 + 500 + rnd() * (BR.d1 - BR.d0 - 1000); if (x > BR.g0 - 120 && x < BR.g1 + 120) x = BR.g0 - 160; const n = 3 + Math.floor(rnd() * 3); CROWS.push({x, gull:true, birds:Array.from({length:n}, (_, k) => ({x:x + (k - n / 2) * 22 + (rnd() - .5) * 8, y:0, vx:0, vy:0, fly:false, ph:rnd() * 6}))}); }
     for (let i = 0; i < 2; i++) SKY.push({k:'gulls', x:BR.d0 + 700 + i * 1500 + rnd() * 600, h:560 + rnd() * 300, ph:rnd() * 6}); }
@@ -356,7 +361,8 @@ let NPCS = [];
 function showZone(n, sub){ const el = $('zone'); el.innerHTML = n + (sub ? '<small>' + sub + '</small>' : ''); el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 1800); }
 function zoneTick(){ if (!rag || state !== 'fly') return; const z = zoneAt(rag.torso.position.x); if (z && !z.seen){ z.seen = true; showZone(z.n, z.s); if (z.k === 'maki') sfx('cowbells', .5, {force:true}); if (z.k === 'pelto') sfx('moo2', .45, {force:true, delay:.4}); } }
 function fling(vx, vy){ rag.all.forEach(q => Body.setVelocity(q, {x:vx + (rnd() - .5) * 3, y:vy + (rnd() - .5) * 3})); }
-const NPCTXT = {piru:'PIRU HEITTÄÄ', skater:'SKEITTARI HEITTÄÄ', spuge:'SPUGE POTKAISEE', loyly:'LÖYLYMIES HEITTÄÄ', pallo:'PURKUPALLO', tykki:'IHMISTYKKI', kauppias:'KAUPPIAS HEITTÄÄ', kiekko:'LÄMÄRI!', magneetti:'MAGNEETTI', hirvi:'HIRVI PUSKEE', lokki:'LOKKI NAPPAA', hyppaaja:'MÄKIHYPPÄÄJÄ KYYDITTÄÄ', grillari:'MAKKARAT MUKAAN', traktori:'TRAKTORI NOSTAA', ufo:'UFO SIEPPAA', tikut:'KYMMENEN TIKKUU', ratikka:'RATIKKA AJAA PÄÄLLE'};
+const NPCTXT = {piru:'PIRU HEITTÄÄ', skater:'SKEITTARI HEITTÄÄ', spuge:'SPUGE POTKAISEE', loyly:'LÖYLYMIES HEITTÄÄ', pallo:'PURKUPALLO', tykki:'IHMISTYKKI', kauppias:'KAUPPIAS HEITTÄÄ', kiekko:'LÄMÄRI!', magneetti:'MAGNEETTI', hirvi:'HIRVI PUSKEE', lokki:'LOKKI NAPPAA', hyppaaja:'MÄKIHYPPÄÄJÄ KYYDITTÄÄ', grillari:'MAKKARAT MUKAAN', traktori:'TRAKTORI NOSTAA', ufo:'UFO SIEPPAA', tikut:'KYMMENEN TIKKUU', ratikka:'RATIKKA AJAA PÄÄLLE', posti:'POSTINKANTAJA PAKKAA', lintu:'SININEN LINTU NAPPAA', yobussi:'YÖBUSSI AJAA PÄÄLLE', kauris:'VUORIKAURIS PUSKEE'};
+const VEH = {ratikka:1, yobussi:1};
 function npcGo(n){ n.used = true; n.ph = 'act'; n.at = 0; const x = n.x, y = n.y; pops.push({x, y:y - 260, t:0, s:NPCTXT[n.kind], col:'#ffd28a'}); award(1500, x, y - 200); shake = Math.max(shake, 10); mEv(n.kind);
   const hold = (k) => { n.ph = 'hold'; n.ht = 0; n.c = Constraint.create({pointA:{x:rag.torso.position.x, y:rag.torso.position.y}, bodyB:rag.torso, pointB:{x:0, y:0}, stiffness:.4, damping:.1, length:0}); Composite.add(world, n.c); };
   switch (n.kind){
@@ -379,8 +385,13 @@ function npcGo(n){ n.used = true; n.ph = 'act'; n.at = 0; const x = n.x, y = n.y
       for (let i = 0; i < 10; i++) parts.push({x:x + 60 + (rnd() - .5) * 24, y:y - 34, vx:2 + rnd() * 9, vy:-8 - rnd() * 10, life:3, t:0, k:'stick', s:15, r:rnd() * 6, vr:(rnd() - .5) * .6});
       later(1.35, () => { for (const bx of [x - 335, x + 340]) pops.push({x:bx, y:surf(bx) - 120, t:0, s:'PIILOSTA!', col:'#cfe8a8'}); }); break;
     // the tram comes from behind, runs into him and takes him along
-    case 'ratikka': n.ph = 'chase'; n.ct = 0; sfx('electric', .6, {x, y, force:true}); sfx('metal_strike', .5, {x, y, force:true}); break; } }
-function npcStep(dt){ for (const n of NPCS){ n.t += dt; if (n.kind === 'ratikka' && n.ph === 'done' && n.tv > 0){ n.tx = Math.min(n.tmax, n.tx + n.tv * dt); n.tv = Math.max(0, n.tv - 1800 * dt); }
+    case 'ratikka': n.ph = 'chase'; n.ct = 0; sfx('electric', .6, {x, y, force:true}); sfx('metal_strike', .5, {x, y, force:true}); break;
+    case 'yobussi': n.ph = 'chase'; n.ct = 0; sfx('bus', .9, {x, y, force:true}); break;
+    // the postman wraps him up and sends him off
+    case 'posti': hold(); rag.box = 1; rag.boxT = simT; sfx('bell', .8, {x, y, force:true}); sfx('wood_pile', .6, {x, y, force:true}); break;
+    case 'lintu': hold(); sfx('bluebird', 1, {x, y, force:true}); sfx('flap', .7, {x, y, force:true}); break;
+    case 'kauris': fling(35, -16); sfx('kauris', 1, {x, y, force:true}); sfx('thud_heavy', .9, {x, y, force:true}); break; } }
+function npcStep(dt){ for (const n of NPCS){ n.t += dt; if (VEH[n.kind] && n.ph === 'done' && n.tv > 0){ n.tx = Math.min(n.tmax, n.tx + n.tv * dt); n.tv = Math.max(0, n.tv - 1800 * dt); }
     if (n.ph === 'act'){ n.at += dt; if (n.at > 1.2) n.ph = 'done'; }
     else if (n.ph === 'chase'){ n.ct += dt; n.tx = Math.min(n.tmax, n.tx + 1300 * dt); const p = rag && rag.torso.position;
       if (p && state === 'fly' && n.tx + 140 >= p.x - 20){ n.ph = 'hold'; n.ht = 0; n.cx0 = n.tx; n.c = Constraint.create({pointA:{x:n.tx + 150, y:surf(n.tx + 150) - 62}, bodyB:rag.torso, pointB:{x:0, y:0}, stiffness:.4, damping:.1, length:0}); Composite.add(world, n.c);
@@ -391,36 +402,42 @@ function npcStep(dt){ for (const n of NPCS){ n.t += dt; if (n.kind === 'ratikka'
       else if (n.kind === 'magneetti'){ px2 = n.x + 70; py2 = n.y - 120 - 380 * Math.min(1, ht / 1); end = 1.15; }
       else if (n.kind === 'traktori'){ px2 = n.x + 120; py2 = n.y - 50 - 230 * Math.min(1, ht / .8); end = .95; }
       else if (n.kind === 'hyppaaja'){ px2 = n.x + 820 * ht; py2 = n.y - 110 - 300 * ht + 60 * ht * ht; end = 1.9; n.gx = px2; n.gy = py2 + 10; }
-      else if (n.kind === 'ratikka'){ n.tx = Math.min(n.tmax, n.cx0 + 650 * ht + 260 * ht * ht); px2 = n.tx + 150; py2 = surf(px2) - 62; end = n.tx >= n.tmax ? ht : .8; if (rnd() < .5) parts.push({x:n.tx - 10, y:surf(n.tx) - 196, vx:(rnd() - .5) * 4, vy:rnd() * 3, life:.35, t:0, k:'spark', c:'#cfe9ff', s:2.5}); }
+      else if (n.kind === 'posti'){ px2 = n.x + 34; py2 = n.y - 80 - 70 * Math.min(1, ht / .4); end = .55; }
+      else if (VEH[n.kind]){ n.tx = Math.min(n.tmax, n.cx0 + 650 * ht + 260 * ht * ht); px2 = n.tx + 150; py2 = surf(px2) - 62; end = n.tx >= n.tmax ? ht : .8; if (n.kind === 'ratikka' && rnd() < .5) parts.push({x:n.tx - 10, y:surf(n.tx) - 196, vx:(rnd() - .5) * 4, vy:rnd() * 3, life:.35, t:0, k:'spark', c:'#cfe9ff', s:2.5}); }
       else if (n.kind === 'ufo'){ px2 = n.x0 + 380 * ht; py2 = n.y0 - 320 * Math.min(1, ht / 1.2) + Math.sin(ht * 7) * 12; end = 1.7; n.ux = px2; n.uy = py2 - 170; }
       else { px2 = n.x + 760 * ht; py2 = n.y - 140 - 460 * ht + 70 * ht * ht + Math.sin(ht * 9) * 10; end = 2.3; n.gx = px2; n.gy = py2 - 34; }
       if (n.c){ n.c.pointA.x = px2; n.c.pointA.y = py2; }
-      if (ht >= end || !rag || state !== 'fly'){ if (n.c) Composite.remove(world, n.c); n.c = null; n.ph = 'done'; if (n.kind === 'ratikka') n.tv = 900;
+      if (ht >= end || !rag || state !== 'fly'){ if (n.c) Composite.remove(world, n.c); n.c = null; n.ph = 'done'; if (VEH[n.kind]) n.tv = 900; if (n.kind === 'posti' && rag) rag.box = rag.box ? 2 : 0;
         if (rag && state === 'fly'){ if (n.kind === 'tykki'){ fling(37, -37); explode(n.x + 60, n.y - 70, 90, 4, 'boom_tan'); for (let i = 0; i < 14; i++) smoke(n.x + 70, n.y - 80, 1); } else if (n.kind === 'magneetti') fling(30, -22);
           else if (n.kind === 'traktori'){ fling(33, -27); sfx('thud_heavy', .9, {force:true}); }
-          else if (n.kind === 'ratikka'){ fling(36, -16); sfx('metal_strike', .8, {force:true}); sfx('electric', .5, {force:true}); }
+          else if (VEH[n.kind]){ fling(36, -16); sfx('metal_strike', .8, {force:true}); if (n.kind === 'ratikka') sfx('electric', .5, {force:true}); }
+          else if (n.kind === 'posti'){ fling(40, -19); rag.boxT = simT; sfx('fireball', .5, {force:true, rate:1.2}); pops.push({x:rag.torso.position.x, y:rag.torso.position.y - 90, t:0, s:'LÄHTEE KIRJATTUNA', col:'#ffd28a'}); }
+          else if (n.kind === 'lintu'){ fling(30, -6); sfx('bluebird', .7, {force:true, rate:1.1}); }
           else if (n.kind === 'hyppaaja'){ fling(40, -9); rag.jumpX = rag.torso.position.x; rag.jumpT = simT; pops.push({x:rag.torso.position.x, y:rag.torso.position.y - 90, t:0, s:'IRTI SUKSISTA', col:'#cfe9ff'}); }
           else if (n.kind === 'ufo'){ fling(32, -3); const p2 = rag.torso.position; award(2500, p2.x, p2.y - 80, 'UFO EI HALUNNUT', '#cfe8a8'); sfx('ufo_crash', .9, {force:true}); n.ft = 0; }
           else fling(22, -6); } } }
     else if (n.kind === 'ufo'){ n.ft = (n.ft || 0) + dt; if (!n.crashed && n.ux != null){ const ft = n.ft, cx = n.ux + ft * 520, cy = n.uy + ft * ft * 260; if (cy > gy(cx) - 20 || ft > 9){ n.crashed = true; n.cx = cx; explode(cx, gy(cx) - 30, 220, 12, 'boom_rocky'); if (!ended) award(3000, cx, gy(cx) - 160, 'UFO PUTOSI', '#cfe8a8'); for (let i = 0; i < 24; i++) parts.push({x:cx + (rnd() - .5) * 80, y:gy(cx) - 20, vx:(rnd() - .5) * 8, vy:-3 - rnd() * 7, life:1.2, t:0, k:'spark', c:rnd() < .5 ? '#cfe8a8' : '#8d8a82', s:5}); } } }
-    else if (!n.used && rag && state === 'fly'){ const p = rag.torso.position, tr = n.kind === 'ratikka'; if (p.x > n.x + (tr ? 60 : -120) && p.x < n.x + (tr ? 420 : 80) && p.y > n.y - 240 && p.y < n.y + 30) npcGo(n); } } }
+    else if (!n.used && rag && state === 'fly'){ const p = rag.torso.position, tr = VEH[n.kind], hi = n.kind === 'lintu' ? 480 : 240; if (p.x > n.x + (tr ? 60 : -120) && p.x < n.x + (tr ? 420 : 80) && p.y > n.y - hi && p.y < n.y + 30) npcGo(n); } } }
 // ---------- people along the way, weather, odd events ----------
 const FOLKTXT = {skeitti:['SICK', 'KUVASITKO TON', 'UUDESTAAN'], lahio:['OIOI', 'TOI ON SE RÄPPÄRI', 'LAINAAKS VIITOSEN'], ranta:['LÖYLYÄ', 'VESI ON LÄMMINTÄ', 'UIMAAN SIITÄ'], tyomaa:['KYPÄRÄ PÄÄHÄN', 'KAHVITAUKO', 'EI KUULU MEILLE'], tivoli:['LIPUT LOPPU', 'OLIKS SE LAITE', 'MÄKIN HALUUN'],
   tori:['MUIKKUJA', 'TUORETTA', 'LOKKI VEI MUN PULLAN'], kentta:['PAITSIO', 'JÄÄHY', 'MAALI'], romu:['OSTETAAN KAIKKI', 'HYVÄ KUNTO', 'PRÄSSIIN VAAN'], metsa:['MUSTIKKAAN?', 'KUULITKO HIRVEN', 'METSÄ VASTAA'], helvetti:['TERVETULOA', 'LÄMPÖÄ RIITTÄÄ', 'ÄLÄ KOSKE MIHINKÄÄN'],
-  satama:['LAIVA LÄHTI JO', 'LOKIT ON PAHIMPIA', 'TAX FREE'], silta:['KATO LOKKI', 'KAIDE PALAA', 'RATIKKA TULEE'], vuosaari:['OIOI', 'TOI ON SE RÄPPÄRI', 'POSTI TULI'], hymy:['PAITSIO', 'JÄÄHY', 'MAALI'],
-  uni:['NUKUNKO MÄ', 'KAIKKI ON SINISTÄ', 'HERÄÄ JO'], yobussi:['VIIMENEN MENI JO', 'TAKSIJONO ON TOSSA', 'MIHIN SÄ MEET'], vuori:['LÖYLYÄ', 'HUIPULLE ON MATKAA', 'VUORI KUTSUU'], maki:['KANTAA', 'TELEMARK', 'HYVÄ ALASTULO'], grilli:['YKS MEETVURSTI', 'KAIKILLA MAUSTEILLA', 'JONO ALKAA TÄSTÄ'], pelto:['MUUUU', 'ÄLÄ TALLO OHRAA', 'HEINÄT KUIVUU']};
+  satama:['LAIVA LÄHTI JO', 'LOKIT ON PAHIMPIA', 'TAX FREE'], silta:['KATO LOKKI', 'KAIDE PALAA', 'RATIKKA TULEE'], vuosaari:['OIOI', 'TOI ON SE RÄPPÄRI', 'POSTI TULI', 'LAINAAKS VIITOSEN'], hymy:['ON KYLMÄ', 'HYMYILE', 'LUNTA RIITTÄÄ', 'LÄMÄRI'],
+  uni:['NUKUNKO MÄ', 'KAIKKI ON SINISTÄ', 'HERÄÄ JO', 'SININEN LINTU'], yobussi:['VIIMENEN MENI JO', 'TAKSIJONO ON TOSSA', 'MIHIN SÄ MEET'], vuori:['LÖYLYÄ', 'HUIPULLE ON MATKAA', 'VUORI KUTSUU'], maki:['KANTAA', 'TELEMARK', 'HYVÄ ALASTULO'], grilli:['YKS MEETVURSTI', 'KAIKILLA MAUSTEILLA', 'JONO ALKAA TÄSTÄ'], pelto:['MUUUU', 'ÄLÄ TALLO OHRAA', 'HEINÄT KUIVUU']};
 const FOLKCOL = ['#c23b3b', '#3d6f96', '#5f8a4a', '#c9902a', '#8a5a9a', '#ece4cc', '#d8806a'];
 let FOLK = [], WX = 'selkea', EVT = {}, lastShout = -9;
 function makeFolk(){ FOLK = []; for (const z of ZL){ if ((z.k === 'helvetti' && rnd() < .5) || z.k === 'tikut') continue; const n = z.k === 'grilli' ? 5 : 2 + Math.floor(rnd() * 2), npcX = (structs.find(s2 => s2.t === 'npc' && s2.x > z.a && s2.x < z.b) || {x:-1e9}).x;
+    if (z.k === 'yobussi'){ const tq = z.a + ZLEN * .8; for (let i = 0; i < 4; i++) FOLK.push({x:tq + 60 - i * 28, z:z.id, col:FOLKCOL[Math.floor(rnd() * FOLKCOL.length)], hat:rnd() < .5, said:false, ch:0, dir:1, lines:['TAKSI!', 'KUKA ON VIIMENEN', 'JONO ALKAA TÄSTÄ', 'EI ETUILLA']});
+      for (let i = 0; i < 3; i++) FOLK.push({x:z.a + 600 + rnd() * (ZLEN - 1400), z:z.id, col:FOLKCOL[Math.floor(rnd() * FOLKCOL.length)], hat:rnd() < .3, said:false, ch:0, dir:rnd() < .5 ? -1 : 1, drunk:true, ph:rnd() * 6, lines:['VIISTONEEEE', 'HEI SÄ', 'MÄ RAKASTAN SUA', 'LAULA JOTAIN', 'YKS VIEL']}); continue; }
     for (let i = 0; i < n; i++){ const x = z.k === 'grilli' && i > 1 ? npcX - 150 - i * 34 : z.a + 300 + rnd() * (ZLEN - 600); if ((Math.abs(x - npcX) < 140 && !(z.k === 'grilli' && i > 1)) || (inWater(x) && !onDeck(x))) continue; FOLK.push({x, z:z.id, col:FOLKCOL[Math.floor(rnd() * FOLKCOL.length)], hat:rnd() < .4, said:false, ch:0, dir:rnd() < .5 ? -1 : 1}); } }
   const r = Math.random(); WX = r < .45 ? 'selkea' : r < .7 ? 'sade' : r < .85 ? 'lumi' : 'sumu'; EVT = {ufo:Math.random() < .3, salama:WX === 'sade' && Math.random() < .8, ufoDone:false, salamaDone:false}; }
 function folkStep(){ if (!rag || state !== 'fly') return; const p = rag.torso.position; for (const f of FOLK){ if (f.ch > 0) f.ch -= .016; if (f.said || Math.abs(p.x - f.x) > 220 || p.y < surf(f.x) - 700) continue; f.said = true; f.ch = 1.4; f.dir = 1;
-    if (simT - lastShout > 1.1){ lastShout = simT; const L = FOLKTXT[f.z] || ['OIOI']; pops.push({x:f.x, y:surf(f.x) - 120, t:0, s:L[Math.floor(rnd() * L.length)], col:'#ece4cc'}); if (f.z === 'pelto') sfx(rnd() < .5 ? 'moo1' : 'moo2', .7, {x:f.x, y:surf(f.x), force:true}); else sfx('crowd_shout', .25, {x:f.x, y:surf(f.x), gap:.8}); } }
+    if (simT - lastShout > 1.1){ lastShout = simT; const L = f.lines || FOLKTXT[f.z] || ['OIOI']; pops.push({x:f.x, y:surf(f.x) - 120, t:0, s:L[Math.floor(rnd() * L.length)], col:'#ece4cc'}); if (f.z === 'pelto') sfx(rnd() < .5 ? 'moo1' : 'moo2', .7, {x:f.x, y:surf(f.x), force:true}); else sfx('crowd_shout', .25, {x:f.x, y:surf(f.x), gap:.8}); } }
   for (const n of NPCS){ if (n.kind === 'grillari' && !n.sz && Math.abs(p.x - n.x) < 1100){ n.sz = true; sfx('sizzle', .55, {x:n.x, y:n.y, force:true}); } } }
 function drawFolk(x0, x1, t){ for (const f of FOLK){ if (f.x < x0 - 60 || f.x > x1 + 60) continue; const y = surf(f.x), up = f.ch > 0 ? Math.abs(Math.sin(t * 9)) : 0, x = f.x, d = f.dir, hop = f.ch > 0 ? Math.abs(Math.sin(t * 9)) * 6 : 0, st = PEE && PEE.o === f && PEE.ph === 'walk' ? Math.sin(t * 13) * 7 : 0;
+    if (f.drunk){ g.save(); g.translate(x, y); g.rotate(Math.sin(t * 1.7 + f.ph) * .16); g.translate(-x, -y); }
     line(x - 4, y - 26 - hop, x - 6 - st, y, INK, 7); line(x + 4, y - 26 - hop, x + 6 + st, y, INK, 7); line(x - 4, y - 26 - hop, x - 6 - st, y, '#2a2b30', 3.5); line(x + 4, y - 26 - hop, x + 6 + st, y, '#2a2b30', 3.5);
     rr(x - 9, y - 52 - hop, 18, 28, 7); ink(f.col, 2.5); line(x + 6 * d, y - 46 - hop, x + (12 + up * 4) * d, y - 30 - up * 34 - hop, INK, 6); line(x - 6 * d, y - 46 - hop, x - 12 * d, y - 30 - hop, INK, 6); disc(x, y - 62 - hop, 10, C.skin, 2.5);
-    if (f.hat){ g.beginPath(); g.arc(x, y - 64 - hop, 10.5, Math.PI, 0); ink(C.beanie, 2); } if (f.ch > 0){ g.beginPath(); g.arc(x + 2 * d, y - 59 - hop, 3.5, 0, Math.PI); g.fillStyle = INK; g.fill(); } } }
+    if (f.hat){ g.beginPath(); g.arc(x, y - 64 - hop, 10.5, Math.PI, 0); ink(C.beanie, 2); } if (f.ch > 0){ g.beginPath(); g.arc(x + 2 * d, y - 59 - hop, 3.5, 0, Math.PI); g.fillStyle = INK; g.fill(); } if (f.drunk) g.restore(); } }
 function eventsStep(dt){ if (!rag || state !== 'fly') return; const p = rag.torso.position, alt = gy(p.x) - p.y, holding = NPCS.some(n2 => n2.ph === 'hold');
   if (EVT.ufo && !EVT.ufoDone && flyT > 2.5 && alt > 520 && !holding && p.x < EDGE - 2500 && p.x > STAGE.x + 1500){ EVT.ufoDone = true; const n = {kind:'ufo', x:p.x, y:p.y, x0:p.x, y0:p.y, used:true, ph:'hold', ht:0, t:0, at:0, ux:p.x, uy:p.y - 170};
     n.c = Constraint.create({pointA:{x:p.x, y:p.y}, bodyB:rag.torso, pointB:{x:0, y:0}, stiffness:.35, damping:.1, length:0}); Composite.add(world, n.c); NPCS.push(n); pops.push({x:p.x, y:p.y - 260, t:0, s:'UFO SIEPPAA', col:'#cfe8a8'}); sfx('ufo_pass', .9, {force:true}); sfx('electric', .4, {force:true}); mEv('ufo'); }
@@ -430,7 +447,7 @@ function drawWeather(t){ if (state === 'start') return;
   if (WX === 'sade'){ g.strokeStyle = 'rgba(190,205,220,.35)'; g.lineWidth = 1.5; g.beginPath(); for (let i = 0; i < 140; i++){ const sx = ((i * 173.3 - cam.x * .5 + t * 60) % (W + 60) + W + 60) % (W + 60) - 30, sy = ((i * 97.1 + t * (700 + i % 5 * 90) - cam.y * .5) % (H + 60) + H + 60) % (H + 60) - 30; g.moveTo(sx, sy); g.lineTo(sx - 5, sy + 18); } g.stroke(); }
   if (WX === 'sumu'){ const fg = g.createLinearGradient(0, H * .35, 0, H); fg.addColorStop(0, 'rgba(170,170,180,0)'); fg.addColorStop(1, 'rgba(170,170,180,.32)'); g.fillStyle = fg; g.fillRect(0, 0, W, H); } }
 // ---------- how the areas look ----------
-function zDecoBack(x0, x1, t){ for (const z of ZL){ if (z.b < x0 - 600 || z.a > x1 + 600) continue; const mx = (z.a + z.b) / 2, my = gy(Math.min(mx, EDGE - 10));
+function zDecoBack(x0, x1, t){ for (const z of ZL){ if (z.b < x0 - 1500 || z.a > x1 + 1500) continue; const mx = (z.a + z.b) / 2, my = gy(Math.min(mx, EDGE - 10));
     if (z.k === 'ranta'){ g.beginPath(); g.ellipse(mx, my - 30, 900, 120, 0, 0, 7); ink('#3d5f7a', 4); for (let i = -4; i <= 4; i++) line(mx + i * 160 - 30, my - 60 + (i % 2) * 20, mx + i * 160 + 30, my - 60 + (i % 2) * 20, '#7ab0d0', 3); }
     if (z.k === 'tivoli'){ const cx = mx - 300, cy = my - 420; disc(cx, cy, 300, null, 5); for (let i = 0; i < 12; i++){ const a = i / 12 * 6.283 + t * .15; line(cx, cy, cx + Math.cos(a) * 300, cy + Math.sin(a) * 300, '#3a3633', 3); rr(cx + Math.cos(a) * 300 - 14, cy + Math.sin(a) * 300, 28, 22, 4); ink(['#c23b3b', '#e7c25a', '#3d6f96'][i % 3], 2.5); } line(cx - 160, my, cx, cy, INK, 7); line(cx + 160, my, cx, cy, INK, 7);
       for (let i = 0; i < 22; i++){ const lx = z.a + 200 + i * 130; disc(lx, gy(lx) - 210 + Math.sin(i) * 10, 6, Math.sin(t * 4 + i) > 0 ? '#ffe08a' : '#ff8a5c', 2); } }
@@ -446,6 +463,19 @@ function zDecoBack(x0, x1, t){ for (const z of ZL){ if (z.b < x0 - 600 || z.a > 
     if (z.k === 'silta' && BR){ const wy = BR.WY; for (let i = 0; i < 14; i++){ const bx = z.a + 300 + i * 300 + ((i * 97) % 80), bw = 140 + (i * 53) % 90, bh = 280 + (i * 131) % 320; rr(bx, wy - bh, bw, bh + 20, 2); ink(i % 3 ? '#2c2b30' : '#33302c', 3);
         for (let yy = wy - bh + 20; yy < wy - 20; yy += 30) for (let xx = bx + 14; xx < bx + bw - 14; xx += 28){ g.fillStyle = ((xx * 7 + yy * 13) % 9) < 3 ? '#e8b35c' : '#1b1b1e'; g.fillRect(xx, yy, 12, 14); } }
       const cx = z.a + ZLEN * .72, cy = wy; rr(cx - 50, cy - 640, 100, 660, 3); ink('#5f5a50', 3); path([[cx - 58, cy - 640], [cx, cy - 820], [cx + 58, cy - 640]]); ink('#3d5a4a', 3); disc(cx, cy - 560, 22, '#d8c79a', 3); line(cx, cy - 560, cx, cy - 576, INK, 2); line(cx, cy - 560, cx + 12, cy - 560, INK, 2); }
+    if (z.k === 'vuosaari') for (let i = 0; i < 9; i++){ const bx = z.a + 160 + i * 500 + (i * 71) % 120, by = gy(bx) + 60, bw = 210 + (i * 37) % 80, bh = 560 + (i * 113) % 360; rr(bx, by - bh, bw, bh, 2); ink(i % 2 ? '#35343a' : '#3d3b40', 3);
+      for (let yy = by - bh + 24; yy < by - 60; yy += 34) for (let xx = bx + 16; xx < bx + bw - 20; xx += 30){ g.fillStyle = ((xx * 3 + yy * 7 + i) % 11) < 3 ? '#e8b35c' : '#1b1b1e'; g.fillRect(xx, yy, 14, 16); } }
+    if (z.k === 'hymy') for (let i = 0; i < 22; i++){ const px2 = z.a + 80 + i * 210 + (i * 53) % 90, py2 = gy(px2) + 6, hh = 1 + (i % 3) * .25; for (let k = 0; k < 3; k++){ const w = (70 - k * 18) * hh, yy = py2 - 30 * hh - k * 58 * hh; path([[px2 - w, yy], [px2, yy - 96 * hh], [px2 + w, yy]]); ink('#24382a', 3); path([[px2 - w * .45, yy - 52 * hh], [px2, yy - 96 * hh], [px2 + w * .45, yy - 52 * hh]]); ink('#eef3f5', 2); } }
+    if (z.k === 'uni'){ const wy = my - 280, L0 = mx - 1700, L1 = mx + 1700; g.fillStyle = '#22355e'; g.fillRect(L0, wy, L1 - L0, 900); line(L0, wy, L1, wy, '#9ab8e8', 3);
+      g.globalAlpha = .5; for (let i = 0; i < 9; i++) g.fillRect(mx + 300 - 30 + Math.sin(t + i) * 10, wy + 18 + i * 30, 60 - i * 5, 5); g.globalAlpha = 1;
+      for (let i = 0; i < 26; i++){ const px2 = L0 + 40 + i * 132, h = 90 + (i * 41) % 70; path([[px2 - 34, wy], [px2, wy - h], [px2 + 34, wy]]); ink('#1a2a4a', 2.5); g.globalAlpha = .35; path([[px2 - 34, wy], [px2, wy + h], [px2 + 34, wy]]); g.fillStyle = '#4a6aa8'; g.fill(); g.globalAlpha = 1; }
+      for (let i = 0; i < 18; i++){ const sx = L0 + ((i * 397 + t * 30) % (L1 - L0)), sy = wy - 300 - (i * 131) % 600 + Math.sin(t * .7 + i) * 20; g.globalAlpha = .4 + .4 * Math.sin(t * 2 + i); disc(sx, sy, 3, '#cfe0ff', 0); } g.globalAlpha = 1; }
+    if (z.k === 'yobussi'){ for (let i = 0; i < 8; i++){ const bx = z.a + 300 + i * 560, by = gy(bx) + 60, bw = 230, bh = 420 + (i * 97) % 300; rr(bx, by - bh, bw, bh, 2); ink('#2e2c33', 3); for (let yy = by - bh + 24; yy < by - 60; yy += 34) for (let xx = bx + 16; xx < bx + bw - 20; xx += 30){ g.fillStyle = ((xx * 5 + yy * 3 + i) % 13) < 3 ? '#e8b35c' : '#1b1b1e'; g.fillRect(xx, yy, 14, 16); } }
+      const tq = z.a + ZLEN * .8; for (let i = 0; i < 4; i++){ const cx = tq + 120 + i * 190, cy = gy(cx), an = Math.atan2(gy(cx + 20) - gy(cx - 20), 40); at(cx, cy, an, () => { path([[-75, -8], [-70, -26], [-44, -28], [-28, -50], [34, -50], [50, -28], [75, -24], [75, -6], [-75, -6]]); ink('#2a2b30', 3); rr(-16, -64, 32, 14, 3); ink('#e7c25a', 2); g.fillStyle = INK; g.font = '11px VT323'; g.textAlign = 'center'; g.fillText('TAKSI', 0, -54); path([[-22, -30], [-12, -46], [4, -46], [4, -30]]); ink('rgba(232,196,106,.55)', 2); disc(-46, -6, 12, '#1a1a1a', 3); disc(46, -6, 12, '#1a1a1a', 3); }); }
+      const sx = z.a + 420, sy = gy(sx); line(sx, sy, sx, sy - 170, INK, 6); line(sx, sy, sx, sy - 170, '#8d8a82', 3); rr(sx - 40, sy - 210, 80, 44, 4); ink('#2f5592', 3); g.fillStyle = '#ece4cc'; g.font = '20px VT323'; g.textAlign = 'center'; g.fillText('YÖBUSSI', sx, sy - 182); }
+    if (z.k === 'vuori'){ const base = my + 380; for (const [dx, h, w, c1] of [[-2000, 1450, 850, '#4a5468'], [2300, 1400, 820, '#4a5468'], [-1000, 1850, 1050, '#55607a'], [1250, 1950, 1100, '#55607a'], [150, 1650, 950, '#637088']]){ const ax = mx + dx, ay = base - h; path([[ax - w, base], [ax - w * .3, ay + h * .35], [ax, ay], [ax + w * .25, ay + h * .3], [ax + w, base]]); ink(c1, 4);
+        path([[ax - w * .3 * .55, ay + h * .35 * .55], [ax, ay], [ax + w * .25 * .6, ay + h * .3 * .6], [ax + w * .05, ay + h * .26], [ax - w * .08, ay + h * .2]]); ink('#d8e0ea', 3); }
+      const hz = g.createLinearGradient(0, base - 3000, 0, base); hz.addColorStop(0, 'rgba(60,62,80,0)'); hz.addColorStop(1, 'rgba(60,62,80,.45)'); g.fillStyle = hz; g.fillRect(mx - 3200, base - 3000, 6400, 3000); }
     if (z.k === 'metsa'){ for (let i = 0; i < Math.floor(ZLEN / 125); i++){ const px2 = z.a + 60 + i * 125; const py2 = gy(px2) + 4; for (let k = 0; k < 3; k++){ const w = 70 - k * 18, yy = py2 - 30 - k * 60; path([[px2 - w, yy], [px2, yy - 100], [px2 + w, yy]]); ink('#203018', 3); } } } } }
 function zDecoFront(x0, x1, t){ for (const z of ZL){ if (z.b < x0 - 400 || z.a > x1 + 400) continue; const zd = ZDEF[z.k];
     // the town sign at the start of each area
@@ -462,6 +492,8 @@ function kid(x, y, col, kick, run, face, cover){ at(x, y, 0, () => { g.scale(.72
   rr(-11, -62, 22, 34, 8); ink(col); if (cover){ line(8, -56, 4, -76, INK, 7); line(-8, -56, -4, -76, INK, 7); } else { line(8, -56, 18 + sw * 4, -38 - (run != null ? 14 : 0), INK, 7); line(-8, -56, -16 - sw * 4, -40, INK, 7); }
   disc(0, -74, 12, C.skin, 2.5); g.beginPath(); g.arc(0, -77, 12.5, Math.PI, 0); ink('#6b4a2a', 2.2); if (cover){ rr(-9, -79, 18, 7, 3); ink(C.skin, 2); } }); }
 function bush(x, y, s){ at(x, y, 0, () => { g.scale(s || 1, 1); [[-30, -18, 22], [0, -30, 28], [30, -18, 22], [-14, -40, 18], [16, -42, 18]].forEach(([dx, dy, r]) => disc(dx, dy, r, '#4a6a34', 3)); [[-30, -18, 22], [0, -30, 28], [30, -18, 22]].forEach(([dx, dy, r]) => disc(dx, dy, r - 3, '#4a6a34', 0)); }); }
+// the parcel he travels in
+function drawBox(){ const t0 = rag.torso; at(t0.position.x, t0.position.y, t0.angle, () => { rr(-30, -32, 60, 62, 3); ink('#c9a26a', 3); line(-30, -4, 30, -4, '#e0c48a', 7); line(-30, -4, 30, -4, '#8a6a3a', 1.5); rr(-22, 8, 30, 14, 1); ink('#ece4cc', 1.5); g.fillStyle = INK; g.font = '9px VT323'; g.textAlign = 'left'; g.fillText('VIISTONE', -20, 18); }); }
 function drawNpc(n, t){ const x = n.x, y = n.y, act = n.ph === 'act' ? Math.max(0, 1 - n.at / .6) : 0, sk = '#e0b08e';
   const person = (dx, body, legKick, armUp, hat) => { if (n.walk) return; line(x + dx - 5, y - 30, x + dx - 8 - legKick * 18, y, INK, 9); line(x + dx - 5, y - 30, x + dx - 8 - legKick * 18, y, '#2a2b30', 5); line(x + dx + 5, y - 30, x + dx + 6 + legKick * 30, y - legKick * 26, INK, 9); line(x + dx + 5, y - 30, x + dx + 6 + legKick * 30, y - legKick * 26, '#2a2b30', 5);
     rr(x + dx - 11, y - 62, 22, 34, 8); ink(body); line(x + dx + 8, y - 56, x + dx + 20 + armUp * 10, y - 40 - armUp * 36, INK, 8); line(x + dx + 8, y - 56, x + dx + 20 + armUp * 10, y - 40 - armUp * 36, body, 4); disc(x + dx, y - 74, 12, sk, 2.5); if (hat) hat(x + dx, y - 74); };
@@ -501,6 +533,23 @@ function drawNpc(n, t){ const x = n.x, y = n.y, act = n.ph === 'act' ? Math.max(
       kids.forEach(([k0, k1, col, face], i) => { const run = k < .35 ? 0 : Math.min(1, (k - .35) / .9), kx = k0 + (k1 - k0) * run, hid = run >= 1, kick = i === 0 && k >= 0 && k < .35 ? Math.sin(k / .35 * Math.PI) : 0, peek = hid && Math.sin(t * 1.3 + i * 2.1) > .7;
         if (!hid || peek) kid(kx, surf(kx) - (hid ? 10 : 0), col, kick, run > 0 && run < 1 ? t : null, run > 0 ? Math.sign(k1 - k0) : face, i === 2 && k < 0); });
       for (const bx of [x - 345, x + 342]) bush(bx, surf(bx), bx > x ? 1.25 : 1); break; }
+    case 'posti': { rr(x - 74, y - 30, 30, 30, 2); ink('#c9a26a', 2.5); rr(x - 66, y - 54, 22, 24, 2); ink('#d8b47a', 2.5); line(x - 74, y - 15, x - 44, y - 15, '#8a6a3a', 2); line(x - 55, y - 54, x - 55, y - 30, '#8a6a3a', 2);
+      person(0, '#d8702a', act, n.ph === 'hold' ? 1 : act, (hx, hy) => { rr(hx - 13, hy - 14, 26, 8, 3); ink('#2a2b30', 2); rr(hx + 4, hy - 9, 14, 4, 2); ink('#2a2b30', 1.5); }); if (!n.walk){ rr(x - 20, y - 50, 14, 22, 3); ink('#6b4a2a', 2); line(x - 8, y - 60, x - 14, y - 50, INK, 2); } break; }
+    case 'lintu': { const fly = n.ph === 'hold' && n.c, gone = n.ph === 'done' && n.gx != null; line(x - 6, y, x - 2, y - 300, INK, 16); line(x - 6, y, x - 2, y - 300, '#2e3a4a', 10); line(x, y - 240, x + 70, y - 268, INK, 8); line(x, y - 240, x + 70, y - 268, '#2e3a4a', 4);
+      [[-40, -330, 60], [30, -360, 54], [-6, -400, 50], [60, -310, 40], [-70, -290, 40]].forEach(([dx, dy, r]) => disc(x + dx, y + dy, r, '#24405a', 3));
+      if (gone){ n.gx += 7; n.gy -= 3.5; }
+      const bx = fly || gone ? n.gx : x + 60, by = fly || gone ? n.gy : y - 286, fl = fly || gone ? Math.sin(t * 14) * 34 : Math.sin(t * 2) * 3, sc = fly || gone ? 1.5 : 1;
+      at(bx, by, 0, () => { g.scale(sc, sc); g.beginPath(); g.ellipse(0, 0, 26, 16, -.2, 0, 7); ink('#3d7ad0', 2.5); disc(20, -12, 11, '#3d7ad0', 2.5); path([[29, -14], [42, -10], [29, -7]]); ink('#e7a43a', 2); disc(23, -15, 2.5, INK, 0); path([[-22, 2], [-42, 10], [-24, 10]]); ink('#2d5aa0', 2);
+        path([[-8, -6], [-30, -26 - fl], [10, -10]]); ink('#5a9ae8', 2.5); if (!fly && !gone){ line(-4, 14, -6, 22, '#e7a43a', 2.5); line(6, 14, 6, 22, '#e7a43a', 2.5); } }); break; }
+    case 'kauris': at(x, y, 0, () => { if (n.fx < 0) g.scale(-1, 1); const lean = n.ph === 'act' ? Math.min(1, n.at * 4) * .5 : 0; for (const lx of [-30, -14, 20, 34]){ line(lx, -40, lx + (lx > 0 ? 2 : -2), 0, INK, 8); line(lx, -40, lx + (lx > 0 ? 2 : -2), 0, '#d8d4ca', 4); }
+      g.beginPath(); g.ellipse(2, -52, 46, 22, 0, 0, 7); ink('#e8e4da'); at(44, -66, -lean, () => { g.beginPath(); g.ellipse(12, 2, 16, 12, .5, 0, 7); ink('#e8e4da'); disc(10, -2, 2.5, INK, 0); path([[14, 10], [10, 26], [6, 12]]); ink('#d8d4ca', 2);
+        g.beginPath(); g.moveTo(2, -8); g.quadraticCurveTo(-16, -36, -30, -18); g.strokeStyle = INK; g.lineWidth = 7; g.stroke(); g.strokeStyle = '#6b5a4a'; g.lineWidth = 3.5; g.stroke(); }); }); break;
+    case 'yobussi': { const tx = n.tx != null ? n.tx : x, ty = surf(tx);
+      at(tx, ty, 0, () => { g.beginPath(); g.moveTo(140, -40); g.lineTo(380, -80); g.lineTo(380, 10); g.closePath(); g.fillStyle = 'rgba(255,241,196,.12)'; g.fill();
+        rr(-140, -96, 280, 84, 12); ink('#2f5592', 3); g.fillStyle = '#d8d4ca'; g.fillRect(-137, -30, 274, 8);
+        for (let i = 0; i < 7; i++){ rr(-126 + i * 34, -84, 26, 34, 3); ink(i % 3 === 1 ? '#3a3c43' : '#e8c46a', 2); } rr(110, -84, 24, 50, 4); ink('rgba(200,225,230,.85)', 2);
+        rr(-50, -110, 100, 16, 3); ink('#1b1714', 2); g.fillStyle = '#ffb35c'; g.font = '15px VT323'; g.textAlign = 'center'; g.fillText('VIIMEINEN', 0, -97);
+        disc(136, -24, 5, '#ffe08a', 2); for (const wx of [-90, 90]) disc(wx, -12, 15, '#2a2b30', 3); }); break; }
     case 'ratikka': { const tx = n.tx != null ? n.tx : x, ty = surf(tx), mv = n.ph === 'chase' || n.ph === 'hold' || n.tv > 0;
       if (mv && rnd() < .6) parts.push({x:tx - 10, y:ty - 196, vx:(rnd() - .5) * 5, vy:rnd() * 3, life:.3, t:0, k:'spark', c:'#cfe9ff', s:2.5});
       at(tx, ty, 0, () => { line(-24, -82, 6, -140, INK, 4); line(6, -140, -14, -192, INK, 4); line(-36, -194, 24, -194, INK, 5);
@@ -610,6 +659,7 @@ const T = {
     s.push(block('wood', x + 50, y - 168, 130, 12, -.5), block('wood', x + 170, y - 168, 130, 12, .5), block('hay', x + 60, y - 20, 52, 40), block('hay', x + 116, y - 20, 52, 40), block('hay', x + 88, y - 60, 52, 40), explosive('gas', x + 180, y - 19)); return ['LATO', s, 1400]; },
   grillikoju(x){ const y = pad(x - 40, x + 170); const s = [block('stone', x + 60, y - 15, 120, 30), block('wood', x + 8, y - 75, 10, 90), block('wood', x + 112, y - 75, 10, 90), block('glass', x + 60, y - 52, 76, 40)];
     const roof = block('metal', x + 60, y - 125, 150, 10); roof.plugin.col = '#c23b3b'; s.push(roof); for (let i = 0; i < 3; i++) s.push(block('crate', x + 30 + i * 30, y - 38, 24, 16)); s.push(explosive('gas', x + 150, y - 19), explosive('gas', x - 20, y - 19)); return ['GRILLIKOJU', s, 1100]; },
+  patsas(x){ const y = pad(x - 80, x + 80), b = Bodies.rectangle(x, y - 165, 90, 330, {isStatic:true, friction:.4, restitution:.2}); b.plugin = {kind:'hymy', w:90, h:330, big:true}; Composite.add(world, b); bodies.push(b); return ['PATSAS', [], 0]; },
   mankka(x, s){ const y = pad(x - 90, x + 90), b = Bodies.rectangle(x, y - 34, 120, 68, {isStatic:true, friction:.6, restitution:.25, chamfer:{radius:8}}); b.plugin = {kind:'mankka', w:120, h:68, song:s.song, t:-9}; Composite.add(world, b); bodies.push(b); return ['MANKKA', [], 0]; },
   kaljat(x){ const y = pad(x - 20, x + 150); const s = []; for (let r = 0; r < 5; r++) for (let k = 0; k < 5 - r; k++) s.push(block('crate', x + 14 + k * 26 + r * 13, y - 9 - r * 18, 24, 17));
     s.push(explosive('fw', x + 160, y - 12)); return ['KALJAKORIT', s, 600]; }
@@ -632,13 +682,16 @@ const ZDEF = {
   helvetti:{n:'HELVETTI', s:'ÄLÄ PYSÄHDY', g:'#3a1612', set:['tynnyrit', 'kaasut', 'muuri', 'tynnyrit', 'kaasut'], npc:'piru', hell:true},
   satama:{n:'SATAMA', s:'VIIMEINEN LAIVA LÄHTI JO', g:'#58585a', set:['kontit', 'tynnyrit', 'kontit', 'kaasut'], npc:'lokki'},
   tikut:{n:'KYMMENEN TIKKUU', s:'PIHALEIKIT', g:'#5e5a3e', set:['trampoliini', 'halkopino', 'roskakatos', 'paalit', 'trampoliini'], npc:'tikut'},
+  vuosaari:{n:'VUOSAARI', s:'POSTI KULKEE', g:'#5f5c58', set:['kerrostalo', 'roskakatos', 'tornitalo', 'bussi', 'kerrostalo', 'kioski'], npc:'posti', npc2:'spuge', rat:true},
+  hymy:{n:'HYMYTYTTÖ', s:'TALVI TULI', g:'#c9d2d6', set:['kaljat', 'roskakatos', 'halkopino', 'muuri', 'kaasut'], npc:'kiekko', ice:true, snow:true, statue:true},
+  uni:{n:'UNIMAAILMA', s:'NUKU JO', g:'#34405a', set:['mokki', 'halkopino', 'paalit', 'kaasut'], npc:'lintu', trees:true, dream:true},
+  yobussi:{n:'YÖBUSSI', s:'VIIMEINEN VUORO', g:'#4a4a50', set:['kioski', 'roskakatos', 'kaljat', 'auto', 'grillikoju'], npc:'yobussi'},
+  vuori:{n:'VUORI', s:'SAUNA VUOREN JUURELLA', g:'#d0d8dc', set:['sauna', 'halkopino', 'mokki', 'sauna', 'kaasut'], npc:'kauris', npc2:'loyly', snow:true},
   silta:{n:'PITKÄSILTA', s:'KAITEET TULESSA', g:'#5a5650', set:['bussi', 'kaljat', 'roskakatos', 'tynnyrit'], npc:'ratikka', bridge:true}
 };
 // the course: always the same order, each area once; what is in them changes every time
-// (Vuosaari, Hymytyttö, Unimaailma, Yöbussi and Vuori borrow older areas until they get their own)
-const COURSE = [{k:'skeitti'}, {k:'tikut', song:'kymmenentikkuu'}, {k:'lahio', id:'vuosaari', n:'VUOSAARI', s:'LÄHIÖ', song:'postinkantaja'}, {k:'tivoli'}, {k:'silta', song:'pitkasilta'}, {k:'tyomaa'},
-  {k:'kentta', id:'hymy', n:'HYMYTYTTÖ', s:'JÄÄ ON KOVAA', song:'hymytytto'}, {k:'grilli'}, {k:'satama', id:'uni', n:'UNIMAAILMA', s:'NUKU JO', song:'symmetrisiiunii'}, {k:'romu'},
-  {k:'tori', id:'yobussi', n:'YÖBUSSI', s:'VIIMEINEN VUORO', song:'kotiinpaluu'}, {k:'pelto'}, {k:'ranta', id:'vuori', n:'VUORI', s:'SAUNA VUOREN JUURELLA', song:'valiivuodella'}, {k:'metsa'}, {k:'maki'}, {k:'helvetti', song:'vikaselka'}];
+const COURSE = [{k:'skeitti'}, {k:'tikut', song:'kymmenentikkuu'}, {k:'vuosaari', song:'postinkantaja'}, {k:'tivoli'}, {k:'silta', song:'pitkasilta'}, {k:'tyomaa'},
+  {k:'hymy', song:'hymytytto'}, {k:'grilli'}, {k:'uni', song:'symmetrisiiunii'}, {k:'romu'}, {k:'yobussi', song:'kotiinpaluu'}, {k:'pelto'}, {k:'vuori', song:'valiivuodella'}, {k:'metsa'}, {k:'maki'}, {k:'helvetti', song:'vikaselka'}];
 const SILTA_I = COURSE.findIndex(c2 => c2.k === 'silta');
 let ZL = [], EDGE = 34000, EDGEY = 0;
 function zoneAt(x){ for (const z of ZL) if (x >= z.a && x < z.b) return z; return null; }
@@ -647,9 +700,10 @@ function planCourse(){ seed = 1 + Math.floor(Math.random() * 2e9); structs = [];
   COURSE.forEach((c2, i) => { const k = c2.k, a = 700 + i * ZLEN, b = a + ZLEN, z = ZDEF[k], mid = a + ZLEN / 2, br = !!z.bridge, last = i === COURSE.length - 1;
     const npcX = br ? a + ZLEN * .18 : c2.song ? a + ZLEN * .3 + (R() - .5) * 300 : a + ZLEN * .5 + (R() - .5) * 400;
     ZL.push({k, id:c2.id || k, n:c2.n || z.n, s:c2.s || z.s, song:c2.song || null, a, b, seen:i === 0});
-    let x = a + 260, j = Math.floor(R() * z.set.length); const stop = br ? b - 560 : last ? b - 720 : b - 330;
-    while (x < stop){ if (x > npcX - 520 && x < (c2.song ? mid + 260 : npcX + 300)){ x = c2.song ? mid + 260 : npcX + 300; continue; } if (br && BR && x + 300 > BR.g0 - 60 && x - 30 < BR.g1 + 60){ x = BR.g1 + 90; continue; } const t = z.set[j % z.set.length]; j++; structs.push({t, x, spawned:false, done:false}); x += 470 + R() * 260 + (t === 'kerrostalo' || t === 'muuri' || t === 'vesitorni' || t === 'kontit' ? 160 : 0); }
-    structs.push({t:'npc', npc:z.npc, x:npcX, spawned:false, done:true, mid});
+    const n2X = z.npc2 ? a + ZLEN * .12 : -1e9; let x = a + 260, j = z.npc2 === 'loyly' ? 0 : Math.floor(R() * z.set.length); const stop = br ? b - 560 : last ? b - 720 : b - 330;
+    while (x < stop){ if (x > n2X - 520 && x < n2X + 300){ x = n2X + 300; continue; } if (x > npcX - 520 && x < (c2.song ? mid + 260 : npcX + 300)){ x = c2.song ? mid + 260 : npcX + 300; continue; } if (br && BR && x + 300 > BR.g0 - 60 && x - 30 < BR.g1 + 60){ x = BR.g1 + 90; continue; } const t = z.set[j % z.set.length]; j++; structs.push({t, x, spawned:false, done:false}); x += 470 + R() * 260 + (t === 'kerrostalo' || t === 'muuri' || t === 'vesitorni' || t === 'kontit' ? 160 : 0); }
+    structs.push({t:'npc', npc:z.npc, x:npcX, spawned:false, done:true, mid}); if (z.npc2) structs.push({t:'npc', npc:z.npc2, x:n2X, spawned:false, done:true, mid});
+    if (z.statue) structs.push({t:'patsas', x:(npcX + mid) / 2 + 30, spawned:false, done:true});
     if (c2.song) structs.push({t:'mankka', x:mid, song:c2.song, spawned:false, done:true}); });
   structs.push({t:'mankka', x:EDGE - 170, song:'epilogi', spawned:false, done:true});
   structs.sort((p2, q) => p2.x - q.x);
@@ -824,6 +878,7 @@ function ragHit(part, other, imp, rv, x, y){ if (state !== 'fly' || (rag.torso.p
   const op = other.plugin || {}; if (imp > 8 && !other.isStatic && op.kind && op.kind !== 'rag'){ if (simT - (rag.stT || -9) < 1.6) rag.streak = (rag.streak || 0) + 1; else rag.streak = 1; rag.stT = simT;
     if (rag.streak >= 2 && rag.streak < 5) pops.push({x, y:y - 90, t:.3, s:rag.streak + ' / 5', col:'#ff8a5c'}); if (rag.streak === 5) viisi(); }
   if (op.kind === 'car' && imp > 6) mEv('car');
+  if (rag.box === 2 && imp > 8 && simT - rag.boxT > .4){ rag.box = 0; award(2500, x, y - 100, 'PAKETTI PERILLE', '#ffd28a'); mEv('paketti'); sfx('plywood_crumble', .8, {x, y, force:true}); sfx('bell', .6, {force:true, delay:.2}); for (let i = 0; i < 18; i++){ const a = rnd() * 6.28, v = 2 + rnd() * 6; parts.push({x, y:y - 10, vx:Math.cos(a) * v, vy:Math.sin(a) * v - 3, life:1.4, t:0, k:'chip', c:'#c9a26a', s:4 + rnd() * 5, r:rnd() * 6, vr:(rnd() - .5) * .5}); } }
   if (op.kind === 'mankka' && imp > 6 && simT - op.t > 1.2){ op.t = simT; sfx('metal_table1', .7, {x, y, force:true}); sfx('thud_heavy', .5, {x, y}); pops.push({x, y:y - 90, t:0, s:'MANKKA KESTÄÄ', col:'#cfe8a8'}); }
   if (op.kind === 'rat' && simT - op.t > .5){ op.t = simT; rag.all.forEach(q => Body.setVelocity(q, {x:Math.max(q.velocity.x, 8) + 8, y:Math.min(q.velocity.y, 0) - 17})); sfx('rat', .9, {x, y, force:true}); sfx('thud_soft', .8, {x, y, force:true}); award(1000, x, y - 80, 'JÄTTIROTTA', '#ece4cc'); shake = 16; mEv('rat'); }
   if (op.kind === 'hymy' && !op.seen){ op.seen = true; sfx('static', .5, {force:true}); hymySeen('c02'); award(1500, x, y - 120, 'HYMYTYTTÖ', '#cfe0e8'); mEv('hymy'); }
@@ -901,19 +956,22 @@ function newGame(){ recAbort(); gameId++; PEE = null; if (engine){ Composite.cle
   state = 'stage'; $('over').classList.remove('on'); $('hint').classList.add('on'); $('score').textContent = '0'; $('dist').textContent = '0 M'; }
 // ---------- lorotus: someone nearby walks up to him when it's all over ----------
 let PEE = null;
-const PEEK = {skater:[0, '#c23b3b'], spuge:[0, '#5f6a3a', 1], loyly:[0, '#d8806a'], kauppias:[30, '#ece4cc'], kiekko:[0, '#2f5592'], hyppaaja:[0, '#e7c25a'], grillari:[24, '#ece4cc'], piru:[0], hirvi:[0]};
-function peeFind(){ if (!rag || rag.overEdge) return null; const p = rag.torso.position, fy = surf(p.x, p.y); if (p.y < fy - 80 || p.x > EDGE - 40) return null;
-  const ok = cx => Math.abs(surf(cx) - fy) < 110 && !onLava(cx) && !(inWater(cx) && !onDeck(cx)); let best = null, bd = 301;
+const PEEK = {posti:[0, '#d8702a'], skater:[0, '#c23b3b'], spuge:[0, '#5f6a3a', 1], loyly:[0, '#d8806a'], kauppias:[30, '#ece4cc'], kiekko:[0, '#2f5592'], hyppaaja:[0, '#e7c25a'], grillari:[24, '#ece4cc'], piru:[0], hirvi:[0]};
+function peeFind(){ if (!rag || rag.overEdge) return null; const p = rag.torso.position, fy = surf(p.x, p.y); if (p.y < fy - 160 || p.x > EDGE - 40 || (inWater(p.x) && !onDeck(p.x))) return null;
+  // the way there has to be walkable: no river, no lava, no cliff
+  const ok = cx => { if (cx > EDGE - 20) return false; for (let i = 0; i <= 12; i++){ const xx = cx + (p.x - cx) * i / 12; if (Math.abs(surf(xx) - fy) > 130 + Math.abs(xx - p.x) * .5 || onLava(xx) || (inWater(xx) && !onDeck(xx))) return false; } return true; }; let best = null, bd = 801;
   for (const n of NPCS){ const k = PEEK[n.kind]; if (!k || n.ph === 'hold') continue; const cx = n.x + k[0], d = Math.abs(cx - p.x); if (d < bd && ok(cx)){ bd = d; best = {n, cx}; } }
   for (const f of FOLK){ const d = Math.abs(f.x - p.x); if (d < bd && ok(f.x)){ bd = d; best = {f, cx:f.x}; } }
+  // nobody around: someone comes along from the side
+  if (!best){ const z = zoneAt(p.x); if (z && z.k === 'tikut') return null; for (const sd of [-1, 1]){ const cx = p.x + sd * 430; if (ok(cx)){ const f = {x:cx, z:z ? z.id : '', col:FOLKCOL[Math.floor(rnd() * FOLKCOL.length)], hat:rnd() < .4, said:true, ch:0, dir:-sd}; FOLK.push(f); return {f, cx}; } } }
   return best; }
 function peeStart(c2){ const p = rag.torso.position, dir = Math.sign(p.x - c2.cx) || 1, tx = p.x - dir * 58; let o, type;
   if (c2.f){ o = c2.f; type = 'folk'; o.dir = dir; }
   else if (c2.n.kind === 'piru' || c2.n.kind === 'hirvi'){ o = c2.n; type = 'npc'; o.fx = dir; o.walk = true; }
   else { const k = PEEK[c2.n.kind]; c2.n.walk = true; o = {x:c2.cx, col:k[1], hat:!!k[2], dir}; type = 'man'; }
-  PEE = {o, type, kind:c2.n ? c2.n.kind : 'folk', dir, tx, ph:'walk', t:0, pt:0, walk:Math.abs(tx - c2.cx) / 140}; return PEE; }
+  const spd = Math.max(140, Math.abs(tx - c2.cx) / 2.4); PEE = {o, type, kind:c2.n ? c2.n.kind : 'folk', dir, tx, spd, ph:'walk', t:0, pt:0, walk:Math.abs(tx - c2.cx) / spd}; return PEE; }
 function peeStep(dt){ const P = PEE; if (!P || !rag) return; P.t += dt; const o = P.o;
-  if (P.ph === 'walk'){ const dx = P.tx - o.x, st = 140 * dt; if (P.t - (P.stepT || -9) > .42){ P.stepT = P.t; sfx('step', .55, {x:o.x, y:surf(o.x), force:true}); } if (Math.abs(dx) <= st){ o.x = P.tx; P.ph = 'pee'; P.pt = 0; pops.push({x:o.x, y:surf(o.x) - 160, t:0, s:'LOROTTAA', col:'#f2d24a'}); sfx('lorina', .9, {force:true, vary:false}); } else o.x += Math.sign(dx) * st; if (P.type === 'npc') o.y = surf(o.x); }
+  if (P.ph === 'walk'){ const dx = P.tx - o.x, st = P.spd * dt; if (P.t - (P.stepT || -9) > 58 / P.spd){ P.stepT = P.t; sfx('step', .55, {x:o.x, y:surf(o.x), force:true}); } if (Math.abs(dx) <= st){ o.x = P.tx; P.ph = 'pee'; P.pt = 0; pops.push({x:o.x, y:surf(o.x) - 160, t:0, s:'LOROTTAA', col:'#f2d24a'}); sfx('lorina', .9, {force:true, vary:false}); } else o.x += Math.sign(dx) * st; if (P.type === 'npc') o.y = surf(o.x); }
   else if (P.ph === 'pee'){ P.pt += dt; if (P.pt > 2.6){ P.ph = 'done'; sfx('fart', .8, {x:o.x, y:surf(o.x), force:true}); } else if (rnd() < .7){ const e = rag.torso.position; parts.push({x:e.x + (rnd() - .5) * 14, y:e.y - 4, vx:(rnd() - .5) * 3, vy:-1 - rnd() * 2, life:.6, t:0, k:'drop', s:1.6 + rnd() * 1.6, c:'#f2d24a'}); } } }
 function peeFrom(){ const P = PEE, o = P.o, y = surf(o.x), d = P.dir; if (P.kind === 'hirvi') return {x:o.x + 14 * d, y:y - 44}; if (P.kind === 'piru') return {x:o.x + 9 * d, y:y - 34}; return {x:o.x + 8 * d, y:y - 25}; }
 function drawPuddle(){ if (!PEE || PEE.ph === 'walk' || !rag) return; const e = rag.torso.position, r = 12 + Math.min(1, PEE.pt / 2.2) * 30, y = surf(e.x, e.y); g.globalAlpha = .55; g.beginPath(); g.ellipse(e.x, y + 1, r * 1.4, r * .25, 0, 0, 7); g.fillStyle = '#d8b84a'; g.fill(); g.globalAlpha = 1; }
@@ -1078,11 +1136,12 @@ function makeBg(){ const mk = (w, h) => { const c = document.createElement('canv
 function makeOverlay(){ vig = null; }
 
 // ---------- rendering ----------
-let tufts = null, STARS = null, SPACE = null, skyFw = [], HK = 0;
+let tufts = null, STARS = null, SPACE = null, skyFw = [], HK = 0, DK = 0;
 function draw(t){ g.setTransform(DPR, 0, 0, DPR, 0, 0);
   const alt = cam.x > EDGE - 200 ? Math.max(0, EDGEY - cam.y) : Math.max(0, gy(cam.x) - cam.y), sk = cam.x > EDGE + 100 ? clamp(.4 + (cam.y - EDGEY) / 2500, .4, 1) : clamp((alt - 900) / 2200, 0, 1);
   const mix = (a, b) => { const p = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)], A = p(a), B = p(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * sk)).join(',') + ')'; };
   const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, mix('#1d1b24', '#020206')); sky.addColorStop(.55, mix('#3a3236', '#0a0a16')); sky.addColorStop(1, mix('#4b3e36', '#1a1630')); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  { const uz = ZL.find(z2 => z2.k === 'uni'); DK = uz ? clamp(1 - Math.max(0, uz.a - cam.x, cam.x - uz.b) / 1200, 0, 1) : 0; if (DK > 0){ const ug = g.createLinearGradient(0, 0, 0, H); ug.addColorStop(0, 'rgba(10,20,60,' + .7 * DK + ')'); ug.addColorStop(1, 'rgba(60,100,190,' + .55 * DK + ')'); g.fillStyle = ug; g.fillRect(0, 0, W, H); } }
   { const hz = ZL.find(z2 => z2.k === 'helvetti'); const hk = hz ? clamp(1 - Math.max(0, hz.a - cam.x, cam.x - hz.b) / 900, 0, 1) : 0; HK = hk;
     if (hk > 0){ const hg = g.createLinearGradient(0, 0, 0, H); hg.addColorStop(0, 'rgba(40,4,2,' + .85 * hk + ')'); hg.addColorStop(1, 'rgba(170,40,10,' + .75 * hk + ')'); g.fillStyle = hg; g.fillRect(0, 0, W, H);
       for (let i = 0; i < 40; i++){ const ex = ((i * 157.3 + t * 25 * (1 + i % 4)) % W), ey = H - ((i * 97.1 + t * 60 * (1 + i % 3)) % H); g.globalAlpha = hk * (.4 + .6 * ((i * 7) % 10) / 10); g.fillStyle = i % 2 ? '#ffb347' : '#ff6a1a'; g.fillRect(ex, ey, 3, 3); } g.globalAlpha = 1; } }
@@ -1133,12 +1192,12 @@ function draw(t){ g.setTransform(DPR, 0, 0, DPR, 0, 0);
   drawStage();
   for (const b of bodies) drawBody(b);
   for (const f of fires){ /* flames come as particles */ }
-  if (rag) drawRag(); else if (state === 'stage' || state === 'start') drawRapper(STAGE.x + 10, STAGE.y - 60, t);
+  if (rag){ drawRag(); if (rag.box) drawBox(); } else if (state === 'stage' || state === 'start') drawRapper(STAGE.x + 10, STAGE.y - 60, t);
   drawWaterFront(x0, gx1, t); drawPee(t);
   for (const r of rockets) at(r.position.x, r.position.y, r.angle, () => { rr(-10, -3.5, 16, 7, 2); ink('#e8572a', 2.5); path([[6, -3.5], [12, 0], [6, 3.5]]); ink(C.cream, 2.5); });
   if (Math.abs(cam.x - STAGE.x) < 1800) drawCrowd(t);
   drawParts(); drawBooms(); drawArcs(); drawPops();
-  g.restore();
+  g.restore(); if (DK > 0){ g.fillStyle = 'rgba(40,80,180,' + (.2 * DK).toFixed(3) + ')'; g.fillRect(0, 0, W, H); }
   // grain, scanlines, vignette
   g.globalAlpha = .07; const gx = Math.floor(rnd() * 256), gyy = Math.floor(rnd() * 256); g.fillStyle = g.createPattern(grainC, 'repeat'); g.save(); g.translate(-gx, -gyy); g.fillRect(gx, gyy, W, H); g.restore(); g.globalAlpha = 1;
   g.fillStyle = 'rgba(0,0,0,.08)'; for (let y = 0; y < H; y += 3) g.fillRect(0, y, W, 1);
@@ -1184,11 +1243,14 @@ function drawBody(b){ const p = b.plugin; if (!p || p.gone) return; const x = b.
       for (const sx of [-35, 35]){ disc(sx, 8, 21 + bt * 3, '#1b1b1e', 3); disc(sx, 8, 13 + bt * 3, '#3a3c43', 2); disc(sx, 8, 4.5 + bt, '#8d8a82', 0); }
       rr(-13, -4, 26, 22, 2); ink('#d8cfb4', 2); rr(-9, 0, 18, 9, 1); ink('#3a3633', 1.2); for (const rx of [-4.5, 4.5]){ disc(rx, 4.5, 3, '#ece4cc', 1); line(rx, 4.5, rx + Math.cos(ra) * 2.6, 4.5 + Math.sin(ra) * 2.6, INK, 1); }
       for (let i = 0; i < 4; i++){ rr(-30 + i * 16, -40, 10, 6, 1); ink(i === 1 && on ? '#c23b3b' : '#8d8a82', 1.5); } }); return; }
-  case 'rat': at(x, y, 0, () => { g.scale(1.5, 1.5); const sq = Math.max(0, 1 - (simT - p.t) * 3), s2 = 1 - Math.sin(sq * 9) * .18 * sq; g.scale(1 + (1 - s2) * .6, s2);
+  case 'rat': if (p.img && ratImg.complete && ratImg.naturalWidth){ at(x, y, 0, () => { const sq = Math.max(0, 1 - (simT - p.t) * 3), s2 = 1 - Math.sin(sq * 9) * .18 * sq; g.scale(1 + (1 - s2) * .6, s2); g.drawImage(ratImg, -150, -112, 300, 160); }); return; }
+    at(x, y, 0, () => { g.scale(1.5, 1.5); const sq = Math.max(0, 1 - (simT - p.t) * 3), s2 = 1 - Math.sin(sq * 9) * .18 * sq; g.scale(1 + (1 - s2) * .6, s2);
       g.beginPath(); g.moveTo(-58, 8); g.quadraticCurveTo(-110, 10, -120, -20); g.strokeStyle = INK; g.lineWidth = 9; g.stroke(); g.strokeStyle = '#c99a8e'; g.lineWidth = 5; g.stroke();
       g.beginPath(); g.ellipse(-6, 0, 60, 24, 0, 0, 7); ink('#6e655c'); g.beginPath(); g.ellipse(48, -8, 22, 17, -.2, 0, 7); ink('#7a7066'); disc(38, -26, 9, '#d9a0a0', 2.5); disc(58, -10, 3, INK, 0); disc(70, -4, 4, '#2a1b1b', 2);
       line(68, 0, 88, -4, INK, 1.5); line(68, 2, 88, 6, INK, 1.5); line(-30, 22, -34, 26, INK, 4); line(20, 22, 24, 26, INK, 4); }); return;
-  case 'hymy': at(x, y, 0, () => { rr(-16, 40, 32, 8, 2); ink('#8d8a82', 2); if (hymyImg.complete && hymyImg.naturalWidth) g.drawImage(hymyImg, -28, -50, 56, 90); }); return;
+  case 'hymy': if (p.big){ at(x, y, 0, () => { rr(-80, 105, 160, 60, 4); ink('#8f8a80', 3); g.fillStyle = INK; g.font = '22px VT323'; g.textAlign = 'center'; g.fillText('HYMYTYTTÖ', 0, 143); if (hymyImg.complete && hymyImg.naturalWidth) g.drawImage(hymyImg, -120, -283, 240, 388);
+      g.beginPath(); g.ellipse(-4, -279, 46, 9, 0, 0, 7); g.fillStyle = '#eef3f5'; g.fill(); g.beginPath(); g.ellipse(0, 107, 82, 8, 0, 0, 7); g.fill(); }); return; }
+    at(x, y, 0, () => { rr(-16, 40, 32, 8, 2); ink('#8d8a82', 2); if (hymyImg.complete && hymyImg.naturalWidth) g.drawImage(hymyImg, -28, -50, 56, 90); }); return;
   case 'backdrop': at(x, y, 0, () => { rr(-20, -1110, 40, 2220, 3); ink('#3a302a'); for (let i = -1090; i < 1100; i += 40) line(-16, i, 16, i + 10, '#2a221d', 2); }); return;
   case 'speaker': at(x, y, a, () => { rr(-20, -40, 40, 80, 4); ink('#1f1f22'); disc(0, -18, 11, '#2c2c30', 2.5); disc(0, -18, 4, '#111', 0); disc(0, 16, 14, '#2c2c30', 2.5); disc(0, 16, 5, '#111', 0); }); return;
   case 'hat': at(x, y, a, () => { g.beginPath(); g.arc(0, 4, 15, Math.PI, 0); ink(C.beanie); rr(-16, 0, 32, 7, 3); ink('#555a52', 2.5); disc(3, -12, 3.5, C.beanie, 2); }); return;
@@ -1328,7 +1390,7 @@ requestAnimationFrame(frame);
 window.__heita = { setEvt:(o, w) => { Object.assign(EVT, o); if (w) WX = w; }, rec:() => REC, popList:() => pops.map(x => x.s), npcs:() => NPCS.map(n => n.kind + ':' + n.ph), get state(){ return state; }, zones:() => ZL.map(z => z.id + ':' + Math.round(z.a / PXM) + (z.song ? ':' + z.song : '')), mus:() => ({cur:curP && curP.song, pos:curP ? Math.round(curP.el.currentTime) : null, lv:DECK.map(p => (p.song || '-') + ':' + p.lvl.toFixed(2) + (p.el.paused ? ':p' : ':on')), srcs:SRCS.length}), pee:() => PEE && {ph:PEE.ph, kind:PEE.kind, type:PEE.type}, surf:(x) => surf(x), br:() => BR, edge:() => EDGE, get score(){ return score; }, get dist(){ return maxDist; }, get bodies(){ return bodies.length; }, get rag(){ return rag; }, tally:() => tally, combo:() => maxCombo,
   start(){ $('bgo').click(); },
   throwNow(vx, vy){ if (state !== 'stage') return; doGrab({x:STAGE.x + 30, y:STAGE.y - 150}); rag.all.forEach(b => Body.setVelocity(b, {x:vx, y:vy})); release(); rag.all.forEach(b => Body.setVelocity(b, {x:vx, y:vy})); },
-  off:() => rag ? Object.keys(rag.off) : [], tp:(k) => { const z = ZL.find(z2 => z2.k === k || z2.id === k), n = structs.find(s2 => s2.t === 'npc' && s2.x > z.a && s2.x < z.b); const tx = n.x - 600, ty = gy(tx) - 120, dx = tx - rag.torso.position.x, dy = ty - rag.torso.position.y; cam.x += dx; cam.y += dy; spawnAhead(); rag.all.forEach(b => { Body.setPosition(b, {x:b.position.x + dx, y:b.position.y + dy}); Body.setVelocity(b, {x:12, y:-2}); }); return n.x; }, total:() => total(), big:() => BIGR.map(r => [Math.round(r.x / PXM), r.st]), extras:() => ({trees:TREES.map(t => [Math.round(t.x / PXM), t.ph]), ice:ICE.map(r => Math.round(r[0] / PXM)), rats:bodies.filter(b => b.plugin && b.plugin.kind === "rat").map(b => Math.round(b.position.x / PXM))}), cam, dbg:() => ({mv: rag ? Math.max(...rag.all.filter(b => b !== rag.mic).map(b => Math.hypot(b.velocity.x, b.velocity.y))) : 0, timers: timers.length, rockets: rockets.length, restT, flyT, tv: rag && rag.throwV, parts: rag ? rag.all.map(b => Math.hypot(b.velocity.x, b.velocity.y).toFixed(2)) : []}) };
+  off:() => rag ? Object.keys(rag.off) : [], tp:(k, kind) => { const z = ZL.find(z2 => z2.k === k || z2.id === k), n = structs.find(s2 => s2.t === 'npc' && (!kind || s2.npc === kind) && s2.x > z.a && s2.x < z.b); const tx = n.x - 600, ty = gy(tx) - 120, dx = tx - rag.torso.position.x, dy = ty - rag.torso.position.y; cam.x += dx; cam.y += dy; spawnAhead(); rag.all.forEach(b => { Body.setPosition(b, {x:b.position.x + dx, y:b.position.y + dy}); Body.setVelocity(b, {x:12, y:-2}); }); return n.x; }, total:() => total(), big:() => BIGR.map(r => [Math.round(r.x / PXM), r.st]), extras:() => ({trees:TREES.map(t => [Math.round(t.x / PXM), t.ph]), ice:ICE.map(r => Math.round(r[0] / PXM)), rats:bodies.filter(b => b.plugin && b.plugin.kind === "rat").map(b => Math.round(b.position.x / PXM))}), cam, dbg:() => ({mv: rag ? Math.max(...rag.all.filter(b => b !== rag.mic).map(b => Math.hypot(b.velocity.x, b.velocity.y))) : 0, timers: timers.length, rockets: rockets.length, restT, flyT, tv: rag && rag.throwV, parts: rag ? rag.all.map(b => Math.hypot(b.velocity.x, b.velocity.y).toFixed(2)) : []}) };
 })();
 </script>
 </body></html>
