@@ -117,11 +117,12 @@ main{max-width:980px;margin:0 auto;position:relative;z-index:1}
 .tapebtn .tapeimg .reel{position:absolute;height:auto;filter:none}
 .tapebtn:hover,.tapebtn:focus-visible{transform:rotate(0deg) translateY(-3px);filter:drop-shadow(0 14px 22px rgba(0,0,0,.7)) brightness(1.05)}
 .tapebtn .reel{transition:transform .2s}
-.tapebtn:hover .reel{animation:reel 1.4s linear infinite}
+/* the reels turn while the game list is open, and while the tape is pressed */
+.tapebtn[aria-expanded="true"] .reel,.tapebtn:active .reel{animation:reel 1.4s linear infinite}
 @keyframes reel{to{transform:rotate(360deg)}}
 .tapelabel{font-family:"Permanent Marker","Comic Sans MS",cursive;font-size:21px;fill:#1b1a18;letter-spacing:.02em}
 .tapesmall{font-family:"IBM Plex Mono",monospace;font-size:7px;fill:#1b1a18;letter-spacing:.12em}
-@media (prefers-reduced-motion:reduce){.tapebtn:hover .reel{animation:none}}
+@media (prefers-reduced-motion:reduce){.tapebtn .reel{animation:none!important}}
 .gamepick{display:grid;grid-template-columns:repeat(4,minmax(0,170px));gap:16px;justify-content:center;margin:30px auto 0}
 .gamepick[hidden]{display:none}
 .pick{position:relative}
