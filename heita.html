@@ -947,11 +947,11 @@ function diveBoom(x, y){ rag.diveHit = true; shake = 30; flashT = .1; sfx('thud_
   for (const b of bodies){ if (b.isStatic || !b.plugin || b.plugin.gone) continue; const dx = b.position.x - x, dy = b.position.y - y, d = Math.hypot(dx, dy); if (d > 200) continue; const k = 1 - d / 200;
     Sleeping.set(b, false); Body.setVelocity(b, {x:b.velocity.x + dx / (d || 1) * 14 * k, y:b.velocity.y - 10 * k}); if (EXPL[b.plugin.kind]){ const bb = b; later(.2, () => arm(bb)); } else hurt(b, 30 * k, b.position.x, b.position.y); }
   bleed(x, y, 24, 7); award(2500, x, y - 120, 'SYÖKSYPOMMI', '#ff8a5c'); mInc('dive'); }
-const DYN_START = 1, DYN_PICK_MAX = 3, DYN_SVG = '<svg viewBox="0 0 16 34"><path d="M8 9 C8 5 11 4 12 1" fill="none" stroke="#ece4cc" stroke-width="1.6"/><circle cx="12.5" cy="1.8" r="1.8" fill="#ffd27a"/><rect x="2" y="9" width="12" height="24" rx="2" fill="#b8402e" stroke="#1b1714" stroke-width="2"/><rect x="2" y="15" width="12" height="3" fill="#ece4cc" opacity=".8"/></svg>';
+const DYN_START = 1, DYN_PICK_MAX = 2, DYN_SVG = '<svg viewBox="0 0 16 34"><path d="M8 9 C8 5 11 4 12 1" fill="none" stroke="#ece4cc" stroke-width="1.6"/><circle cx="12.5" cy="1.8" r="1.8" fill="#ffd27a"/><rect x="2" y="9" width="12" height="24" rx="2" fill="#b8402e" stroke="#1b1714" stroke-width="2"/><rect x="2" y="15" width="12" height="3" fill="#ece4cc" opacity=".8"/></svg>';
 let DYNS = [];
 function dynHud(isNew){ const el = $('dyn'), n = rag && state === 'fly' ? rag.blasts || 0 : 0; el.innerHTML = Array.from({length:n}, (_, i) => '<i' + (isNew && i === n - 1 ? ' class="new"' : '') + '>' + DYN_SVG + '</i>').join(''); }
-// pickups along the course: plenty to find, but only three can be picked up per throw
-function dynPlace(){ DYNS = []; let x = STAGE.x + 70 * PXM; while (x < EDGE - 200){ DYNS.push({x, h:70 + rnd() * 280, ph:rnd() * 6, got:false}); x += (90 + rnd() * 90) * PXM; } }
+// two sticks hidden somewhere along the hill each throw: one early, one further down
+function dynPlace(){ DYNS = [[80, 220], [280, 480]].map(([a, b]) => ({x:Math.min(EDGE - 400, STAGE.x + (a + rnd() * (b - a)) * PXM), h:70 + rnd() * 260, ph:rnd() * 6, got:false})); }
 function dynStep(){ if (!rag || state !== 'fly' || (rag.picked || 0) >= DYN_PICK_MAX) return; const p = rag.torso.position;
   for (const d of DYNS){ if (d.got) continue; const dy = gy(d.x) - d.h; if (Math.abs(p.x - d.x) < 70 && Math.abs(p.y - dy) < 80){ d.got = true; rag.picked = (rag.picked || 0) + 1; rag.blasts++; dynHud(true);
     sfx('grab', .7, {force:true}); pops.push({x:d.x, y:dy - 60, t:0, s:'DYNAMIITTI', col:'#ffb35c'}); if (rag.picked >= DYN_PICK_MAX) break; } } }
