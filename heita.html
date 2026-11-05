@@ -82,6 +82,9 @@ body.menu .hud{opacity:0}
 .panel button,.panel a{font:inherit;font-size:clamp(24px,3.4vw,32px);padding:8px 26px;border-radius:4px;cursor:pointer;text-decoration:none}
 .panel .go{background:#ffb35c;color:#14130f;border:2px solid #ffb35c}
 .panel .alt{background:transparent;color:#ece4cc;border:2px solid #ece4cc}
+.panel #bspot{color:#cfe8a8;border-color:#cfe8a8}
+.oend{font-size:clamp(20px,2.8vw,26px);line-height:1.25;color:#ece4cc;margin:-6px 0 14px}.oend b{font-weight:400;color:#cfe8a8}
+.panel a.ohome{display:inline-block;margin-top:12px;font-size:18px;padding:4px 8px;color:#b3b0aa;text-decoration:underline;text-underline-offset:3px}
 #hint{position:fixed;left:50%;top:22%;transform:translateX(-50%);font-size:clamp(22px,3.4vw,32px);border:2px solid rgba(236,228,204,.45);background:rgba(27,23,20,.6);padding:10px 22px;border-radius:6px;text-align:center;display:none;pointer-events:none}
 #hint.on{display:block;animation:hb 1.2s ease-in-out infinite}
 @keyframes hb{50%{opacity:.6}}
@@ -97,9 +100,9 @@ body.menu .hud{opacity:0}
 <div class="panel on" id="start"><h1>HEITÄ VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Mitä useampi kierros, sitä pidempi lento.</p><p>Mäki on pitkä. Kukaan ei ole nähnyt sen loppua.</p><div class="act" style="margin-top:6px"><button class="go" id="bgo">ALOITA</button></div><button id="bclear" class="reset">NOLLAA ENNÄTYKSET</button></div>
 <div id="next"><div id="nres"></div><button id="bnext">SEURAAVA HEITTO</button></div>
 <div id="zone"></div>
-<div class="panel" id="over" style="background:rgba(15,13,16,.82)"><h1 id="oh">VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div id="omiss"></div>
+<div class="panel" id="over" style="background:rgba(15,13,16,.82)"><h1 id="oh">VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div class="oend" id="oend"></div><div id="omiss"></div>
 <div class="pinit" id="pinit"><p class="plab">PÄÄSIT LISTALLE. NIMIKIRJAIMET:</p><input class="pname" id="pname" type="text" maxlength="3" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done" aria-label="Kolme nimikirjainta" placeholder="___"><button class="alt sm" id="psave" type="button">TALLENNA</button></div>
-<div class="boards"><div><p class="plab">TÄNÄÄN</p><ol id="btoday"></ol></div><div><p class="plab">KAIKKIEN AIKOJEN</p><ol id="ball"></ol></div></div><div class="act"><button class="go" id="bagain">UUDESTAAN</button><button class="alt" id="bvid" type="button">JAA VIDEO</button><a class="alt" href="/#pelit">KOTISIVULLE</a></div></div>
+<div class="boards"><div><p class="plab">TÄNÄÄN</p><ol id="btoday"></ol></div><div><p class="plab">KAIKKIEN AIKOJEN</p><ol id="ball"></ol></div></div><div class="act"><button class="go" id="bagain">UUDESTAAN</button><a class="alt" id="bspot" href="https://open.spotify.com/artist/6u7uLNnINNky7DDh3Ym3Ao" target="_blank" rel="noopener">KUUNTELE SPOTIFYSSA</a><button class="alt" id="bvid" type="button">JAA VIDEO</button></div><a class="ohome" href="/#pelit">KOTISIVULLE</a></div>
 <script src="assets/lib/matter.min.js"></script>
 <script>
 (function(){
@@ -969,6 +972,14 @@ function newGame(){ recAbort(); gameId++; PEE = null; KICK = null; if (engine){ 
   state = 'stage'; $('over').classList.remove('on'); $('hint').classList.add('on'); $('score').textContent = '0'; $('dist').textContent = '0 M'; }
 // ---------- lorotus: someone nearby walks up to him when it's all over ----------
 let PEE = null, KICK = null;
+const SPOTIFY = 'https://open.spotify.com/artist/6u7uLNnINNky7DDh3Ym3Ao';
+const ENDSONG = {skeitti:['SKEITTIPARKKIIN', 'KYMMENEN TIKKUU'], tikut:['LASTEN PIHALLE', 'KYMMENEN TIKKUU'], vuosaari:['VUOSAAREEN', 'POSTINKANTAJA'], tivoli:['TIVOLIIN', 'SYMMETRISII UNII'],
+  silta:['PITKÄLLESILLALLE', 'PITKÄSILTA'], tyomaa:['TYÖMAALLE', 'POSTINKANTAJA'], hymy:['HYMYTYTÖN LUO', 'HYMYTYTTÖ'], grilli:['NAKKIKIOSKILLE', 'VIKA SELKÄ'], uni:['UNIMAAILMAAN', 'SYMMETRISII UNII'],
+  romu:['ROMUTTAMOLLE', 'HYMYTYTTÖ'], yobussi:['YÖBUSSIPYSÄKILLE', 'KOTIINPALUU KAI JOTENKI JÄRJESTYY'], pelto:['PELLOLLE', 'VÄLII VUODELLA'], vuori:['VUORELLE', 'VÄLII VUODELLA'],
+  metsa:['METSÄÄN', 'PROLOGI'], maki:['HYPPYRIMÄKEEN', 'PITKÄSILTA'], helvetti:['HELVETTIIN', 'VIKA SELKÄ']};
+function endSong(){ if (rag.overEdge) return ['VIISTONE PUTOSI MAAILMAN REUNALTA.', 'EPILOGI']; const z = zoneAt(rag.torso.position.x), e = z && ENDSONG[z.k];
+  return e ? ['VIISTONE JÄI ' + e[0] + '.', e[1]] : ['VIISTONE JÄI LAVAN VIEREEN.', 'PROLOGI']; }
+function cap(t){ return t.charAt(0) + t.slice(1).toLowerCase(); }
 // foot offset [dx, dy] from its rest spot (facing right) plus a 0..1 lean, for kick time kt
 function kickLeg(kt){ if (kt == null) return [0, 0, 0];
   if (kt < .26){ const a = kt / .26; return [-22 * a, -12 * a, -.8 * a]; }
@@ -1030,8 +1041,8 @@ function finish(){ if (ended) return; ended = true; state = 'over'; $('oh').text
   $('orows').innerHTML = d + ' M · COMBO x' + Math.max(1, maxCombo) + '<br>MATKA ' + (Math.max(0, d) * 100).toLocaleString('fi-FI') + ' · VIISTONE ITSE ' + tally.self.toLocaleString('fi-FI') + ' · YMPÄRISTÖ ' + tally.env.toLocaleString('fi-FI') + ' · RÄJÄHDYKSET ' + tally.boom.toLocaleString('fi-FI') + '<br>' + (rec && tot > 0 ? '<span class="rec">UUSI ENNÄTYS</span>' : 'ENNÄTYS ' + best.toLocaleString('fi-FI')) + '<br>' + (recD ? '<span class="rec">PISIN MATKA TÄHÄN ASTI</span>' : missD > 0 && missD <= 40 ? '<span class="rec">' + missD + ' M PUUTTUI MATKAENNÄTYKSESTÄ</span>' : '');
   $('omiss').innerHTML = ''; lastScore = tot; lastDist = Math.max(0, d); showBoards();
   const pc = Math.random() < .1 && !rag.peeKick ? peeFind() : null, extra = pc ? (peeStart(pc).walk + 3.1) * 1000 : 0, gid = gameId;
-  REC.endT = performance.now() + extra; REC.endD = Math.max(0, d); REC.endS = tot; REC.endH = rag.overEdge ? 'PUTOSI MAAILMAN REUNALTA' : 'VIHDOIN HILJAISTA'; clearTimeout(REC.stopTO); if (REC.mr) REC.stopTO = setTimeout(recStop, 2800 + extra); recBtn();
-  setTimeout(() => { if (state === 'over' && gid === gameId) $('over').classList.add('on'); }, 1000 + extra); }
+  REC.endT = performance.now() + extra; REC.endD = Math.max(0, d); REC.endS = tot; const es = endSong(); REC.endE = es; $('oend').innerHTML = es[0] + '<br>SINNE SOPII: <b>' + es[1] + '</b>'; REC.endH = rag.overEdge ? 'PUTOSI MAAILMAN REUNALTA' : 'VIHDOIN HILJAISTA'; clearTimeout(REC.stopTO); if (REC.mr) REC.stopTO = setTimeout(recStop, 2800 + extra); recBtn();
+  const rec2 = !!REC.mr; setTimeout(() => { if (state === 'over' && gid === gameId){ $('over').classList.add('on'); if (rec2) REC.endT = -1; } }, (rec2 ? 2900 : 1000) + extra); }
 addEventListener('keydown', e => { if (e.target && e.target.tagName === 'INPUT') return; if ((e.key === 'Enter' || e.key === ' ') && state === 'over'){ e.preventDefault(); newGame(); } });
 // ---------- leaderboard: same server and same initials as the other games, its own lists ----------
 const API = 'https://api.viistone.com/api/scores?g=heita'; let lastScore = 0, lastDist = 0, myT = 0;
@@ -1410,11 +1421,14 @@ function drawRecHud(t){ g.setTransform(DPR, 0, 0, DPR, 0, 0); const k0 = Math.ma
   g.font = Math.round(18 * k0) + 'px VT323'; g.fillStyle = 'rgba(236,228,204,.7)'; g.fillText('HEITÄ VIISTONE · VIISTONE.COM', 14, H - 14);
   g.font = Math.round(26 * k0) + 'px VT323'; g.fillStyle = '#ff8a5c'; g.fillText(total().toLocaleString('fi-FI') + ' PTS · ' + Math.max(0, Math.round(maxDist)) + ' M', 14, H - 14 - 22 * k0);
   if (Math.sin(t * 5) > 0){ disc(W - 22, H - 22, 7, '#ff4a3a', 0); }
-  if (REC.endT > 0){ const k = clamp((performance.now() - REC.endT - 500) / 450, 0, 1); if (k > 0){ g.globalAlpha = .9 * k; g.fillStyle = '#141113'; g.fillRect(0, H * .3, W, H * .4); g.globalAlpha = k; g.textAlign = 'center';
+  if (REC.endT > 0){ const k = clamp((performance.now() - REC.endT - 500) / 450, 0, 1); if (k > 0){ g.globalAlpha = .9 * k; g.fillStyle = '#141113'; g.fillRect(0, H * .3, W, H * .43); g.globalAlpha = k; g.textAlign = 'center';
       g.fillStyle = '#ece4cc'; g.font = Math.round(36 * k0) + 'px VT323'; g.fillText(REC.endH, W / 2, H * .41); g.fillStyle = '#ff8a5c'; g.font = Math.round(66 * k0) + 'px VT323'; g.fillText(REC.endS.toLocaleString('fi-FI') + ' PTS', W / 2, H * .52);
-      g.fillStyle = '#ece4cc'; g.font = Math.round(26 * k0) + 'px VT323'; g.fillText(REC.endD + ' M · PYSTYTKÖ PAREMPAAN? VIISTONE.COM', W / 2, H * .61); g.globalAlpha = 1; } } }
+      g.fillStyle = '#ece4cc'; g.font = Math.round(26 * k0) + 'px VT323'; g.fillText(REC.endD + ' M · PYSTYTKÖ PAREMPAAN? VIISTONE.COM', W / 2, H * .61);
+      if (REC.endE){ const fit = (tx, px) => { g.font = Math.round(px * k0) + 'px VT323'; const w = g.measureText(tx).width; if (w > W * .92) g.font = Math.round(px * k0 * W * .92 / w) + 'px VT323'; };
+        g.fillStyle = '#ece4cc'; fit(REC.endE[0], 24); g.fillText(REC.endE[0], W / 2, H * .655); g.fillStyle = '#cfe8a8'; fit('SINNE SOPII: ' + REC.endE[1] + ' · SPOTIFY', 24); g.fillText('SINNE SOPII: ' + REC.endE[1] + ' · SPOTIFY', W / 2, H * .69); }
+      g.globalAlpha = 1; } } }
 $('brec').onclick = () => { REC.on = !REC.on; try { localStorage.setItem('viistone-heita-rec', REC.on ? '1' : '0'); } catch(e){} if (!REC.on) recAbort(); recBtn(); };
-$('bvid').onclick = async () => { const d = lastDist, txt = 'Heitin Viistonen ' + d + ' metriä ja sain ' + lastScore.toLocaleString('fi-FI') + ' pistettä. Pystytkö parempaan? https://viistone.com/heita.html';
+$('bvid').onclick = async () => { const d = lastDist, txt = 'Heitin Viistonen ' + d + ' metriä ja sain ' + lastScore.toLocaleString('fi-FI') + ' pistettä. Pystytkö parempaan? https://viistone.com/heita.html' + (REC.endE ? '\n' + cap(REC.endE[0]) + ' Sinne sopii ' + cap(REC.endE[1]) + ': ' + SPOTIFY : '');
   if (REC.blob){ const f = new File([REC.blob], 'heita-viistone-' + d + 'm.' + REC.ext, {type:REC.type});
     try { if (navigator.canShare && navigator.canShare({files:[f]})){ await navigator.share({files:[f], text:txt}); return; } } catch(e){ if (e && e.name === 'AbortError') return; }
     const a = document.createElement('a'); a.href = URL.createObjectURL(REC.blob); a.download = f.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); $('bvid').textContent = 'VIDEO LADATTU'; return; }
