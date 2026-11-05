@@ -85,6 +85,14 @@ body.menu .hud{opacity:0}
 .panel #bspot{color:#cfe8a8;border-color:#cfe8a8}
 .oend{font-size:clamp(20px,2.8vw,26px);line-height:1.25;color:#ece4cc;margin:-6px 0 14px}.oend b{font-weight:400;color:#cfe8a8}
 .panel a.ohome{display:inline-block;margin-top:12px;font-size:18px;padding:4px 8px;color:#b3b0aa;text-decoration:underline;text-underline-offset:3px}
+#bblast{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));width:84px;height:84px;border-radius:50%;border:3px solid #ffb35c;background:rgba(27,23,20,.7);color:#ffb35c;display:none;place-items:center;cursor:pointer;padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+#bblast.on{display:grid}
+#bblast svg{position:absolute;inset:10px;width:calc(100% - 20px);height:calc(100% - 20px)}
+#bblast b{position:relative;font-weight:400;font-size:40px;line-height:1;color:#14130f;margin-top:2px}
+#bblast:active{transform:scale(.93)}
+#bblast.empty{opacity:.3;border-color:#b3b0aa;cursor:default}#bblast.empty svg path{fill:#b3b0aa}
+#bblast.pop{animation:bpop .25s}@keyframes bpop{40%{transform:scale(1.15)}}
+@media (max-width:440px){ #bblast{width:76px;height:76px} #bblast b{font-size:36px} }
 #hint{position:fixed;left:50%;top:22%;transform:translateX(-50%);font-size:clamp(22px,3.4vw,32px);border:2px solid rgba(236,228,204,.45);background:rgba(27,23,20,.6);padding:10px 22px;border-radius:6px;text-align:center;display:none;pointer-events:none}
 #hint.on{display:block;animation:hb 1.2s ease-in-out infinite}
 @keyframes hb{50%{opacity:.6}}
@@ -98,6 +106,7 @@ body.menu .hud{opacity:0}
 <div id="hint">TARTU VIISTOSEEN<br>PYÖRITÄ MONTA KIERROSTA<br>JA PÄÄSTÄ IRTI</div>
 <div id="btns"><button id="breset" aria-label="Uusi heitto">↺</button><button id="bmus" aria-label="Musiikki">♪</button><button id="bfx" aria-label="Äänet">FX</button><button id="brec" aria-label="Nauhoita heitot videoksi">REC</button><a href="/#pelit" aria-label="Kotisivulle">⏏</a></div>
 <div class="panel on" id="start"><h1>HEITÄ VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Mitä useampi kierros, sitä pidempi lento.</p><p>Mäki on pitkä. Kukaan ei ole nähnyt sen loppua.</p><div class="act" style="margin-top:6px"><button class="go" id="bgo">ALOITA</button></div><button id="bclear" class="reset">NOLLAA ENNÄTYKSET</button></div>
+<button id="bblast" aria-label="Räjäytä"><svg viewBox="0 0 100 100" aria-hidden="true"><path fill="#ffb35c" d="M50 2 59 30 84 12 72 40 99 44 74 58 92 82 63 72 58 99 47 74 26 94 30 66 3 70 24 50 6 28 34 32 30 6 46 28Z"/></svg><b id="nblast">3</b></button>
 <div id="next"><div id="nres"></div><button id="bnext">SEURAAVA HEITTO</button></div>
 <div id="zone"></div>
 <div class="panel" id="over" style="background:rgba(15,13,16,.82)"><h1 id="oh">VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div class="oend" id="oend"></div><div id="omiss"></div>
@@ -942,6 +951,20 @@ function diveBoom(x, y){ rag.diveHit = true; shake = 30; flashT = .1; sfx('thud_
   for (const b of bodies){ if (b.isStatic || !b.plugin || b.plugin.gone) continue; const dx = b.position.x - x, dy = b.position.y - y, d = Math.hypot(dx, dy); if (d > 200) continue; const k = 1 - d / 200;
     Sleeping.set(b, false); Body.setVelocity(b, {x:b.velocity.x + dx / (d || 1) * 14 * k, y:b.velocity.y - 10 * k}); if (EXPL[b.plugin.kind]){ const bb = b; later(.2, () => arm(bb)); } else hurt(b, 30 * k, b.position.x, b.position.y); }
   bleed(x, y, 24, 7); award(2500, x, y - 120, 'SYÖKSYPOMMI', '#ff8a5c'); mInc('dive'); }
+const BLASTS = 3;
+function blastHud(){ const b = $('bblast'), n = rag ? rag.blasts || 0 : 0; b.classList.toggle('on', state === 'fly' && !!rag); b.classList.toggle('empty', n <= 0); $('nblast').textContent = n; }
+function blast(){ if (state !== 'fly' || !rag || !(rag.blasts > 0) || simT - (rag.blastT || -9) < .25) return; rag.blasts--; rag.blastT = simT;
+  const p = rag.torso.position, bx = p.x - 30, by = p.y + 30;
+  // always the same push: forward and up, on top of whatever speed he already has
+  rag.all.forEach(q => Body.setVelocity(q, {x:q.velocity.x + 17, y:Math.min(q.velocity.y, 4) - 15}));
+  restT = 0; rag.hist = []; rag.stillT = rag.slowT = rag.stuckT = rag.wedge = 0; rag.face = 'shock';
+  booms.push({x:bx, y:by, r:130, t:0}); shake = Math.max(shake, 18);
+  for (let i = 0; i < 22; i++){ const a = Math.PI * .6 + rnd() * Math.PI * .9, v = 4 + rnd() * 10; parts.push({x:bx, y:by, vx:Math.cos(a) * v, vy:Math.sin(a) * v, life:.6 + rnd() * .5, t:0, k:'spark', c:rnd() < .5 ? '#ffd27a' : '#ff8a2a', s:3}); }
+  for (let i = 0; i < 8; i++) smoke(bx + (rnd() - .5) * 50, by + (rnd() - .5) * 30, 1);
+  sfx('boom_bright', .8, {x:bx, y:by, force:true, gap:.02}); pops.push({x:p.x, y:p.y - 90, t:0, s:'PAM!', col:'#ffb35c'});
+  const b = $('bblast'); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); blastHud(); }
+$('bblast').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); audioInit(); blast(); });
+addEventListener('keydown', e => { if (e.target && e.target.tagName === 'INPUT') return; if ((e.key === 'b' || e.key === 'B' || e.key === 'ArrowUp') && state === 'fly'){ e.preventDefault(); blast(); } });
 function diveHud(){ $('dives').textContent = rag ? 'SYÖKSY ' + '●'.repeat(Math.max(0, rag.dives)) + '○'.repeat(Math.max(0, 2 - rag.dives)) : ''; }
 function release(){ document.body.classList.remove('grab'); Composite.remove(world, grab); grab = null; state = 'fly'; flyT = 0; restT = 0; recStart(); if (rag){ rag.bestT = simT; rag.bestD = 0; rag.hist = []; }
   // a good swing gets a little extra, as if he helped
@@ -956,14 +979,14 @@ function release(){ document.body.classList.remove('grab'); Composite.remove(wor
   rag.all.forEach(b => { let vx = (b.velocity.x * .35 + pvx * .95) * pw, vy = (b.velocity.y * .35 + pvy * .95) * pw; const s = Math.hypot(vx, vy); if (s > cap){ vx *= cap / s; vy *= cap / s; } Body.setVelocity(b, {x:Math.abs(vx) + spinTurns * 1.5, y:vy - spinTurns * 2}); });
   rag.throwV = Math.hypot(pvx, pvy);
   rag.face = 'ouch'; sfx('yell_strained', .85, {force:true}); sfx('crowd_shout', .6, {force:true, x:STAGE.x, y:STAGE.y});
-  rag.dives = 0; }
+  rag.dives = 0; rag.blasts = BLASTS; blastHud(); }
 
 // ---------- game flow ----------
 let gameId = 0;
 function newGame(){ recAbort(); gameId++; PEE = null; KICK = null; if (engine){ Composite.clear(engine.world, false); Engine.clear(engine); }
   engine = Engine.create({enableSleeping:true}); engine.gravity.scale = .00085; engine.positionIterations = 10; engine.velocityIterations = 8; engine.constraintIterations = 4; world = engine.world;
   bodies = []; parts = []; rockets = []; timers = []; pops = []; booms = []; arcs = []; fires = []; stains = []; splats = []; flashT = 0; rag = null; grab = null;
-  RUN = {ev:{}, cnt:{}}; mTickT = 0; NPCS = []; $('dives').textContent = ''; $('zone').classList.remove('on');
+  RUN = {ev:{}, cnt:{}}; mTickT = 0; NPCS = []; $('dives').textContent = ''; $('bblast').classList.remove('on'); $('zone').classList.remove('on');
   score = 0; combo = 0; maxCombo = 0; comboShown = 0; viisiCount = 0; lastHit = -9; tally = {self:0, env:0, boom:0}; simT = 0; flyT = 0; restT = 0; slowT = 0; shake = 0; maxDist = 0; ended = false;
   shuffleCourse(); buildCurve(); planCourse(); makeFlats(); makeExtras(); terrain(); bridgeBody(); stage(); RAMPS.forEach(x => { if (!FLATS.some(f => x > f.a - 260 && x < f.b + 240) && !offBridge(x) && !offBridge(x + 140)) ramp(x); });
   Events.on(engine, 'collisionStart', onCollide);
@@ -1032,7 +1055,7 @@ function drawPee(t){ const P = PEE; if (!P || !rag) return; const o = P.o;
   if (P.ph !== 'pee') return; const S = peeFrom(), E = rag.torso.position, k = P.pt < .25 ? P.pt / .25 : P.pt > 2.3 ? Math.max(0, (2.6 - P.pt) / .3) : 1; if (k <= 0) return;
   const ex = S.x + (E.x - S.x) * k, ey = S.y + (E.y - S.y) * k + Math.sin(t * 17) * 3, cx = (S.x + ex) / 2, cy = Math.min(S.y, ey) - 34 * k;
   g.beginPath(); g.moveTo(S.x, S.y); g.quadraticCurveTo(cx, cy, ex, ey); g.strokeStyle = 'rgba(242,210,74,.9)'; g.lineWidth = 3.4; g.setLineDash([9, 5]); g.lineDashOffset = -t * 90; g.stroke(); g.setLineDash([]); g.lineDashOffset = 0; }
-function finish(){ if (ended) return; ended = true; state = 'over'; $('oh').textContent = rag.overEdge ? 'PUTOSI MAAILMAN REUNALTA.' : 'VIHDOIN HILJAISTA.';
+function finish(){ if (ended) return; ended = true; state = 'over'; $('bblast').classList.remove('on'); $('oh').textContent = rag.overEdge ? 'PUTOSI MAAILMAN REUNALTA.' : 'VIHDOIN HILJAISTA.';
   const d = Math.round(maxDist), tot = total(), rec = tot > best, recD = d > bestD + .5, missD = Math.round(bestD) - d; if (rec){ best = tot; try { localStorage.setItem('viistone-heita-best', String(best)); } catch(e){} } if (recD){ bestD = d; try { localStorage.setItem('viistone-heita-bestd', String(d)); } catch(e){} }
   sfx('groan' + (1 + Math.floor(rnd() * 7)), .7, {force:true, x:rag.torso.position.x, y:rag.torso.position.y}); sfx('crowd_aww', .45, {force:true, delay:.9});
   if (rec && tot > 0) sfx(rnd() < .5 ? 'victory1' : 'victory2', .6, {force:true, delay:2.4});
@@ -1155,7 +1178,7 @@ function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= d
   for (const s of structs){ if (!s.spawned || s.done || !s.list || !s.list.length) continue; let moved = 0; for (const b of s.list){ const p = b.plugin; if (p.gone || p.boomed || Math.hypot(b.position.x - p.x0, b.position.y - p.y0) > 50 || Math.abs(b.angle - p.a0) > .6) moved++; }
     if (moved >= s.list.length * .6){ s.done = true; tally.env += 0; award(s.bonus, s.x + 60, gy(s.x) - 170, s.name, '#ffd28a'); mEv(s.name); sfx('wood_metal_smash', .4, {x:s.x, y:gy(s.x), gap:.4}); } } }
 function backOnStage(msg){ // a weak or backwards throw: he gets back up and you can try again
-  rag.all.forEach(b => Composite.remove(world, b)); rag.cons.forEach(c => Composite.remove(world, c)); if (rag.micC) Composite.remove(world, rag.micC); rag = null; state = 'stage'; $('hint').classList.add('on'); BIGR.forEach(r => { if (r.c) Composite.remove(world, r.c); r.c = null; if (r.st === 'fly') r.st = 'done'; });
+  rag.all.forEach(b => Composite.remove(world, b)); rag.cons.forEach(c => Composite.remove(world, c)); if (rag.micC) Composite.remove(world, rag.micC); rag = null; state = 'stage'; $('bblast').classList.remove('on'); $('hint').classList.add('on'); BIGR.forEach(r => { if (r.c) Composite.remove(world, r.c); r.c = null; if (r.st === 'fly') r.st = 'done'; });
   score = 0; tally = {self:0, env:0, boom:0}; combo = 0; maxCombo = 0; maxDist = 0; pops.push({x:STAGE.x, y:STAGE.y - 200, t:0, s:msg || 'HEITÄ KUNNOLLA', col:'#ece4cc'}); }
 
 // ---------- camera ----------
