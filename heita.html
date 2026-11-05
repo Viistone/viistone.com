@@ -14,6 +14,11 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .hud{position:fixed;pointer-events:none;text-shadow:-2px 0 rgba(255,40,40,.45),2px 0 rgba(40,220,255,.4),2px 3px 0 #1b1714;letter-spacing:.04em}
 #tl{left:max(16px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top))}
 #tl b{display:block;font-weight:400;font-size:clamp(26px,4.4vw,44px);line-height:1}
+#dyn{display:flex;gap:6px;margin-top:8px;min-height:34px}
+#dyn i{display:block;width:16px;height:34px;filter:drop-shadow(-2px 0 rgba(255,40,40,.45)) drop-shadow(2px 0 rgba(40,220,255,.4)) drop-shadow(2px 3px 0 #1b1714)}
+#dyn i svg{display:block;width:100%;height:100%}
+#dyn i.new{animation:dnew .5s}@keyframes dnew{0%{transform:translateY(-14px);opacity:0}60%{transform:translateY(2px)}}
+@media (max-width:440px){ #dyn i{width:13px;height:28px} #dyn{min-height:28px} }
 #tl span{display:block;font-size:clamp(17px,2.4vw,26px);opacity:.85;margin-top:4px;text-shadow:none}
 body.grab #miss{opacity:0}
 #miss{transition:opacity .3s}
@@ -85,28 +90,19 @@ body.menu .hud{opacity:0}
 .panel #bspot{color:#cfe8a8;border-color:#cfe8a8}
 .oend{font-size:clamp(20px,2.8vw,26px);line-height:1.25;color:#ece4cc;margin:-6px 0 14px}.oend b{font-weight:400;color:#cfe8a8}
 .panel a.ohome{display:inline-block;margin-top:12px;font-size:18px;padding:4px 8px;color:#b3b0aa;text-decoration:underline;text-underline-offset:3px}
-#bblast{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));width:84px;height:84px;border-radius:50%;border:3px solid #ffb35c;background:rgba(27,23,20,.7);color:#ffb35c;display:none;place-items:center;cursor:pointer;padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
-#bblast.on{display:grid}
-#bblast svg{position:absolute;inset:10px;width:calc(100% - 20px);height:calc(100% - 20px)}
-#bblast b{position:relative;font-weight:400;font-size:40px;line-height:1;color:#14130f;margin-top:2px}
-#bblast:active{transform:scale(.93)}
-#bblast.empty{opacity:.3;border-color:#b3b0aa;cursor:default}#bblast.empty svg path{fill:#b3b0aa}
-#bblast.pop{animation:bpop .25s}@keyframes bpop{40%{transform:scale(1.15)}}
-@media (max-width:440px){ #bblast{width:76px;height:76px} #bblast b{font-size:36px} }
 #hint{position:fixed;left:50%;top:22%;transform:translateX(-50%);font-size:clamp(22px,3.4vw,32px);border:2px solid rgba(236,228,204,.45);background:rgba(27,23,20,.6);padding:10px 22px;border-radius:6px;text-align:center;display:none;pointer-events:none}
 #hint.on{display:block;animation:hb 1.2s ease-in-out infinite}
 @keyframes hb{50%{opacity:.6}}
 #start .note{font-size:18px;opacity:.6;margin-top:18px}
 </style></head><body>
 <canvas id="cv"></canvas>
-<div class="hud" id="tl"><b>HEITÄ VIISTONE</b><span id="song">CH 02</span></div>
+<div class="hud" id="tl"><b>HEITÄ VIISTONE</b><span id="song">CH 02</span><div id="dyn" aria-label="Dynamiitit"></div></div>
 <div class="hud" id="tr"><div id="score">0</div><div id="dist">0 M</div><div id="dives"></div></div>
 <div class="hud" id="mid"><div id="combo"></div></div>
 <div id="viisi">VIISI<small style="display:block;font-size:.22em;color:#ece4cc">VIISI OSUMAA PUTKEEN</small></div>
 <div id="hint">TARTU VIISTOSEEN<br>PYÖRITÄ MONTA KIERROSTA<br>JA PÄÄSTÄ IRTI</div>
 <div id="btns"><button id="breset" aria-label="Uusi heitto">↺</button><button id="bmus" aria-label="Musiikki">♪</button><button id="bfx" aria-label="Äänet">FX</button><button id="brec" aria-label="Nauhoita heitot videoksi">REC</button><a href="/#pelit" aria-label="Kotisivulle">⏏</a></div>
 <div class="panel on" id="start"><h1>HEITÄ VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Mitä useampi kierros, sitä pidempi lento.</p><p>Mäki on pitkä. Kukaan ei ole nähnyt sen loppua.</p><div class="act" style="margin-top:6px"><button class="go" id="bgo">ALOITA</button></div><button id="bclear" class="reset">NOLLAA ENNÄTYKSET</button></div>
-<button id="bblast" aria-label="Räjäytä"><svg viewBox="0 0 100 100" aria-hidden="true"><path fill="#ffb35c" d="M50 2 59 30 84 12 72 40 99 44 74 58 92 82 63 72 58 99 47 74 26 94 30 66 3 70 24 50 6 28 34 32 30 6 46 28Z"/></svg><b id="nblast">3</b></button>
 <div id="next"><div id="nres"></div><button id="bnext">SEURAAVA HEITTO</button></div>
 <div id="zone"></div>
 <div class="panel" id="over" style="background:rgba(15,13,16,.82)"><h1 id="oh">VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div class="oend" id="oend"></div><div id="omiss"></div>
@@ -951,8 +947,19 @@ function diveBoom(x, y){ rag.diveHit = true; shake = 30; flashT = .1; sfx('thud_
   for (const b of bodies){ if (b.isStatic || !b.plugin || b.plugin.gone) continue; const dx = b.position.x - x, dy = b.position.y - y, d = Math.hypot(dx, dy); if (d > 200) continue; const k = 1 - d / 200;
     Sleeping.set(b, false); Body.setVelocity(b, {x:b.velocity.x + dx / (d || 1) * 14 * k, y:b.velocity.y - 10 * k}); if (EXPL[b.plugin.kind]){ const bb = b; later(.2, () => arm(bb)); } else hurt(b, 30 * k, b.position.x, b.position.y); }
   bleed(x, y, 24, 7); award(2500, x, y - 120, 'SYÖKSYPOMMI', '#ff8a5c'); mInc('dive'); }
-const BLASTS = 3;
-function blastHud(){ const b = $('bblast'), n = rag ? rag.blasts || 0 : 0; b.classList.toggle('on', state === 'fly' && !!rag); b.classList.toggle('empty', n <= 0); $('nblast').textContent = n; }
+const DYN_START = 1, DYN_PICK_MAX = 3, DYN_SVG = '<svg viewBox="0 0 16 34"><path d="M8 9 C8 5 11 4 12 1" fill="none" stroke="#ece4cc" stroke-width="1.6"/><circle cx="12.5" cy="1.8" r="1.8" fill="#ffd27a"/><rect x="2" y="9" width="12" height="24" rx="2" fill="#b8402e" stroke="#1b1714" stroke-width="2"/><rect x="2" y="15" width="12" height="3" fill="#ece4cc" opacity=".8"/></svg>';
+let DYNS = [];
+function dynHud(isNew){ const el = $('dyn'), n = rag && state === 'fly' ? rag.blasts || 0 : 0; el.innerHTML = Array.from({length:n}, (_, i) => '<i' + (isNew && i === n - 1 ? ' class="new"' : '') + '>' + DYN_SVG + '</i>').join(''); }
+// pickups along the course: plenty to find, but only three can be picked up per throw
+function dynPlace(){ DYNS = []; let x = STAGE.x + 70 * PXM; while (x < EDGE - 200){ DYNS.push({x, h:70 + rnd() * 280, ph:rnd() * 6, got:false}); x += (90 + rnd() * 90) * PXM; } }
+function dynStep(){ if (!rag || state !== 'fly' || (rag.picked || 0) >= DYN_PICK_MAX) return; const p = rag.torso.position;
+  for (const d of DYNS){ if (d.got) continue; const dy = gy(d.x) - d.h; if (Math.abs(p.x - d.x) < 70 && Math.abs(p.y - dy) < 80){ d.got = true; rag.picked = (rag.picked || 0) + 1; rag.blasts++; dynHud(true);
+    sfx('grab', .7, {force:true}); pops.push({x:d.x, y:dy - 60, t:0, s:'DYNAMIITTI', col:'#ffb35c'}); if (rag.picked >= DYN_PICK_MAX) break; } } }
+function drawDyn(x0, x1, t){ if (!rag || state === 'stage' || (rag.picked || 0) >= DYN_PICK_MAX) return;
+  for (const d of DYNS){ if (d.got || d.x < x0 - 100 || d.x > x1 + 100) continue; const y = gy(d.x) - d.h + Math.sin(t * 2 + d.ph) * 8;
+    at(d.x, y, Math.sin(t * 1.3 + d.ph) * .15, () => { rr(-11, -26, 22, 52, 4); ink('#b8402e', 3); g.fillStyle = 'rgba(236,228,204,.8)'; g.fillRect(-9.5, -12, 19, 6);
+      g.beginPath(); g.moveTo(0, -26); g.quadraticCurveTo(2, -36, 9, -40); g.strokeStyle = '#ece4cc'; g.lineWidth = 2.5; g.stroke();
+      if (Math.sin(t * 22 + d.ph) > -.3) disc(9, -40, 4 + Math.sin(t * 30) * 1.5, '#ffd27a', 0); }); } }
 function blast(){ if (state !== 'fly' || !rag || !(rag.blasts > 0) || simT - (rag.blastT || -9) < .25) return; rag.blasts--; rag.blastT = simT;
   const p = rag.torso.position, bx = p.x - 30, by = p.y + 30;
   // always the same push: forward and up, on top of whatever speed he already has
@@ -961,9 +968,9 @@ function blast(){ if (state !== 'fly' || !rag || !(rag.blasts > 0) || simT - (ra
   booms.push({x:bx, y:by, r:130, t:0}); shake = Math.max(shake, 18);
   for (let i = 0; i < 22; i++){ const a = Math.PI * .6 + rnd() * Math.PI * .9, v = 4 + rnd() * 10; parts.push({x:bx, y:by, vx:Math.cos(a) * v, vy:Math.sin(a) * v, life:.6 + rnd() * .5, t:0, k:'spark', c:rnd() < .5 ? '#ffd27a' : '#ff8a2a', s:3}); }
   for (let i = 0; i < 8; i++) smoke(bx + (rnd() - .5) * 50, by + (rnd() - .5) * 30, 1);
-  sfx('boom_bright', .8, {x:bx, y:by, force:true, gap:.02}); pops.push({x:p.x, y:p.y - 90, t:0, s:'PAM!', col:'#ffb35c'});
-  const b = $('bblast'); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); blastHud(); }
-$('bblast').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); audioInit(); blast(); });
+  sfx('boom_bright', .8, {x:bx, y:by, force:true, gap:.02}); pops.push({x:p.x, y:p.y - 90, t:0, s:'PAM!', col:'#ffb35c'}); dynHud(); }
+// during the flight, a click or tap anywhere on the game blows the next stick
+cv.addEventListener('pointerdown', e => { if (state !== 'fly') return; e.preventDefault(); audioInit(); blast(); });
 addEventListener('keydown', e => { if (e.target && e.target.tagName === 'INPUT') return; if ((e.key === 'b' || e.key === 'B' || e.key === 'ArrowUp') && state === 'fly'){ e.preventDefault(); blast(); } });
 function diveHud(){ $('dives').textContent = rag ? 'SYÖKSY ' + '●'.repeat(Math.max(0, rag.dives)) + '○'.repeat(Math.max(0, 2 - rag.dives)) : ''; }
 function release(){ document.body.classList.remove('grab'); Composite.remove(world, grab); grab = null; state = 'fly'; flyT = 0; restT = 0; recStart(); if (rag){ rag.bestT = simT; rag.bestD = 0; rag.hist = []; }
@@ -979,14 +986,14 @@ function release(){ document.body.classList.remove('grab'); Composite.remove(wor
   rag.all.forEach(b => { let vx = (b.velocity.x * .35 + pvx * .95) * pw, vy = (b.velocity.y * .35 + pvy * .95) * pw; const s = Math.hypot(vx, vy); if (s > cap){ vx *= cap / s; vy *= cap / s; } Body.setVelocity(b, {x:Math.abs(vx) + spinTurns * 1.5, y:vy - spinTurns * 2}); });
   rag.throwV = Math.hypot(pvx, pvy);
   rag.face = 'ouch'; sfx('yell_strained', .85, {force:true}); sfx('crowd_shout', .6, {force:true, x:STAGE.x, y:STAGE.y});
-  rag.dives = 0; rag.blasts = BLASTS; blastHud(); }
+  rag.dives = 0; rag.blasts = DYN_START; rag.picked = 0; dynPlace(); dynHud(); }
 
 // ---------- game flow ----------
 let gameId = 0;
 function newGame(){ recAbort(); gameId++; PEE = null; KICK = null; if (engine){ Composite.clear(engine.world, false); Engine.clear(engine); }
   engine = Engine.create({enableSleeping:true}); engine.gravity.scale = .00085; engine.positionIterations = 10; engine.velocityIterations = 8; engine.constraintIterations = 4; world = engine.world;
   bodies = []; parts = []; rockets = []; timers = []; pops = []; booms = []; arcs = []; fires = []; stains = []; splats = []; flashT = 0; rag = null; grab = null;
-  RUN = {ev:{}, cnt:{}}; mTickT = 0; NPCS = []; $('dives').textContent = ''; $('bblast').classList.remove('on'); $('zone').classList.remove('on');
+  RUN = {ev:{}, cnt:{}}; mTickT = 0; NPCS = []; $('dives').textContent = ''; $('dyn').innerHTML = ''; DYNS = []; $('zone').classList.remove('on');
   score = 0; combo = 0; maxCombo = 0; comboShown = 0; viisiCount = 0; lastHit = -9; tally = {self:0, env:0, boom:0}; simT = 0; flyT = 0; restT = 0; slowT = 0; shake = 0; maxDist = 0; ended = false;
   shuffleCourse(); buildCurve(); planCourse(); makeFlats(); makeExtras(); terrain(); bridgeBody(); stage(); RAMPS.forEach(x => { if (!FLATS.some(f => x > f.a - 260 && x < f.b + 240) && !offBridge(x) && !offBridge(x + 140)) ramp(x); });
   Events.on(engine, 'collisionStart', onCollide);
@@ -1055,7 +1062,7 @@ function drawPee(t){ const P = PEE; if (!P || !rag) return; const o = P.o;
   if (P.ph !== 'pee') return; const S = peeFrom(), E = rag.torso.position, k = P.pt < .25 ? P.pt / .25 : P.pt > 2.3 ? Math.max(0, (2.6 - P.pt) / .3) : 1; if (k <= 0) return;
   const ex = S.x + (E.x - S.x) * k, ey = S.y + (E.y - S.y) * k + Math.sin(t * 17) * 3, cx = (S.x + ex) / 2, cy = Math.min(S.y, ey) - 34 * k;
   g.beginPath(); g.moveTo(S.x, S.y); g.quadraticCurveTo(cx, cy, ex, ey); g.strokeStyle = 'rgba(242,210,74,.9)'; g.lineWidth = 3.4; g.setLineDash([9, 5]); g.lineDashOffset = -t * 90; g.stroke(); g.setLineDash([]); g.lineDashOffset = 0; }
-function finish(){ if (ended) return; ended = true; state = 'over'; $('bblast').classList.remove('on'); $('oh').textContent = rag.overEdge ? 'PUTOSI MAAILMAN REUNALTA.' : 'VIHDOIN HILJAISTA.';
+function finish(){ if (ended) return; ended = true; state = 'over'; $('dyn').innerHTML = ''; $('oh').textContent = rag.overEdge ? 'PUTOSI MAAILMAN REUNALTA.' : 'VIHDOIN HILJAISTA.';
   const d = Math.round(maxDist), tot = total(), rec = tot > best, recD = d > bestD + .5, missD = Math.round(bestD) - d; if (rec){ best = tot; try { localStorage.setItem('viistone-heita-best', String(best)); } catch(e){} } if (recD){ bestD = d; try { localStorage.setItem('viistone-heita-bestd', String(d)); } catch(e){} }
   sfx('groan' + (1 + Math.floor(rnd() * 7)), .7, {force:true, x:rag.torso.position.x, y:rag.torso.position.y}); sfx('crowd_aww', .45, {force:true, delay:.9});
   if (rec && tot > 0) sfx(rnd() < .5 ? 'victory1' : 'victory2', .6, {force:true, delay:2.4});
@@ -1117,6 +1124,7 @@ function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= d
   fires = fires.filter(f => f.t < f.life);
   // the mic lets go if it gets yanked
   if (rag && rag.micC){ const c = rag.micC, A = c.bodyA, B = c.bodyB; const ax = A.position.x + c.pointA.x, ay = A.position.y + c.pointA.y, bx = B.position.x + c.pointB.x, by = B.position.y + c.pointB.y; if (Math.hypot(ax - bx, ay - by) > 14) loseMic(); }
+  dynStep();
   if (state === 'fly' && rag && !NPCS.some(n2 => n2.ph === 'hold') && !BIGR.some(r2 => r2.st === 'fly') && !TREES.some(tr => tr.ph === 'load') && rag.torso.position.x < EDGE){ const ab = surf(rag.torso.position.x, rag.torso.position.y) - rag.torso.position.y; if (ab > 450){ const f = clamp((ab - 450) / 1300, 0, 1) * .0009; rag.all.forEach(q => Body.applyForce(q, q.position, {x:0, y:q.mass * f})); } }
   if (state === 'fly' && rag){ const t0 = rag.torso, gx = t0.position.x, sy0 = surf(gx, t0.position.y), dk = onDeck(gx) && t0.position.y < sy0 + 40, sl = dk ? Math.max(BR.s, .09) : (gy(gx + 30) - gy(gx - 30)) / 60; if (t0.position.y > sy0 - 50 && sl > .04 && !(rag.wedge > .6)){ const f = .00045 * Math.min(sl, 1.2), nrm = Math.hypot(1, sl); rag.all.forEach(q => { if (q !== rag.mic) Body.applyForce(q, q.position, {x:q.mass * f / nrm, y:q.mass * f * sl / nrm}); }); } }
   if (rag && state === 'fly' && onLava(rag.torso.position.x) && rag.torso.position.y > gy(rag.torso.position.x) - 45 && simT - (rag.lavaT || -9) > .7){ rag.lavaT = simT; const p2 = rag.torso.position;
@@ -1178,7 +1186,7 @@ function simulate(dt){ const ts = slowT > 0 ? .25 : 1; if (slowT > 0) slowT -= d
   for (const s of structs){ if (!s.spawned || s.done || !s.list || !s.list.length) continue; let moved = 0; for (const b of s.list){ const p = b.plugin; if (p.gone || p.boomed || Math.hypot(b.position.x - p.x0, b.position.y - p.y0) > 50 || Math.abs(b.angle - p.a0) > .6) moved++; }
     if (moved >= s.list.length * .6){ s.done = true; tally.env += 0; award(s.bonus, s.x + 60, gy(s.x) - 170, s.name, '#ffd28a'); mEv(s.name); sfx('wood_metal_smash', .4, {x:s.x, y:gy(s.x), gap:.4}); } } }
 function backOnStage(msg){ // a weak or backwards throw: he gets back up and you can try again
-  rag.all.forEach(b => Composite.remove(world, b)); rag.cons.forEach(c => Composite.remove(world, c)); if (rag.micC) Composite.remove(world, rag.micC); rag = null; state = 'stage'; $('bblast').classList.remove('on'); $('hint').classList.add('on'); BIGR.forEach(r => { if (r.c) Composite.remove(world, r.c); r.c = null; if (r.st === 'fly') r.st = 'done'; });
+  rag.all.forEach(b => Composite.remove(world, b)); rag.cons.forEach(c => Composite.remove(world, c)); if (rag.micC) Composite.remove(world, rag.micC); rag = null; state = 'stage'; $('dyn').innerHTML = ''; $('hint').classList.add('on'); BIGR.forEach(r => { if (r.c) Composite.remove(world, r.c); r.c = null; if (r.st === 'fly') r.st = 'done'; });
   score = 0; tally = {self:0, env:0, boom:0}; combo = 0; maxCombo = 0; maxDist = 0; pops.push({x:STAGE.x, y:STAGE.y - 200, t:0, s:msg || 'HEITÄ KUNNOLLA', col:'#ece4cc'}); }
 
 // ---------- camera ----------
@@ -1259,6 +1267,7 @@ function draw(t){ g.setTransform(DPR, 0, 0, DPR, 0, 0);
     g.beginPath(); g.moveTo(t.x, y); g.quadraticCurveTo(cx, cy, top.x, top.y); g.strokeStyle = INK; g.lineWidth = 13; g.lineCap = 'round'; g.stroke(); g.strokeStyle = '#e8e4da'; g.lineWidth = 8; g.stroke();
     for (let i = 1; i < 6; i++){ const u = i / 6.5, px2 = (1 - u) * (1 - u) * t.x + 2 * (1 - u) * u * cx + u * u * top.x, py2 = (1 - u) * (1 - u) * y + 2 * (1 - u) * u * cy + u * u * top.y; line(px2 - 3, py2, px2 + 2, py2 + 1, INK, 2.2); }
     [[0, 0, 34], [-26, 14, 24], [24, 12, 26], [-8, -24, 24], [14, -20, 20]].forEach(([dx, dy, r]) => disc(top.x + dx, top.y + dy, r, t.used ? '#7d8a40' : '#6b7a3a', 3)); }
+  drawDyn(x0, x1, t);
   drawSky(x0, x1, t);
   drawStains(); drawPuddle();
   for (const n of NPCS) if (n.x > x0 - 500 && n.x < x1 + 800 || (n.tx > x0 - 300 && n.tx < x1 + 300) || n.ph === 'hold' || n.kind === 'ufo') drawNpc(n, t);
@@ -1464,7 +1473,7 @@ newGame(); state = 'start'; $('hint').classList.remove('on');
 requestAnimationFrame(frame);
 
 // for testing
-window.__heita = { kickNow:() => { const p = rag.torso.position, f = {x:p.x - 200, z:'', col:FOLKCOL[0], hat:true, said:true, ch:0, dir:1, kd:true}; FOLK.push(f); kickStart(f, 'folk', 500, ['POTKU'], '#ece4cc', 15); }, kick:() => KICK && {ph:KICK.ph, type:KICK.type, kt:KICK.kt, hit:!!KICK.hit}, peeKick:() => !!(rag && rag.peeKick), course:() => COURSE.map(c2 => c2.k), setEvt:(o, w) => { Object.assign(EVT, o); if (w) WX = w; }, rec:() => REC, popList:() => pops.map(x => x.s), npcs:() => NPCS.map(n => n.kind + ':' + n.ph), get state(){ return state; }, zones:() => ZL.map(z => z.id + ':' + Math.round(z.a / PXM) + (z.song ? ':' + z.song : '')), mus:() => ({cur:curP && curP.song, pos:curP ? Math.round(curP.el.currentTime) : null, lv:DECK.map(p => (p.song || '-') + ':' + p.lvl.toFixed(2) + (p.el.paused ? ':p' : ':on')), srcs:SRCS.length}), pee:() => PEE && {ph:PEE.ph, kind:PEE.kind, type:PEE.type}, surf:(x) => surf(x), br:() => BR, edge:() => EDGE, get score(){ return score; }, get dist(){ return maxDist; }, get bodies(){ return bodies.length; }, get rag(){ return rag; }, tally:() => tally, combo:() => maxCombo,
+window.__heita = { dyns:() => DYNS, gy:(x) => gy(x), kickNow:() => { const p = rag.torso.position, f = {x:p.x - 200, z:'', col:FOLKCOL[0], hat:true, said:true, ch:0, dir:1, kd:true}; FOLK.push(f); kickStart(f, 'folk', 500, ['POTKU'], '#ece4cc', 15); }, kick:() => KICK && {ph:KICK.ph, type:KICK.type, kt:KICK.kt, hit:!!KICK.hit}, peeKick:() => !!(rag && rag.peeKick), course:() => COURSE.map(c2 => c2.k), setEvt:(o, w) => { Object.assign(EVT, o); if (w) WX = w; }, rec:() => REC, popList:() => pops.map(x => x.s), npcs:() => NPCS.map(n => n.kind + ':' + n.ph), get state(){ return state; }, zones:() => ZL.map(z => z.id + ':' + Math.round(z.a / PXM) + (z.song ? ':' + z.song : '')), mus:() => ({cur:curP && curP.song, pos:curP ? Math.round(curP.el.currentTime) : null, lv:DECK.map(p => (p.song || '-') + ':' + p.lvl.toFixed(2) + (p.el.paused ? ':p' : ':on')), srcs:SRCS.length}), pee:() => PEE && {ph:PEE.ph, kind:PEE.kind, type:PEE.type}, surf:(x) => surf(x), br:() => BR, edge:() => EDGE, get score(){ return score; }, get dist(){ return maxDist; }, get bodies(){ return bodies.length; }, get rag(){ return rag; }, tally:() => tally, combo:() => maxCombo,
   start(){ $('bgo').click(); },
   throwNow(vx, vy){ if (state !== 'stage') return; doGrab({x:STAGE.x + 30, y:STAGE.y - 150}); rag.all.forEach(b => Body.setVelocity(b, {x:vx, y:vy})); release(); rag.all.forEach(b => Body.setVelocity(b, {x:vx, y:vy})); },
   off:() => rag ? Object.keys(rag.off) : [], tp:(k, kind) => { const z = ZL.find(z2 => z2.k === k || z2.id === k), n = structs.find(s2 => s2.t === 'npc' && (!kind || s2.npc === kind) && s2.x > z.a && s2.x < z.b); const tx = n.x - 600, ty = gy(tx) - 120, dx = tx - rag.torso.position.x, dy = ty - rag.torso.position.y; cam.x += dx; cam.y += dy; spawnAhead(); rag.all.forEach(b => { Body.setPosition(b, {x:b.position.x + dx, y:b.position.y + dy}); Body.setVelocity(b, {x:12, y:-2}); }); return n.x; }, total:() => total(), big:() => BIGR.map(r => [Math.round(r.x / PXM), r.st]), extras:() => ({trees:TREES.map(t => [Math.round(t.x / PXM), t.ph]), ice:ICE.map(r => Math.round(r[0] / PXM)), rats:bodies.filter(b => b.plugin && b.plugin.kind === "rat").map(b => Math.round(b.position.x / PXM))}), cam, dbg:() => ({mv: rag ? Math.max(...rag.all.filter(b => b !== rag.mic).map(b => Math.hypot(b.velocity.x, b.velocity.y))) : 0, timers: timers.length, rockets: rockets.length, restT, flyT, tv: rag && rag.throwV, parts: rag ? rag.all.map(b => Math.hypot(b.velocity.x, b.velocity.y).toFixed(2)) : []}) };
