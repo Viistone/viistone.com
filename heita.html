@@ -30,7 +30,6 @@ body.grab #miss{opacity:0}
 .gig button:disabled{opacity:.2}
 .sub{color:#b3b0aa;margin:4px 0}
 .new{color:#ff6a33}
-.reset{font:inherit;font-size:18px;background:none;border:1px solid rgba(236,228,204,.3);color:#b3b0aa;border-radius:4px;padding:3px 12px;margin-top:6px;cursor:pointer}
 body.menu .hud{opacity:0}
 #zone{position:fixed;left:0;right:0;top:30%;text-align:center;font-size:clamp(46px,9vw,96px);line-height:1;color:#ece4cc;opacity:0;pointer-events:none;transition:opacity .4s;text-shadow:-3px 0 rgba(255,40,40,.5),3px 0 rgba(40,220,255,.45),2px 4px 0 #1b1714}
 #zone small{display:block;font-size:.3em;color:#e7c25a}
@@ -102,7 +101,7 @@ body.menu .hud{opacity:0}
 <div id="viisi">VIISI<small style="display:block;font-size:.22em;color:#ece4cc">VIISI OSUMAA PUTKEEN</small></div>
 <div id="hint">TARTU VIISTOSEEN<br>PYÖRITÄ MONTA KIERROSTA<br>JA PÄÄSTÄ IRTI</div>
 <div id="btns"><button id="breset" aria-label="Uusi heitto">↺</button><button id="bmus" aria-label="Musiikki">♪</button><button id="bfx" aria-label="Äänet">FX</button><button id="brec" aria-label="Nauhoita heitot videoksi">REC</button><a href="/#pelit" aria-label="Kotisivulle">⏏</a></div>
-<div class="panel on" id="start"><h1>HEITÄ VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Mitä useampi kierros, sitä pidempi lento.</p><p>Mäki on pitkä. Kukaan ei ole nähnyt sen loppua.</p><div class="act" style="margin-top:6px"><button class="go" id="bgo">ALOITA</button></div><button id="bclear" class="reset">NOLLAA ENNÄTYKSET</button></div>
+<div class="panel on" id="start"><h1>HEITÄ VIISTONE</h1><p>Viistone räppää lavalla. Tartu häneen, pyöritä ja heitä.</p><p>Pisteitä matkasta ja kaikesta mikä hajoaa.</p><p>Mitä useampi kierros, sitä pidempi lento.</p><p>Mäki on pitkä. Kukaan ei ole nähnyt sen loppua.</p><div class="act" style="margin-top:6px"><button class="go" id="bgo">ALOITA</button></div></div>
 <div id="next"><div id="nres"></div><button id="bnext">SEURAAVA HEITTO</button></div>
 <div id="zone"></div>
 <div class="panel" id="over" style="background:rgba(15,13,16,.82)"><h1 id="oh">VIHDOIN HILJAISTA.</h1><div class="pts" id="opts">0 PTS</div><div class="rows" id="orows"></div><div class="oend" id="oend"></div><div id="omiss"></div>
@@ -1100,8 +1099,6 @@ $('bgo').onclick = () => { audioInit(); document.body.classList.remove('menu'); 
 $('bagain').onclick = () => { audioInit(); newGame(); };
 // start this throw over at any point
 $('breset').onclick = () => { if (state === 'start') return; audioInit(); if (ptr != null){ ptr = null; } if (grab){ Composite.remove(world, grab); grab = null; } document.body.classList.remove('grab'); newGame(); };
-$('bclear').onclick = e => { const b2 = e.currentTarget; if (!b2.dataset.sure){ b2.dataset.sure = 1; b2.textContent = 'VARMASTI? PAINA UUDESTAAN'; setTimeout(() => { delete b2.dataset.sure; b2.textContent = 'NOLLAA ENNÄTYKSET'; }, 3000); return; }
-  best = 0; bestD = 0; try { localStorage.removeItem('viistone-heita-best'); localStorage.removeItem('viistone-heita-bestd'); } catch(e2){} delete b2.dataset.sure; b2.textContent = 'NOLLATTU'; };
 
 // ---------- simulation step ----------
 const STEP = 1000 / 120;
